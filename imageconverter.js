@@ -1161,8 +1161,8 @@ ${jsonString}
       margin: 0;
     }
     img {
-      width: ${img.width}px;
-      height: ${img.height}px;
+      max-width: 100%;
+      max-height: 100%;
       border: 2px solid #00fff7;
       box-shadow: 0 0 20px #00fff7;
     }
