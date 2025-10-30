@@ -369,16 +369,6 @@ async function convertImage(file, mimeType, ext) {
       }
 
       sharedCtx.drawImage(img, 0, 0);
-
-      // Example: convert to PNG and show result
-      const pngDataUrl = sharedCanvas.toDataURL("image/png");
-      const originalName = file.name.replace(/\.[^/.]+$/, "");
-      resultDiv.innerHTML = `
-        <img src="${pngDataUrl}" alt="Converted TIFF"/>
-        <br/>
-        <a href="${pngDataUrl}" download="${originalName}.png">Download PNG</a>
-      `;
-      progressBar.style.display = "none";
     };
 
     img.onerror = () => {
