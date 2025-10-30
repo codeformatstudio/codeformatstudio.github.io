@@ -51,10 +51,10 @@ document.addEventListener("dragover", (e) => {
   e.preventDefault();
   overlay.style.display = "flex";
 });
-document.addEventListener("dragleave", (e) => {
+overlay.addEventListener("dragleave", (e) => {
   overlay.style.display = "none";
 });
-document.addEventListener("drop", (e) => {
+overlay.addEventListener("drop", (e) => {
   e.preventDefault();
   overlay.style.display = "none";
   fileInput.files = e.dataTransfer.files;
