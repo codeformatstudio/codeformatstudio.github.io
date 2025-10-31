@@ -203,9 +203,7 @@ async function convertImage(file, mimeType, ext) {
   // === HEIF/HEIC DECODING ===
   if (
     file.type === "image/heic" ||
-    file.type === "image/heif" ||
-    file.name.toLowerCase().endsWith(".heic") ||
-    file.name.toLowerCase().endsWith(".heif")
+    file.type === "image/heif"
   ) {
     try {
       progressBar.style.display = "block";
