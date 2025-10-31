@@ -1407,7 +1407,6 @@ async function convertImage(file, mimeType, ext) {
       return;
     }
   }
-
   if (file.type === "image/tiff" || file.name.toLowerCase().endsWith(".tif")) {
     const arrayBuffer = await file.arrayBuffer();
     const ifds = UTIF.decode(arrayBuffer);
@@ -1423,29 +1422,24 @@ async function convertImage(file, mimeType, ext) {
     );
     sharedCtx.putImageData(imageData, 0, 0);
 
-    const img = new Image();
-    img.onload = () => {
-      // Inline your conversion pipeline here
-      sharedCanvas.width = img.width;
-      sharedCanvas.height = img.height;
-
-      const useTransparent = transparentBgCheckbox.checked;
-      if (!useTransparent) {
-        sharedCtx.fillStyle = "#ffffff";
-        sharedCtx.fillRect(0, 0, img.width, img.height);
-      } else {
-        sharedCtx.clearRect(0, 0, img.width, img.height);
+    // Convert canvas to PNG Blob
+    sharedCanvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert("Failed to convert TIFF to PNG.");
+        return;
       }
 
-      sharedCtx.drawImage(img, 0, 0);
-    };
+      // Keep the same filename but we will replace content
+      const newFile = new File([blob], file.name, { type: "image/png" });
 
-    img.onerror = () => {
-      alert("Failed to load decoded TIFF image.");
-      progressBar.style.display = "none";
-    };
+      // Replace the file in your file input
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(newFile);
+      fileInput.files = dataTransfer.files;
 
-    img.src = sharedCanvas.toDataURL("image/png");
+      // Now you can continue with your conversion pipeline
+      console.log("TIFF decoded succesfully");
+    }, "image/png");
 
     return; // stop further execution for TIFF
   }
