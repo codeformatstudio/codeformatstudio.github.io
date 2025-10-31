@@ -221,7 +221,7 @@ async function convertImage(file, mimeType, ext) {
       progressBar.value = 50;
 
       // Create a new File from the converted Blob
-      const heicName = file.name
+      const heicName = file.name;
       const originalName = file.name.replace(/\.[^/.]+$/, "");
       const pngFile = new File([convertedBlob], `${heicName}`, {
         type: "image/png",
@@ -232,12 +232,1098 @@ async function convertImage(file, mimeType, ext) {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(pngFile);
       fileInput.files = dataTransfer.files;
-      fileInput.textContent = `${heicName}`
+      fileInput.textContent = `${heicName}`;
       // Optionally trigger your existing "file change" handler
       // (if your app listens for `fileInput.onchange`)
       fileInput.dispatchEvent(new Event("change"));
 
       progressBar.style.display = "none";
+      if (mimeType === "image/heif" || mimeType === "image/heic") {
+        progressBar.style.display = "block";
+        progressBar.value = 10;
+
+        try {
+          if (!heifModule) {
+            alert(
+              "libheif-js not yet initialized. Please wait a few seconds and try again."
+            );
+            progressBar.style.display = "none";
+            return;
+          }
+
+          // Get RGBA data from canvas
+          const imageData = sharedCtx.getImageData(
+            0,
+            0,
+            sharedCanvas.width,
+            sharedCanvas.height
+          );
+          const { data: rgba, width, height } = imageData;
+
+          // === Create HEIF context ===
+          const ctx = new heifModule.HeifContext();
+
+          // === Create image handle with RGB (discard alpha like TIFF) ===
+          const img = ctx.createImage(
+            width,
+            height,
+            heifModule.Colorspace.RGB, // RGB instead of RGBA
+            heifModule.Chroma.INTERLEAVED_RGB // interleaved RGB planes
+          );
+
+          // === Fill the RGB image with pixel data ===
+          const plane = img.getPlane(heifModule.Channel.INTERLEAVED);
+
+          // Copy RGBA -> RGB (drop alpha)
+          for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
+            plane[j] = rgba[i]; // R
+            plane[j + 1] = rgba[i + 1]; // G
+            plane[j + 2] = rgba[i + 2]; // B
+            // Alpha is discarded
+          }
+
+          // === Add image to context ===
+          ctx.addImage(img);
+
+          // === Encode using HEVC (HEIC) ===
+          const encoder = ctx.getEncoder("hevc");
+          encoder.setLossyQuality(parseInt(qualityInput.value * 100)); // 0–100
+          ctx.encodeImage(img, encoder);
+
+          // === Write HEIF buffer ===
+          const heifBuffer = ctx.write();
+          const blob = new Blob([heifBuffer], { type: "image/heif" });
+          const url = URL.createObjectURL(blob);
+          const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+          resultDiv.innerHTML = `
+            <img src="${sharedCanvas.toDataURL(
+              "image/png"
+            )}" alt="HEIF Preview" />
+            <br/>
+            <a href="${url}" download="${originalName}.heic">Download HEIC</a>
+          `;
+
+          progressBar.value = 100;
+          progressBar.style.display = "none";
+          return;
+        } catch (err) {
+          console.error("HEIF encoding failed:", err);
+          alert("HEIF encoding failed: " + err.message);
+          progressBar.style.display = "none";
+          return;
+        }
+      }
+
+      if (
+        file.type === "image/tiff" ||
+        file.name.toLowerCase().endsWith(".tif")
+      ) {
+        const arrayBuffer = await file.arrayBuffer();
+        const ifds = UTIF.decode(arrayBuffer);
+        UTIF.decodeImages(arrayBuffer, ifds);
+        const rgba = UTIF.toRGBA8(ifds[0]);
+
+        sharedCanvas.width = ifds[0].width;
+        sharedCanvas.height = ifds[0].height;
+        const imageData = new ImageData(
+          new Uint8ClampedArray(rgba.buffer),
+          ifds[0].width,
+          ifds[0].height
+        );
+        sharedCtx.putImageData(imageData, 0, 0);
+
+        const img = new Image();
+        img.onload = () => {
+          // Inline your conversion pipeline here
+          sharedCanvas.width = img.width;
+          sharedCanvas.height = img.height;
+
+          const useTransparent = transparentBgCheckbox.checked;
+          if (!useTransparent) {
+            sharedCtx.fillStyle = "#ffffff";
+            sharedCtx.fillRect(0, 0, img.width, img.height);
+          } else {
+            sharedCtx.clearRect(0, 0, img.width, img.height);
+          }
+
+          sharedCtx.drawImage(img, 0, 0);
+        };
+
+        img.onerror = () => {
+          alert("Failed to load decoded TIFF image.");
+          progressBar.style.display = "none";
+        };
+
+        img.src = sharedCanvas.toDataURL("image/png");
+
+        return; // stop further execution for TIFF
+      }
+
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          progressBar.value = (event.loaded / event.total) * 100;
+        }
+      };
+
+      reader.onload = async () => {
+        progressBar.value = 100;
+        // VML Encoding
+
+        if (ext === "vml") {
+          try {
+            const { svgString } = await convertToVectorSVG(file, {
+              ltres: 1,
+              qtres: 1,
+              pathomit: 8,
+              numberofcolors: 32,
+            });
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(svgString, "image/svg+xml");
+            const paths = xmlDoc.querySelectorAll("path");
+
+            let vml = `<xml xmlns:v="urn:schemas-microsoft-com:vml">\n`;
+            paths.forEach((path, i) => {
+              const d = path.getAttribute("d");
+              vml += `<v:shape id="path${i}" coordorigin="0,0" coordsize="1000,1000" path="${d}" stroked="true" fillcolor="none" />\n`;
+            });
+            vml += `</xml>`;
+
+            const blob = new Blob([vml], { type: "application/vnd.ms-vml" });
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+            resultDiv.innerHTML = `
+              <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize:none;">
+        ${vml}
+              </textarea>
+              <br/>
+              <a href="${url}" download="${originalName}.vml">Download VML</a>
+            `;
+          } catch (err) {
+            alert("VML conversion failed.");
+            console.error(err);
+          }
+          progressBar.style.display = "none";
+          return;
+        }
+        // XML creation
+        if (ext === "dds") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+
+            if (transparentBgCheckbox.checked)
+              sharedCtx.clearRect(0, 0, img.width, img.height);
+            else {
+              sharedCtx.fillStyle = "#fff";
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            }
+
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeDDS(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const preview = sharedCanvas.toDataURL("image/png");
+
+            resultDiv.innerHTML = `
+              <img src="${preview}" /><br>
+              <a href="${url}" download="${originalName}.dds">Download DDS</a>
+            `;
+            progressBar.style.display = "none";
+          };
+          img.src = reader.result;
+          return;
+        }
+
+        // === TSV Output ===
+        if (ext === "tsv") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            sharedCtx.drawImage(img, 0, 0);
+
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const { data, width, height } = imageData;
+
+            // Convert pixel data to TSV (R G B per cell)
+            let tsv = "";
+            for (let y = 0; y < height; y++) {
+              let row = [];
+              for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                row.push(`${data[i]}\t${data[i + 1]}\t${data[i + 2]}`); // R G B
+              }
+              tsv += row.join("\t") + "\n";
+            }
+
+            const blob = new Blob([tsv], { type: "text/tab-separated-values" });
+            const url = URL.createObjectURL(blob);
+
+            resultDiv.innerHTML = `
+              <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">${tsv}</textarea>
+              <br/>
+              <a href="${url}" download="${originalName}.tsv">Download TSV</a>
+            `;
+            progressBar.style.display = "none";
+          };
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "flif") {
+          const img = new Image();
+          img.onload = async () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+
+            if (transparentBgCheckbox.checked)
+              sharedCtx.clearRect(0, 0, img.width, img.height);
+            else {
+              sharedCtx.fillStyle = "#fff";
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            }
+
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = await encodeFLIF(imageData); // async PNG wrap
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const preview = sharedCanvas.toDataURL("image/png");
+
+            resultDiv.innerHTML = `
+              <img src="${preview}" /><br>
+              <a href="${url}" download="${originalName}.flif">Download FLIF</a>
+            `;
+            progressBar.style.display = "none";
+          };
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "tga") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+
+            if (transparentBgCheckbox.checked)
+              sharedCtx.clearRect(0, 0, img.width, img.height);
+            else {
+              sharedCtx.fillStyle = "#fff";
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            }
+
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeTGA(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const preview = sharedCanvas.toDataURL("image/png");
+
+            resultDiv.innerHTML = `
+              <img src="${preview}" /><br>
+              <a href="${url}" download="${originalName}.tga">Download TGA</a>
+            `;
+            progressBar.style.display = "none";
+          };
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "qoi") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+
+            if (transparentBgCheckbox.checked)
+              sharedCtx.clearRect(0, 0, img.width, img.height);
+            else {
+              sharedCtx.fillStyle = "#fff";
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            }
+
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeQOI(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const preview = sharedCanvas.toDataURL("image/png");
+
+            resultDiv.innerHTML = `
+              <img src="${preview}" /><br>
+              <a href="${url}" download="${originalName}.qoi">Download QOI</a>
+            `;
+            progressBar.style.display = "none";
+          };
+          img.src = reader.result;
+          return;
+        }
+
+        if (ext === "xml") {
+          try {
+            const { svgString, url } = await convertToVectorSVG(file, {
+              ltres: 1,
+              qtres: 1,
+              pathomit: 8,
+              numberofcolors: 32,
+            });
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+            // Escape special characters if needed (optional, if you want to be safe)
+            const escapedSvg = svgString
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+
+            resultDiv.innerHTML = `
+          <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">
+    ${svgString}
+          </textarea>
+          <br/>
+          <a href="${url}" download="${originalName}.xml">Download XML</a>
+        `;
+          } catch (err) {
+            alert(
+              "SVG conversion failed. Image may be too large or unsupported."
+            );
+            console.error(err);
+          }
+          progressBar.style.display = "none";
+          return;
+        }
+
+        // === SVG Vectorization ===
+        if (ext === "svg") {
+          try {
+            const { svgString, url } = await convertToVectorSVG(file, {
+              ltres: 1,
+              qtres: 1,
+              pathomit: 8,
+              numberofcolors: 32,
+            });
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            resultDiv.innerHTML = `
+                                          <img src="${url}" alt="Converted SVG" />
+                                          <br/>
+                                          <a href="${url}"
+                                         download="${originalName}.svg">Download SVG</a>
+                                        `;
+          } catch (err) {
+            alert(
+              "SVG conversion failed. Image may be too large or unsupported."
+            );
+            console.error(err);
+          }
+          progressBar.style.display = "none";
+          return;
+        }
+        if (ext === "svg2") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeBMP(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/svg+xml");
+            resultDiv.innerHTML = `
+            <img src="${dataURL}"/> <br>
+              <a href="${dataURL}" download="${originalName}.svg">Download SVG</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "bmp") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeBMP(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${dataURL}"/> <br>
+              <a href="${url}" download="${originalName}.bmp">Download BMP</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "ico") {
+          const img = new Image();
+          img.onload = async () => {
+            // make this async
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+
+            // await the async ICO encoder
+            const blob = await encodeICO(imageData);
+            const url = URL.createObjectURL(blob);
+
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+
+            resultDiv.innerHTML = `
+              <img src="${dataURL}"/> <br>
+              <a href="${url}" download="${originalName}.ico">Download ICO</a>
+            `;
+
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+
+        if (ext === "avif") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeAVIF(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/avif");
+            resultDiv.innerHTML = `
+            <img src="${dataURL}"/> <br>          <a href="${url}" download="${originalName}.tif">Download AVIF</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "json") {
+          try {
+            const { svgString, url } = await convertToVectorSVG(file, {
+              ltres: 1,
+              qtres: 1,
+              pathomit: 8,
+              numberofcolors: 32,
+            });
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+            // Convert XML to JSON using DOMParser
+            function xmlToJson(xml) {
+              const obj = {};
+              if (xml.nodeType === 1) {
+                // element
+                if (xml.attributes.length > 0) {
+                  obj["@attributes"] = {};
+                  for (let j = 0; j < xml.attributes.length; j++) {
+                    const attribute = xml.attributes.item(j);
+                    obj["@attributes"][attribute.nodeName] =
+                      attribute.nodeValue;
+                  }
+                }
+              } else if (xml.nodeType === 3) {
+                // text
+                return xml.nodeValue.trim();
+              }
+
+              // Process child nodes
+              if (xml.hasChildNodes()) {
+                for (let i = 0; i < xml.childNodes.length; i++) {
+                  const item = xml.childNodes.item(i);
+                  const nodeName = item.nodeName;
+                  const value = xmlToJson(item);
+                  if (value) {
+                    if (obj[nodeName] === undefined) {
+                      obj[nodeName] = value;
+                    } else {
+                      if (!Array.isArray(obj[nodeName])) {
+                        obj[nodeName] = [obj[nodeName]];
+                      }
+                      obj[nodeName].push(value);
+                    }
+                  }
+                }
+              }
+              return obj;
+            }
+
+            // Parse the SVG string into XML DOM
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(svgString, "application/xml");
+            const jsonObj = xmlToJson(xmlDoc);
+            const jsonString = JSON.stringify(jsonObj, null, 2); // pretty print JSON
+
+            resultDiv.innerHTML = `
+          <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">
+    ${jsonString}
+          </textarea>
+          <br/>
+          <a href="data:application/json;charset=utf-8,${encodeURIComponent(
+            jsonString
+          )}"
+             download="${originalName}.json">Download JSON</a>
+        `;
+          } catch (err) {
+            alert(
+              "SVG conversion failed. Image may be too large or unsupported."
+            );
+            console.error(err);
+          }
+          progressBar.style.display = "none";
+          return;
+        }
+
+        if (ext === "tif") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeTIFF(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${dataURL}"/> <br>          <a href="${url}" download="${originalName}.tif">Download TIFF</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "rgb") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeRGB(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${url}" alt="No Preview"/> <br/>
+              <a href="${url}" download="${originalName}.rgb">Download RGB</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "rgba") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodeRGB(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${url}" alt="No Preview"/> <br/>
+              <a href="${url}" download="${originalName}.rgba">Download RGBA</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "ppm") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodePPM(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${url}" alt="No Preview"/> <br/>
+              <a href="${url}" download="${originalName}.ppm">Download PPM</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "pgm") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodePGM(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${url}" alt="No Preview"/> <br/>
+              <a href="${url}" download="${originalName}.pgm">Download PGM</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        if (ext === "pbm") {
+          const img = new Image();
+          img.onload = () => {
+            sharedCanvas.width = img.width;
+            sharedCanvas.height = img.height;
+            const useTransparent = transparentBgCheckbox.checked;
+
+            if (!useTransparent) {
+              sharedCtx.fillStyle = "#ffffff"; // white background
+              sharedCtx.fillRect(0, 0, img.width, img.height);
+            } else {
+              sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+            }
+            sharedCtx.drawImage(img, 0, 0);
+            const imageData = sharedCtx.getImageData(
+              0,
+              0,
+              img.width,
+              img.height
+            );
+            const blob = encodePBM(imageData);
+            const url = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+            const dataURL = sharedCanvas.toDataURL("image/png");
+            resultDiv.innerHTML = `
+            <img src="${url}" alt="No Preview"/> <br/>
+              <a href="${url}" download="${originalName}.pbm">Download PBM</a>
+            `;
+            progressBar.style.display = "none";
+          };
+
+          img.src = reader.result;
+          return;
+        }
+        const img = new Image();
+
+        img.onload = () => {
+          const useTransparent = transparentBgCheckbox.checked;
+          sharedCanvas.width = img.width;
+          sharedCanvas.height = img.height;
+
+          if (mimeType === "image/jpeg" || !useTransparent) {
+            sharedCtx.fillStyle = "#ffffff";
+            sharedCtx.fillRect(0, 0, sharedCanvas.width, sharedCanvas.height);
+          } else {
+            sharedCtx.clearRect(0, 0, sharedCanvas.width, sharedCanvas.height);
+          }
+          sharedCtx.drawImage(img, 0, 0);
+
+          (async () => {
+            if (ext === "pdf") {
+              const pdfDoc = await PDFLib.PDFDocument.create();
+              const pngBytes = await fetch(
+                sharedCanvas.toDataURL("image/png")
+              ).then((r) => r.arrayBuffer());
+              const pngImage = await pdfDoc.embedPng(pngBytes);
+              const page = pdfDoc.addPage([img.width, img.height]);
+              page.drawImage(pngImage, {
+                x: 0,
+                y: 0,
+                width: img.width,
+                height: img.height,
+              });
+              const pdfBytes = await pdfDoc.save();
+              const url = URL.createObjectURL(
+                new Blob([pdfBytes], { type: "application/pdf" })
+              );
+              const originalName = file.name.replace(/\.[^/.]+$/, "");
+              resultDiv.innerHTML = `
+            <iframe src="${url}" style="width:100%; height:320px; border:2px solid #00fff7; border-radius:12px;"></iframe>
+            <br/>
+            <a href="${url}" download="${originalName}.pdf">Download PDF</a>
+          `;
+              progressBar.style.display = "none";
+              return;
+            }
+          })();
+          // === GIF Output === \\
+          if (mimeType === "image/gif") {
+            // Map slider 0–1 to GIF.js quality 1–30 (invert: lower = better)
+            const gifQuality = Math.max(
+              1,
+              Math.round((1 - parseFloat(qualityInput.value)) * 29 + 1)
+            );
+            const gif = new GIF({
+              workers: 6,
+              quality: gifQuality,
+              width: img.width,
+              height: img.height,
+              transparent: transparentBgCheckbox.checked ? 0x00000000 : null,
+              workerScript: "assets/gif.worker.js",
+            });
+
+            gif.addFrame(img, { delay: 500 });
+            gif.on("finished", (blob) => {
+              const url = URL.createObjectURL(blob);
+              const originalName = file.name.replace(/\.[^/.]+$/, "");
+              resultDiv.innerHTML = `
+                                <img src="${url}" alt="Converted GIF" />
+                                <br/>
+                                <a href="${url}" download="${originalName}.gif">Download GIF</a>
+                              `;
+              progressBar.style.display = "none";
+            });
+            gif.on("progress", (p) => {
+              progressBar.value = p * 100;
+            });
+
+            gif.render();
+            return;
+          }
+
+          // === HTML Output ===
+          if (mimeType === "text/html") {
+            const isCanvasOutput = conversionSelect.value === "output-canvas";
+            const dataUrl = sharedCanvas.toDataURL(
+              "image/png",
+              parseFloat(qualityInput.value)
+            );
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+            let htmlContent;
+
+            if (isCanvasOutput) {
+              // 🟦 Output HTML page with <canvas> drawing the image
+              htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Canvas Image</title>
+      <style>
+      canvas {
+        border: 2px solid #00fff7;
+        box-shadow: 0 0 20px #00fff7;
+      
+        max-width: 100vw;  /* max width is viewport width */
+        max-height: 100vw; /*Max height is viewport width*/
+        height: auto;      /* maintain aspect ratio */
+        width: auto;       /* prevent distortion */
+        display: block;
+        margin: 0 auto;
+      }
+      
+        body {
+          margin: 0;
+          background: ${useTransparent ? "transparent" : "black"};
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        canvas {
+          border: 2px solid #00fff7;
+          box-shadow: 0 0 20px #00fff7;
+        }
+      </style>
+    </head>
+    <body>
+      <canvas id="imageCanvas" width="${img.width}" height="${
+                img.height
+              }"></canvas>
+      <script>
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = '${dataUrl}';
+      </script>
+    </body>
+    </html>
+    `;
+            } else {
+              // 🟩 Output HTML page with <img> tag
+              htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Converted Image</title>
+      <style>
+        body {
+          background: ${useTransparent ? "transparent" : "#0f0f20"};
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+        img {
+          max-width: 100%;
+          max-height: 100%;
+          border: 2px solid #00fff7;
+          box-shadow: 0 0 20px #00fff7;
+        }
+      </style>
+    </head>
+    <body>
+      <img src="${dataUrl}" alt="Converted Image"/>
+    </body>
+    </html>
+    `;
+            }
+
+            const blob = new Blob([htmlContent], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+
+            resultDiv.innerHTML = `
+    <iframe src="${url}" style="width:100%; height:320px; border:2px solid #00fff7; border-radius:12px;"></iframe>
+    <br/>
+    <a href="${url}" download="${originalName}-${
+              isCanvasOutput ? "canvas" : "image"
+            }.html">
+    Download ${isCanvasOutput ? "Canvas" : "HTML"}
+    </a>
+    `;
+
+            progressBar.style.display = "none";
+            return;
+          }
+          // === Other Raster Formats ===
+          const convertedUrl = sharedCanvas.toDataURL(
+            mimeType,
+            parseFloat(qualityInput.value)
+          );
+          const originalName = file.name.replace(/\.[^/.]+$/, "");
+          if (ext === "b64") {
+            const actualMime = sharedCanvas
+              .toDataURL()
+              .split(",")[0]
+              .split(":")[1]
+              .split(";")[0];
+            const dataUrl = sharedCanvas.toDataURL(
+              actualMime,
+              parseFloat(qualityInput.value)
+            );
+            const base64Data = dataUrl.split(",")[1];
+
+            // Convert Base64 to binary
+            const binary = atob(base64Data);
+            const len = binary.length;
+            const buffer = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              buffer[i] = binary.charCodeAt(i);
+            }
+
+            // Create a Blob from the binary data
+            const blob = new Blob([base64Data], {
+              type: "application/octet-stream",
+            });
+            const blobUrl = URL.createObjectURL(blob);
+            const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+            resultDiv.innerHTML = `
+              <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">
+          ${base64Data}
+              </textarea>
+              <br/>
+              <a href="${blobUrl}" download="${originalName}.${getExt(
+              conversionSelect.value
+            )}">
+                Download ${getExt(conversionSelect.value).toUpperCase()}
+              </a>
+            `;
+            progressBar.style.display = "none";
+            return;
+          }
+
+          resultDiv.innerHTML = `
+                                        <img src="${convertedUrl}" alt="Converted ${ext.toUpperCase()}" />
+                                        <br/>
+                                        <a href="${convertedUrl}" download="${originalName}.${ext}">Download ${ext.toUpperCase()}</a>
+                                      `;
+          progressBar.style.display = "none";
+        };
+
+        img.onerror = () => {
+          alert("Failed to load image.");
+          progressBar.style.display = "none";
+        };
+
+        img.src = reader.result;
+      };
+
+      reader.onerror = () => {
+        alert("Failed to read file.");
+        progressBar.style.display = "none";
+      };
+
+      reader.readAsDataURL(file);
       return;
     } catch (err) {
       console.error("HEIF/HEIC conversion failed:", err);
