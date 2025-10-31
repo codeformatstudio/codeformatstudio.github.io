@@ -220,42 +220,23 @@ async function convertImage(file, mimeType, ext) {
 
       progressBar.value = 50;
 
-      // Create an object URL from the converted blob
-      const objectUrl = URL.createObjectURL(convertedBlob);
-      const img = new Image();
+      // Create a new File from the converted Blob
+      const originalName = file.name.replace(/\.[^/.]+$/, "");
+      const pngFile = new File([convertedBlob], `${originalName}.png`, {
+        type: "image/png",
+        lastModified: Date.now(),
+      });
 
-      img.onload = () => {
-        sharedCanvas.width = img.width;
-        sharedCanvas.height = img.height;
+      // 🪄 Put the new File back into the file input element
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(pngFile);
+      fileInput.files = dataTransfer.files;
 
-        const useTransparent = transparentBgCheckbox.checked;
-        if (!useTransparent) {
-          sharedCtx.fillStyle = "#ffffff";
-          sharedCtx.fillRect(0, 0, img.width, img.height);
-        } else {
-          sharedCtx.clearRect(0, 0, img.width, img.height);
-        }
+      // Optionally trigger your existing "file change" handler
+      // (if your app listens for `fileInput.onchange`)
+      fileInput.dispatchEvent(new Event("change"));
 
-        sharedCtx.drawImage(img, 0, 0);
-        const pngDataUrl = sharedCanvas.toDataURL("image/png");
-
-        const originalName = file.name.replace(/\.[^/.]+$/, "");
-        resultDiv.innerHTML = `
-          <img src="${pngDataUrl}" alt="Converted HEIF"/>
-          <br/>
-          <a href="${pngDataUrl}" download="${originalName}.png">Download PNG</a>
-        `;
-        progressBar.style.display = "none";
-        URL.revokeObjectURL(objectUrl);
-      };
-
-      img.onerror = () => {
-        alert("Failed to load converted HEIF image.");
-        progressBar.style.display = "none";
-        URL.revokeObjectURL(objectUrl);
-      };
-
-      img.src = objectUrl;
+      progressBar.style.display = "none";
       return;
     } catch (err) {
       console.error("HEIF/HEIC conversion failed:", err);
@@ -264,6 +245,7 @@ async function convertImage(file, mimeType, ext) {
       return;
     }
   }
+
   if (mimeType === "image/heif" || mimeType === "image/heic") {
     progressBar.style.display = "block";
     progressBar.value = 10;
