@@ -201,10 +201,7 @@ async function convertImage(file, mimeType, ext) {
   const reader = new FileReader();
   let arrayBuffer;
   // === HEIF/HEIC DECODING ===
-  if (
-    file.type === "image/heic" ||
-    file.type === "image/heif"
-  ) {
+  if (file.type === "image/heic" || file.type === "image/heif") {
     try {
       progressBar.style.display = "block";
       progressBar.value = 10;
@@ -236,7 +233,7 @@ async function convertImage(file, mimeType, ext) {
       fileInput.dispatchEvent(new Event("change"));
 
       progressBar.style.display = "none";
-      convertImage(file, getMime(type), getExt(type));
+      convertBtn.click();
       return;
     } catch (err) {
       console.error("HEIF/HEIC conversion failed:", err);
