@@ -223,7 +223,7 @@ async function convertImage(file, mimeType, ext) {
       // Create a new File from the converted Blob
       const heicName = file.name
       const originalName = file.name.replace(/\.[^/.]+$/, "");
-      const pngFile = new File([convertedBlob], `${originalName}.png`, {
+      const pngFile = new File([convertedBlob], `${heicName}`, {
         type: "image/png",
         lastModified: Date.now(),
       });
