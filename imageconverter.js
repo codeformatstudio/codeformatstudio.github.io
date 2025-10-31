@@ -221,6 +221,7 @@ async function convertImage(file, mimeType, ext) {
       progressBar.value = 50;
 
       // Create a new File from the converted Blob
+      const heicName = file.name
       const originalName = file.name.replace(/\.[^/.]+$/, "");
       const pngFile = new File([convertedBlob], `${originalName}.png`, {
         type: "image/png",
@@ -231,7 +232,7 @@ async function convertImage(file, mimeType, ext) {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(pngFile);
       fileInput.files = dataTransfer.files;
-
+      fileInput.textContent = `${heicName}`
       // Optionally trigger your existing "file change" handler
       // (if your app listens for `fileInput.onchange`)
       fileInput.dispatchEvent(new Event("change"));
