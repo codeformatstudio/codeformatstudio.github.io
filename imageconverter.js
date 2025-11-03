@@ -1211,6 +1211,48 @@ Download ${isCanvasOutput ? "Canvas" : "HTML"}
         progressBar.style.display = "none";
         return;
       }
+      if (ext === "uea") {
+        const actualMime = sharedCanvas
+          .toDataURL()
+          .split(",")[0]
+          .split(":")[1]
+          .split(";")[0];
+        const dataUrl = sharedCanvas.toDataURL(
+          actualMime,
+          parseFloat(qualityInput.value)
+        );
+        const base64Data = dataUrl.split(",")[1];
+
+        // Convert Base64 to binary
+        const binary = atob(base64Data);
+        const len = binary.length;
+        const buffer = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          buffer[i] = binary.charCodeAt(i);
+        }
+
+        // Create a Blob from the binary data
+        const blob = new Blob([buffer], {
+          type: "application/octet-stream",
+        });
+        const blobUrl = URL.createObjectURL(blob);
+        const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+        resultDiv.innerHTML = `
+          <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">
+      ${buffer}
+          </textarea>
+          <br/>
+          <a href="${blobUrl}" download="${originalName}.${getExt(
+          conversionSelect.value
+        )}">
+            Download ${getExt(conversionSelect.value).toUpperCase()}
+          </a>
+        `;
+        progressBar.style.display = "none";
+        return;
+      }
+
 
       resultDiv.innerHTML = `
                                     <img src="${convertedUrl}" alt="Converted ${ext.toUpperCase()}" />
