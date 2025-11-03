@@ -188,6 +188,8 @@ function getExt(type) {
       return "tsv";
     case "output-dxf":
       return "dxf";
+    case "output-unitarray":
+      return "uea";
     default:
       return "unknown";
   }
