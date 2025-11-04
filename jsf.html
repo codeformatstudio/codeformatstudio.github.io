@@ -280,7 +280,8 @@
   <div class="actions">
     <span id="stats">1756 chars</span> <br />
     <a id="run" href="#"  class="button">Run This</a>
-    <!-- <button id="clipBtn">Copy Output</button> -->
+    <button id="downloadBtn">Download The Output</button>
+    <button id="clipBtn">Copy Output</button>
   </div>
   <!--
   <h3>Links</h3>
@@ -805,7 +806,6 @@ E.aa=function(){this.w=!0};E.la=function(){this.G=!0};var Fe=function(a){if("pre
     })();
 
   </script>
-  <script>
 <script>
 function copyToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
@@ -835,6 +835,17 @@ document.getElementById("clipBtn").addEventListener('click', function () {
   copyToClipboard(text);
   alert("Copied To Clipboard!");
 });
+const outputArea = document.getElementById('input')
+document.getElementById('downloadBtn').addEventListener('click', function () {
+
+  const blob = new Blob([outputArea], {type: 'plain/text'})
+  const blobURL = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = blobURL;
+  link.download = 'output.js';
+  document.body.appendChild(link);
+  link.click();
+})
 </script>
  
 </body>
