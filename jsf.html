@@ -838,7 +838,7 @@ document.getElementById("clipBtn").addEventListener('click', function () {
 const outputArea = document.getElementById('input')
 document.getElementById('downloadBtn').addEventListener('click', function () {
 
-  const blob = new Blob([outputArea], {type: 'plain/text'})
+  const blob = new Blob([outputArea.value], {type: 'plain/text'})
   const blobURL = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = blobURL;
