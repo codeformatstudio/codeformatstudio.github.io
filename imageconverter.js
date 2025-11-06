@@ -121,6 +121,10 @@ function getMime(type) {
       return "text/tab-separated-values";
     case "output-dxf":
       return "image/vnd.dxf";
+    case "output-xpm":
+      return "image/x-xpixmap";
+    case "output-yaml":
+        return "application/x-yaml"
 
     default:
       return "unknown";
@@ -190,6 +194,10 @@ function getExt(type) {
       return "dxf";
     case "output-unitarray":
       return "uea";
+    case "output-xpm":
+      return "xpm"
+    case "output-yaml":
+      return "yaml"
     default:
       return "unknown";
   }
@@ -893,6 +901,81 @@ ${jsonString}
       img.src = reader.result;
       return;
     }
+    if (ext === "yaml") {
+      const img = new Image();
+      img.onload = () => {
+        sharedCanvas.width = img.width;
+        sharedCanvas.height = img.height;
+        const useTransparent = transparentBgCheckbox.checked;
+    
+        if (!useTransparent) {
+          sharedCtx.fillStyle = "#ffffff"; // white background
+          sharedCtx.fillRect(0, 0, img.width, img.height);
+        } else {
+          sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+        }
+    
+        sharedCtx.drawImage(img, 0, 0);
+        const imageData = sharedCtx.getImageData(0, 0, img.width, img.height);
+    
+        // ✅ generate YAML text first
+        const yamlText = encodeYAML(imageData);
+
+        // ✅ create blob from YAML text
+        const blob = new Blob([yamlText], { type: "application/x-yaml" });
+        const url = URL.createObjectURL(blob);
+    
+        const originalName = file.name.replace(/\.[^/.]+$/, "");
+    
+        resultDiv.innerHTML = `
+          <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">${yamlText}</textarea>
+          <a href="${url}" download="${originalName}.yaml">Download YAML</a>
+        `;
+    
+        progressBar.style.display = "none";
+      };
+    
+      img.src = reader.result;
+      return;
+    }
+    if (ext === "xpm") {
+      const img = new Image();
+      img.onload = () => {
+        sharedCanvas.width = img.width;
+        sharedCanvas.height = img.height;
+        const useTransparent = transparentBgCheckbox.checked;
+    
+        if (!useTransparent) {
+          sharedCtx.fillStyle = "#ffffff"; // white background
+          sharedCtx.fillRect(0, 0, img.width, img.height);
+        } else {
+          sharedCtx.clearRect(0, 0, img.width, img.height); // keep alpha
+        }
+    
+        sharedCtx.drawImage(img, 0, 0);
+        const imageData = sharedCtx.getImageData(0, 0, img.width, img.height);
+    
+        // ✅ generate YAML text first
+        const yamlText = encodeXPM(imageData);
+
+        // ✅ create blob from YAML text
+        const blob = new Blob([yamlText], { type: "image/x-xpixmap" });
+        const url = URL.createObjectURL(blob);
+    
+        const originalName = file.name.replace(/\.[^/.]+$/, "");
+    
+        resultDiv.innerHTML = `
+          <textarea readonly style="width:100%; height:200px; background:#000; color:#0ff; border:2px solid #0ff; border-radius:10px; resize: none;">${yamlText}</textarea>
+          <a href="${url}" download="${originalName}.xpm">Download XPM</a>
+        `;
+    
+        progressBar.style.display = "none";
+      };
+    
+      img.src = reader.result;
+      return;
+    }
+    
     if (ext === "ppm") {
       const img = new Image();
       img.onload = () => {
