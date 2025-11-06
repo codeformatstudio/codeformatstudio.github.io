@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Python ➜ JavaScript Translator</title>
+  <!-- Include RapydScript-NG compiler script from CDN (or your own host) -->
+  <script src="assets/rapydscript.js"></script>
+  <style>
+    @import url("assets/Orbitron.css"); /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    textarea {resize:none;}
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #0f0f20;
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+      color: #00fff7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .container {
+      animation: fadeIn 0.6s ease;
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+      background: #111122;
+      border: 2px solid #00fff7;
+      border-radius: 12px;
+      padding: 2.5rem 2rem 3rem;
+      width: 400px;
+      box-shadow: 0 0 30px #00fff7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 12px #00fff7;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .file-input-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    input[type="file"] {
+      opacity: 0;
+      width: 100%;
+      height: 45px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      cursor: pointer;
+    }
+    .file-input-label {
+      border: 1.5px solid #00fff7;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      background: #0f0f20;
+      color: #00fff7;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-block;
+      width: 100%;
+      user-select: none;
+      transition: background 0.3s ease, color 0.3s ease;
+      text-align: center;
+      box-shadow: 0 0 15px #00fff7;
+    }
+    .file-input-label:hover {
+      background: #00fff7;
+      color: #0f0f20;
+      box-shadow: 0 0 25px #00fff7;
+    }
+    select {
+      width: 100%;
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1.5px solid #00fff7;
+      background: #0f0f20;
+      color: #00fff7;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 15px #00fff7 inset;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+    }
+    button,
+    .button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+      background: #00fff7;
+      border: none;
+      color: #0f0f20;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #00fff7;
+      transition: background 0.3s ease;
+    }
+    button:hover,
+    .button:hover {
+      background: #00c6b6;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: #0ff;
+      margin: 1rem 0 1.5rem 0;
+    }
+    #result {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    #result img,
+    #result svg,
+    #result iframe {
+      max-width: 100%;
+      max-height: 320px;
+      border: 2px solid #00fff7;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00fff7;
+    }
+    a {
+      display: inline-block;
+      margin-top: 0.75rem;
+      color: #0ff;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #00fff7;
+      text-shadow: 0 0 8px #00fff7;
+    }
+    option {
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+    }
+    @media (max-width: 400px) {
+      .container {
+        font-size: 12px;
+        padding: 5px;
+        width: 100%;
+      }
+    }
+    @media (max-width: 240px) {
+      .container {
+        font-size: 12px;
+        padding: 5px;
+        width: 100%;
+      }
+    }
+    @media (max-width: 239px) {
+      .container {
+        font-size: 10px;
+        padding: 3px;
+        width: 100%;
+      }
+    }
+    @media (max-width: 150px) {
+      .container {
+        font-size: 8px;
+        padding: 5px;
+        width: 100%;
+      }
+    }
+    option {
+      display: flex;
+      justify-content: center;
+      text-align: center;
+    }
+    .quality-container {
+      margin-top: 10px;
+      text-align: center;
+      color: #0ff;
+      font-family: "Orbitron", sans-serif;
+    }
+
+    #quality {
+      width: 60%;
+      margin-top: 5px;
+      accent-color: #0ff;
+      cursor: pointer;
+    }
+
+    #quality-value {
+      font-weight: bold;
+      color: #0ff;
+    }
+    #input {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1.5px solid #00fff7;
+        background: #0f0f20;
+        color: #00fff7;
+        margin-bottom: 1rem;
+        box-shadow: 0 0 15px #00fff7 inset;
+        cursor: text;
+        resize: none;
+      }
+    textarea {
+      width: 100%;
+      height: 250px;
+      font-family: monospace;
+      font-size: 14px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+      resize: none;
+      background-color: transparent;
+      color: #00ffff;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>Python ➜ JavaScript Translator</h2>
+    <textarea id="pycode" placeholder="Type Python code here...">print("Hello, World")</textarea>
+    <textarea id="jscode" placeholder="Translated JavaScript appears here..." readonly></textarea>
+  </div>
+  <script>
+    const py = document.getElementById("pycode");
+    const jsArea = document.getElementById("jscode");
+  
+    // 🕒 debounce compile calls for smoother performance
+    let compileTimer;
+    function liveCompile() {
+      clearTimeout(compileTimer);
+      compileTimer = setTimeout(() => {
+        try {
+          const compiler = RapydScript.create_embedded_compiler();
+          let js = compiler.compile(py.value, { js_version: 2022 });
+  
+          // 🧹 Remove any __module__ setup line
+          js = js.replace(
+            /if\s*\(!.*?__module__\s*\)\s*Object\.defineProperties\s*\([^)]*\)\s*;?/gs,
+            ""
+          );
+          js = js.replace('var', 'let');
+          js = js.replace('print', 'console.log');
+          js = js.replace('input', 'prompt');
+  
+          jsArea.value = js.trim();
+        } catch (err) {
+          jsArea.value = "Error: " + err.message;
+        }
+      }, 200); // compile after 200ms of no typing
+    }
+  
+    py.addEventListener("keydown", (e) => {
+      const pairs = {
+        "(": ")",
+        "{": "}",
+        "[": "]",
+        '"': '"',
+        "'": "'"
+      };
+  
+      const value = py.value;
+      const start = py.selectionStart;
+      const end = py.selectionEnd;
+  
+      // --- Auto-close brackets and quotes ---
+      if (pairs[e.key]) {
+        if (value[start] === pairs[e.key]) {
+          e.preventDefault();
+          py.setSelectionRange(start + 1, start + 1);
+          return;
+        }
+        e.preventDefault();
+        py.value = value.slice(0, start) + e.key + pairs[e.key] + value.slice(end);
+        py.setSelectionRange(start + 1, start + 1);
+        liveCompile();
+        return;
+      }
+  
+      // --- Auto-skip over any closing bracket ---
+      const closers = [")", "]", "}"];
+      if (closers.includes(e.key) && value[start] === e.key) {
+        e.preventDefault();
+        py.setSelectionRange(start + 1, start + 1);
+        return;
+      }
+  
+      // --- Smart delete paired characters ---
+      if (e.key === "Backspace") {
+        if (start === end && start > 0) {
+          const before = value[start - 1];
+          const after = value[start];
+          const match = { "(": ")", "[": "]", "{": "}", '"': '"', "'": "'" };
+          if (match[before] === after) {
+            e.preventDefault();
+            py.value = value.slice(0, start - 1) + value.slice(start + 1);
+            py.setSelectionRange(start - 1, start - 1);
+            liveCompile();
+            return;
+          }
+        }
+      }
+  
+      // --- Auto-indent on Enter ---
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const beforeText = value.substring(0, start);
+        const afterText = value.substring(end);
+        const currentLine = beforeText.split("\n").pop();
+  
+        const indentMatch = currentLine.match(/^\s*/);
+        let indent = indentMatch ? indentMatch[0] : "";
+  
+        // Python-style indent for colon
+        if (currentLine.trim().endsWith(":")) indent += "    ";
+  
+        py.value = beforeText + "\n" + indent + afterText;
+        const newPos = beforeText.length + 1 + indent.length;
+        py.setSelectionRange(newPos, newPos);
+        liveCompile();
+        return;
+      }
+  
+      // --- Tab = insert 4 spaces ---
+      if (e.key === "Tab" && !e.shiftKey) {
+        e.preventDefault();
+        py.value = value.slice(0, start) + "    " + value.slice(end);
+        py.setSelectionRange(start + 4, start + 4);
+        liveCompile();
+        return;
+      }
+  
+      // --- Shift+Tab = unindent ---
+      if (e.key === "Tab" && e.shiftKey) {
+        e.preventDefault();
+        const lines = value.split("\n");
+        let cursorLine = 0;
+        let total = 0;
+        for (let i = 0; i < lines.length; i++) {
+          total += lines[i].length + 1;
+          if (total > start) {
+            cursorLine = i;
+            break;
+          }
+        }
+        const line = lines[cursorLine];
+        const unindented = line.replace(/^ {1,4}/, "");
+        lines[cursorLine] = unindented;
+        const diff = line.length - unindented.length;
+        py.value = lines.join("\n");
+        py.setSelectionRange(start - diff, start - diff);
+        liveCompile();
+        return;
+      }
+    });
+  
+    // --- Compile whenever text changes ---
+    py.addEventListener("input", liveCompile);
+  
+    window.onload = () => {
+      py.value = "";
+      jsArea.value = "";
+    };
+  </script>
+  
+  
+</body>
+</html>
