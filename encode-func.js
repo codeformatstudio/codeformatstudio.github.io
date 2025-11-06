@@ -480,3 +480,58 @@ async function encodeSVG(file, options = {}) {
     reader.readAsDataURL(file);
   });
 }
+function encodeXPM(imageData) {
+  const { width, height, data } = imageData;
+  const colorMap = new Map();
+  const rows = [];
+
+  let colorIndex = 0;
+  for (let y = 0; y < height; y++) {
+    let row = "";
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const hex = `#${data[i].toString(16).padStart(2, "0")}${data[
+        i + 1
+      ]
+        .toString(16)
+        .padStart(2, "0")}${data[i + 2].toString(16).padStart(2, "0")}`;
+      if (!colorMap.has(hex)) {
+        const key = String.fromCharCode(97 + colorIndex); // a,b,c,...
+        colorMap.set(hex, key);
+        colorIndex++;
+      }
+      row += colorMap.get(hex);
+    }
+    rows.push(`"${row}"`);
+  }
+
+  const header = `"${width} ${height} ${colorMap.size} 1"`;
+  const colors = Array.from(colorMap.entries()).map(
+    ([color, key]) => `"${key} c ${color}"`
+  );
+
+  const content = [
+    "/* XPM */",
+    "static char *image[] = {",
+    header,
+    ...colors,
+    ...rows,
+    "};",
+  ].join("\n");
+
+  return content
+}
+function encodeYAML(imageData) {
+  const { width, height, data } = imageData;
+  let yaml = `width: ${width}\nheight: ${height}\npixels:\n`;
+
+  for (let i = 0; i < data.length; i += 4) {
+    yaml += `  - [${data[i]}, ${data[i+1]}, ${data[i+2]}, ${data[i+3]}]\n`;
+  }
+  return yaml;
+}
+
+const yamlText = encodeYAML(imageData);
+resultDiv.innerHTML = `
+  <textarea readonly style="width:100%; height:200px;">${yamlText}</textarea>
+`;
