@@ -262,8 +262,6 @@
             /if\s*\(!.*?__module__\s*\)\s*Object\.defineProperties\s*\([^)]*\)\s*;?/gs,
             ""
           );
-          js = js.replace('var', 'let');
-          js = js.replace('print', 'console.log');
           js = js.replace('input', 'prompt');
   
           jsArea.value = js.trim();
