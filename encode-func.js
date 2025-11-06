@@ -483,33 +483,46 @@ async function encodeSVG(file, options = {}) {
 function encodeXPM(imageData) {
   const { width, height, data } = imageData;
   const colorMap = new Map();
-  const rows = [];
+  let nextCharCode = 33; // start from '!' to avoid special chars
 
-  let colorIndex = 0;
-  for (let y = 0; y < height; y++) {
-    let row = "";
-    for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 4;
-      const hex = `#${data[i].toString(16).padStart(2, "0")}${data[
-        i + 1
-      ]
-        .toString(16)
-        .padStart(2, "0")}${data[i + 2].toString(16).padStart(2, "0")}`;
-      if (!colorMap.has(hex)) {
-        const key = String.fromCharCode(97 + colorIndex); // a,b,c,...
-        colorMap.set(hex, key);
-        colorIndex++;
-      }
-      row += colorMap.get(hex);
+  const pixels = [];
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const a = data[i + 3];
+    const key = a === 0 ? "transparent" : `#${r.toString(16).padStart(2, "0")}${g
+      .toString(16)
+      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+
+    if (!colorMap.has(key)) {
+      const ch = String.fromCharCode(nextCharCode++);
+      colorMap.set(key, ch);
     }
-    rows.push(`"${row}"`);
+    pixels.push(colorMap.get(key));
   }
 
-  const header = `"${width} ${height} ${colorMap.size} 1"`;
-  const colors = Array.from(colorMap.entries()).map(
-    ([color, key]) => `"${key} c ${color}"`
-  );
+  // Build header line
+  const header = `"${width} ${height} ${colorMap.size} 1",`;
 
+  // Build color definitions
+  const colors = [];
+  for (const [color, ch] of colorMap.entries()) {
+    if (color === "transparent") {
+      colors.push(`"${ch} c None",`);
+    } else {
+      colors.push(`"${ch} c ${color}",`);
+    }
+  }
+
+  // Build pixel rows
+  const rows = [];
+  for (let y = 0; y < height; y++) {
+    const row = pixels.slice(y * width, (y + 1) * width).join("");
+    rows.push(`"${row}",`);
+  }
+
+  // Combine everything
   const content = [
     "/* XPM */",
     "static char *image[] = {",
@@ -521,6 +534,7 @@ function encodeXPM(imageData) {
 
   return content
 }
+
 function encodeYAML(imageData) {
   const { width, height, data } = imageData;
   let yaml = `width: ${width}\nheight: ${height}\npixels:\n`;
