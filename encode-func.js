@@ -482,8 +482,13 @@ async function encodeSVG(file, options = {}) {
 }
 function encodeXPM(imageData) {
   const { width, height, data } = imageData;
+
+  // Map to store color -> symbol
   const colorMap = new Map();
-  let nextCharCode = 33; // start from '!' to avoid special chars
+  let nextCharCode = 33; // printable ASCII: 33 (!) → 126 (~)
+
+  // Always reserve a transparent color first
+  colorMap.set("transparent", ".");
 
   const pixels = [];
   for (let i = 0; i < data.length; i += 4) {
@@ -491,49 +496,84 @@ function encodeXPM(imageData) {
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
-    const key = a === 0 ? "transparent" : `#${r.toString(16).padStart(2, "0")}${g
-      .toString(16)
-      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+
+    const key =
+      a === 0
+        ? "transparent"
+        : `#${r.toString(16).padStart(2, "0")}${g
+            .toString(16)
+            .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 
     if (!colorMap.has(key)) {
-      const ch = String.fromCharCode(nextCharCode++);
-      colorMap.set(key, ch);
+      // assign new symbol
+      if (nextCharCode > 126) nextCharCode = 33; // wrap back if > '~'
+      const symbol = String.fromCharCode(nextCharCode++);
+      colorMap.set(key, symbol);
     }
     pixels.push(colorMap.get(key));
   }
 
-  // Build header line
-  const header = `"${width} ${height} ${colorMap.size} 1",`;
+  const charsPerPixel = 1;
 
-  // Build color definitions
-  const colors = [];
-  for (const [color, ch] of colorMap.entries()) {
-    if (color === "transparent") {
-      colors.push(`"${ch} c None",`);
-    } else {
-      colors.push(`"${ch} c ${color}",`);
+  // 🔧 Ensure pixel count matches exactly width * height
+  const expected = width * height;
+  if (pixels.length < expected) {
+    console.warn(
+      `Pixels too few (${pixels.length}), filling ${expected - pixels.length} transparent`
+    );
+    while (pixels.length < expected) {
+      pixels.push(colorMap.get("transparent"));
     }
+  } else if (pixels.length > expected) {
+    console.warn(
+      `Pixels too many (${pixels.length}), trimming ${pixels.length - expected}`
+    );
+    pixels.length = expected;
   }
 
-  // Build pixel rows
+  // === HEADER LINE ===
+  const header = `"${width} ${height} ${colorMap.size} ${charsPerPixel}",`;
+
+  // === COLOR TABLE ===
+  const colors = [];
+  for (const [color, symbol] of colorMap.entries()) {
+    colors.push(
+      `"${symbol} c ${color === "transparent" ? "None" : color}",`
+    );
+  }
+
+  // === PIXEL ROWS ===
   const rows = [];
   for (let y = 0; y < height; y++) {
-    const row = pixels.slice(y * width, (y + 1) * width).join("");
-    rows.push(`"${row}",`);
+    const start = y * width;
+    const end = start + width;
+    const row = pixels.slice(start, end).join("");
+    rows.push(`"${row}"${y === height - 1 ? "" : ","}`);
   }
 
-  // Combine everything
-  const content = [
+  // === FINAL XPM TEXT ===
+  const lines = [
     "/* XPM */",
     "static char *image[] = {",
     header,
     ...colors,
     ...rows,
     "};",
-  ].join("\n");
+  ];
 
-  return content
+  // === Validation ===
+  for (let i = 0; i < height; i++) {
+    const rowStr = rows[i].replace(/["",]/g, "");
+    if (rowStr.length !== width * charsPerPixel) {
+      console.error(
+        `Row ${i} invalid: expected ${width * charsPerPixel}, got ${rowStr.length}`
+      );
+    }
+  }
+
+  return lines.join("\n");
 }
+
 
 function encodeYAML(imageData) {
   const { width, height, data } = imageData;

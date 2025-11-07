@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Code Editor & Page Maker</title>
+    <style>
+        /* === GLOBAL CYBER STYLE === */
+        * {
+            font-family: 'Segoe UI', Tahoma, Roboto, sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            background: radial-gradient(circle at center, #000010, #000000 70%);
+            color: #00ffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 20px;
+        }
+
+
+    /* === LAYOUT === */
+    .container {
+        display: flex;
+        justify-content: space-around;
+        width: 95%;
+        margin-bottom: 20px;
+    }
+    .two-inputs {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 45%;
+    }
+
+    /* === CYBER ELEMENTS === */
+    textarea {
+        background: rgba(0, 20, 30, 0.9);
+        color: #00ffff;
+        border: 2px solid #00ffff;
+        border-radius: 10px;
+        padding: 10px;
+        width: 100%;
+        height: 200px;
+        font-family: 'Consolas', monospace;
+        font-size: 14px;
+        resize: vertical;
+        box-shadow: 0 0 15px #00ffff33;
+        transition: all 0.2s ease;
+    }
+    textarea:focus {
+        outline: none;
+        box-shadow: 0 0 25px #00ffff99;
+    }
+
+    select {
+        background: transparent;
+        color: #00ffff;
+        border: 2px solid #00ffff;
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-bottom: 8px;
+        text-shadow: 0 0 5px #00ffff;
+        box-shadow: 0 0 10px #00ffff33;
+        transition: all 0.3s ease;
+    }
+    select:hover {
+        box-shadow: 0 0 15px #00ffff99;
+    }
+
+    /* === OUTPUT AREA === */
+    .dataContainer {
+        background: rgba(0, 10, 20, 0.9);
+        color: #00ffff;
+        border: 2px solid #00ffff;
+        border-radius: 12px;
+        width: 95%;
+        height: 300px;
+        overflow: auto;
+        box-shadow: 0 0 20px #00ffff55;
+        padding: 10px;
+    }
+
+    /* Section Titles */
+    h2 {
+        text-align: center;
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff;
+    }
+</style>
+
+
+</head>
+<body>
+    <h1>Cyber Code Editor & Page Maker</h1>
+<!-- === MARKUP SECTION === -->
+<h2>Markup</h2>
+<div class="container">
+    <div class="two-inputs">
+        <select id="htmlSelect">
+            <option value="html">HTML</option>
+            <option value="markdown">Markdown</option>
+        </select>
+        <textarea id="htmlInput" placeholder="Write your HTML or Markdown here..."></textarea>
+    </div>
+    <div class="two-inputs">
+        <select id="cssSelect">
+            <option value="css">CSS</option>
+            <option value="scss">SCSS</option>
+            <option value="sass">SASS</option>
+        </select>
+        <textarea id="cssInput" placeholder="Write your CSS, SCSS, or SASS here..."></textarea>
+    </div>
+</div>
+
+<!-- === SCRIPTING SECTION === -->
+<h2>Scripts</h2>
+<div class="container">
+    <div class="two-inputs">
+        <select id="pySelect">
+            <option value="brython">Brython</option>
+        </select>
+        <textarea id="pyInput" placeholder="Write your Python (Brython) code here..."></textarea>
+    </div>
+    <div class="two-inputs">
+        <select id="jsSelect">
+            <option value="typescript">TypeScript</option>
+            <option value="coffeescript">CoffeeScript</option>
+            <option value="livescript">LiveScript</option>
+            <option value="javascript">JavaScript</option>
+        </select>
+        <textarea id="jsInput" placeholder="Write your JS/TS/CS/LS code here..."></textarea>
+    </div>
+</div>
+
+<!-- === OUTPUT === -->
+<div class="dataContainer" id="output">
+    <p><em>Output will appear here...</em></p>
+</div>
+
+
+</body>
+</html>
