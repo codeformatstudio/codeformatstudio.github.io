@@ -1,7 +1,8 @@
 function typewriter(
   text: string,
   speed: number | null = 50,
-  place: string | null = "body"
+  place: string | null = "body",
+  typeOfText: string | null
 ) {
   let element: HTMLElement | null;
 
@@ -25,13 +26,51 @@ function typewriter(
   let i = 0;
 
   function type() {
-    if (i < text.length) {
-      element!.innerHTML += text.charAt(i);
-      i++;
+    if (typeOfText === "innerHTML") {
+      if (i < text.length) {
+        element!.innerHTML += text.charAt(i);
+        i++;
 
-      // Optional: slight random variation for natural typing
-      const randomSpeed = speed! + Math.random() * 50 - 25;
-      setTimeout(type, Math.max(10, randomSpeed)); // prevent negative delay
+        // Optional: slight random variation for natural typing
+        const randomSpeed = speed! + Math.random() * 50 - 25;
+        setTimeout(type, Math.max(10, randomSpeed)); // prevent negative delay
+      }
+    } else if (typeOfText === "innerText") {
+      if (i < text.length) {
+        element!.innerText += text.charAt(i);
+        i++;
+
+        // Optional: slight random variation for natural typing
+        const randomSpeed = speed! + Math.random() * 50 - 25;
+        setTimeout(type, Math.max(10, randomSpeed)); // prevent negative delay
+      }
+    } else if (typeOfText === "textContent") {
+      if (i < text.length) {
+        element!.textContent += text.charAt(i);
+        i++;
+
+        // Optional: slight random variation for natural typing
+        const randomSpeed = speed! + Math.random() * 50 - 25;
+        setTimeout(type, Math.max(10, randomSpeed)); // prevent negative delay
+      }
+    } else if (typeOfText === "outerHTML") {
+      if (i < text.length) {
+        element!.outerHTML += text.charAt(i);
+        i++;
+
+        // Optional: slight random variation for natural typing
+        const randomSpeed = speed! + Math.random() * 50 - 25;
+        setTimeout(type, Math.max(10, randomSpeed)); // prevent negative delay
+      }
+    } else if (typeOfText === "outerText") {
+      if (i < text.length) {
+        element!.outerText += text.charAt(i);
+        i++;
+
+        // Optional: slight random variation for natural typing
+        const randomSpeed = speed! + Math.random() * 50 - 25;
+        setTimeout(type, Math.max(10, randomSpeed)); // prevent negative delay
+      }
     }
   }
 
