@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
 <html lang="en">
-<head>
-    <link rel="icon" href="icons/icon.png">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <link rel="icon" href="icons/icon.png" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cyber Code Editor & Page Maker</title>
     <script src="https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js"></script>
     <script src="assets/coffee-script/lib/coffee-script/coffee-script.js"></script>
@@ -13,43 +13,43 @@
     <script src="assets/brython/brython.js"></script>
     <script src="assets/marked/lib/marked.umd.js"></script>
     <style>
-        /* === GLOBAL CYBER STYLE === */
-        * {
-            font-family: 'Segoe UI', Tahoma, Roboto, sans-serif;
-            box-sizing: border-box;
-        }
-        body {
-            background: radial-gradient(circle at center, #000010, #000000 70%);
-            color: #00ffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            color: #00ffff;
-            text-shadow: 0 0 10px #00ffff;
-            margin-bottom: 20px;
-        }
+      /* === GLOBAL CYBER STYLE === */
+      @import url(assets/Orbitron.css);
+      * {
+        font-family: "Orbitron", "Segoe UI", Tahoma, Roboto, sans-serif;
+        box-sizing: border-box;
+      }
+      body {
+        background: radial-gradient(circle at center, #000010, #000000 70%);
+        color: #00ffff;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      h1 {
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff;
+        margin-bottom: 20px;
+      }
 
-
-    /* === LAYOUT === */
-    .container {
+      /* === LAYOUT === */
+      .container {
         display: flex;
         justify-content: space-around;
         width: 95%;
         margin-bottom: 20px;
-    }
-    .two-inputs {
+      }
+      .two-inputs {
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         width: 45%;
-    }
+      }
 
-    /* === CYBER ELEMENTS === */
-    textarea {
+      /* === CYBER ELEMENTS === */
+      textarea {
         background: rgba(0, 20, 30, 0.9);
         color: #00ffff;
         border: 2px solid #00ffff;
@@ -57,18 +57,18 @@
         padding: 10px;
         width: 100%;
         height: 200px;
-        font-family: 'Consolas', monospace;
+        font-family: "Consolas", monospace;
         font-size: 14px;
         resize: vertical;
         box-shadow: 0 0 15px #00ffff33;
         transition: all 0.2s ease;
-    }
-    textarea:focus {
+      }
+      textarea:focus {
         outline: none;
         box-shadow: 0 0 25px #00ffff99;
-    }
+      }
 
-    select {
+      select {
         background: transparent;
         color: #00ffff;
         border: 2px solid #00ffff;
@@ -78,13 +78,13 @@
         text-shadow: 0 0 5px #00ffff;
         box-shadow: 0 0 10px #00ffff33;
         transition: all 0.3s ease;
-    }
-    select:hover {
+      }
+      select:hover {
         box-shadow: 0 0 15px #00ffff99;
-    }
+      }
 
-    /* === OUTPUT AREA === */
-    .dataContainer {
+      /* === OUTPUT AREA === */
+      .dataContainer {
         background: rgba(0, 10, 20, 0.9);
         color: #00ffff;
         border: 2px solid #00ffff;
@@ -94,65 +94,121 @@
         overflow: auto;
         box-shadow: 0 0 20px #00ffff55;
         padding: 10px;
-    }
+      }
 
-    /* Section Titles */
-    h2 {
+      /* Section Titles */
+      h2 {
         text-align: center;
         color: #00ffff;
         text-shadow: 0 0 10px #00ffff;
-    }
-</style>
-
-
-</head>
-<body>
+      }
+      ul {
+        display: none;
+        background-color: transparent;
+        color: #00ffff;
+        border: 2px solid #00ffff;
+      }
+    </style>
+  </head>
+  <body>
     <h1>Cyber Code Editor & Page Maker</h1>
-<!-- === MARKUP SECTION === -->
-<h2>Markup</h2>
-<div class="container">
-    <div class="two-inputs">
+    <!-- === MARKUP SECTION === -->
+    <h2>Markup</h2>
+    <div class="container">
+      <div class="two-inputs">
         <select id="htmlSelect">
-            <option value="html">HTML</option>
-            <option value="markdown">Markdown</option>
+          <option value="html">HTML</option>
+          <option value="markdown">Markdown</option>
         </select>
-        <textarea id="htmlInput" placeholder="Write your HTML or Markdown here..."></textarea>
-    </div>
-    <div class="two-inputs">
+        <textarea
+          id="htmlInput"
+          placeholder="Write your HTML or Markdown here..."
+        ></textarea>
+      </div>
+      <div class="two-inputs">
         <select id="cssSelect">
-            <option value="css">CSS</option>
-            <option value="scss">SCSS</option>
-            <option value="sass">SASS</option>
+          <!-- <option value="css">CSS</option>
+          <option value="scss">SCSS</option> -->
+          <option value="sass">SASS</option>
         </select>
-        <textarea id="cssInput" placeholder="Write your CSS, SCSS, or SASS here..."></textarea>
+        <textarea
+          id="cssInput"
+          placeholder="Write your CSS, SCSS, or SASS here..."
+        ></textarea>
+      </div>
     </div>
-</div>
 
-<!-- === SCRIPTING SECTION === -->
-<h2>Scripts</h2>
-<div class="container">
-    <div class="two-inputs">
+    <!-- === SCRIPTING SECTION === -->
+    <h2>Scripts</h2>
+    <div class="container">
+      <div class="two-inputs">
         <select id="pySelect">
-            <option value="brython">Brython</option>
+          <option value="brython">Brython</option>
         </select>
-        <textarea id="pyInput" placeholder="Write your Python (Brython) code here..."></textarea>
-    </div>
-    <div class="two-inputs">
+        <textarea
+          id="pyInput"
+          placeholder="Write your Python (Brython) code here..."
+        ></textarea>
+      </div>
+      <div class="two-inputs">
         <select id="jsSelect">
-            <option value="typescript">TypeScript</option>
-            <option value="coffeescript">CoffeeScript</option>
-            <option value="livescript">LiveScript</option>
-            <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <!-- <option value="coffeescript">CoffeeScript</option>
+          <option value="livescript">LiveScript</option> -->
+          <option value="javascript">JavaScript</option>
         </select>
-        <textarea id="jsInput" placeholder="Write your JS/TS/CS/LS code here..."></textarea>
+        <textarea
+          id="jsInput"
+          placeholder="Write your JS/TS/CS/LS code here..."
+        ></textarea>
+      </div>
     </div>
-</div>
 
-<!-- === OUTPUT === -->
-<div class="dataContainer" id="output">
-    <p><em>Output will appear here...</em></p>
-</div>
-<script src="code-editor.js"></script>
-
-</body>
+    <!-- === OUTPUT === -->
+    <!-- <button
+      class="dataBtn"
+      style="
+        position: fixed;
+        top: 50%;
+        right: 20px;
+        padding: 0;
+        background-color: #000010;
+        color: #00ffff;
+      "
+      title="Preview"
+      id="previewBtn"
+    >
+      ...
+    </button> -->
+    <form>
+      <datalist id="choosingList">
+        <option value="Dock To Right">Dock To Right</option>
+        <option value="Dock To Left">Dock To Left</option>
+        <option value="Dock To Bottom">Dock To Bottom</option>
+        <option value="Separate Window">Separate Window</option>
+      </datalist>
+      <input
+        type="text"
+        placeholder="Enter The Preview's Style..."
+        list="choosingList"
+        id="previewInput"
+        style="
+          position: fixed;
+          top: 0px;
+          width: 100%;
+          left: 0%;
+          text-align: center;
+        "
+      />
+    </form>
+    <div
+      class="dataContainer"
+      id="previewScreen"
+      style="display: none; position: fixed"
+      id="output"
+    >
+      <p><em>Output will appear here...</em></p>
+    </div>
+    <script src="code-editor.js"></script>
+  </body>
 </html>
