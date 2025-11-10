@@ -108,6 +108,51 @@
         color: #00ffff;
         border: 2px solid #00ffff;
       }
+      #closePreviewBtn {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        background: #000010;
+        color: #00ffff;
+        border: 1px solid #00ffff;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 0 8px #00ffff88;
+        transition: all 0.2s ease;
+        z-index: 9999;
+      }
+
+      #closePreviewBtn:hover {
+        background: #00ffff;
+        color: #000010;
+        box-shadow: 0 0 15px #00ffffcc;
+      }
+      #downloadBtn {
+        justify-self: center;
+        background: #000010;
+        color: #00ffff;
+        border: 1px solid #00ffff;
+        border-radius: 6px;
+        width: fit-content;
+        height: fit-content;
+        padding: 10px;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 0 8px #00ffff88;
+        transition: all 0.2s ease;
+        z-index: 9999;
+      }
+
+      #downloadBtn:hover {
+        background: #00ffff;
+        color: #000010;
+        box-shadow: 0 0 15px #00ffffcc;
+      }
     </style>
   </head>
   <body>
@@ -206,10 +251,11 @@
       class="dataContainer"
       id="previewScreen"
       style="display: none; position: fixed"
-      id="output"
     >
-      <p><em>Output will appear here...</em></p>
+      <button id="closePreviewBtn" title="Close Preview">✖</button>
+      <div id="previewContent" style="width: 100%; height: 100%"></div>
     </div>
+    <button id="downloadBtn">Download</button>
     <script src="code-editor.js"></script>
   </body>
 </html>
