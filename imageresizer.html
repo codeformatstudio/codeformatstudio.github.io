@@ -6,32 +6,72 @@
 <title>Image Resizer & Cropper</title>
 <link rel="stylesheet" href="assets/Orbitron.css">
 <style>
-/* Your Orbitron/cyber styles here (same as before) */
 * { box-sizing: border-box; }
-body, html { margin:0; padding:0; height:100%; background:#0f0f20; font-family:"Orbitron","Segoe UI",sans-serif; color:#00fff7; display:flex; justify-content:center; align-items:center; text-align:center;}
-.container { background:#111122; border:2px solid #00fff7; border-radius:12px; padding:2.5rem 2rem 3rem; width:400px; box-shadow:0 0 30px #00fff7; display:flex; flex-direction:column; align-items:center;}
-h1 { margin-bottom:1.5rem; text-shadow:0 0 12px #00fff7; font-weight:700; letter-spacing:1.5px;}
-.file-input-wrapper { position:relative; width:100%; margin-bottom:1.5rem;}
+body, html {
+  margin:0; padding:0; height:100%; background:#0f0f20;
+  font-family:"Orbitron","Segoe UI",sans-serif; color:#00fff7;
+  display:flex; justify-content:center; align-items:center; text-align:center;
+}
+.container {
+  background:#111122; border:2px solid #00fff7; border-radius:12px;
+  padding:2.5rem 2rem 3rem; width:400px;
+  box-shadow:0 0 30px #00fff7; display:flex; flex-direction:column; align-items:center;
+}
+h1 { margin-bottom:1.5rem; text-shadow:0 0 12px #00fff7; font-weight:700; letter-spacing:1.5px; }
+.file-input-wrapper { position:relative; width:100%; margin-bottom:1rem; }
 input[type="file"] { opacity:0; width:100%; height:45px; position:absolute; left:0; top:0; cursor:pointer;}
-.file-input-label { border:1.5px solid #00fff7; padding:0.8rem 1rem; border-radius:8px; background:#0f0f20; color:#00fff7; font-weight:600; cursor:pointer; display:inline-block; width:100%; text-align:center; box-shadow:0 0 15px #00fff7; transition: background 0.3s, color 0.3s; }
+.file-input-label {
+  border:1.5px solid #00fff7; padding:0.8rem 1rem; border-radius:8px;
+  background:#0f0f20; color:#00fff7; font-weight:600; cursor:pointer;
+  display:inline-block; width:100%; text-align:center;
+  box-shadow:0 0 15px #00fff7; transition: background 0.3s, color 0.3s;
+}
 .file-input-label:hover { background:#00fff7; color:#0f0f20; box-shadow:0 0 25px #00fff7; }
-button { width:100%; padding:0.75rem 1rem; font-size:1.1rem; background:#00fff7; border:none; color:#0f0f20; font-weight:700; border-radius:8px; cursor:pointer; box-shadow:0 0 20px #00fff7; margin-top:0.5rem;}
-button:hover { background:#00c6b6;}
+
+.resize-controls { width:100%; margin-bottom:1rem; display:flex; flex-wrap:wrap; justify-content:space-between; gap:5%; }
+.resize-controls input { padding:0.5rem; border-radius:6px; border:1.5px solid #00fff7; background:#0f0f20; color:#00fff7; width:45%; }
+
+button {
+  width:100%; padding:0.75rem 1rem; font-size:1.1rem;
+  background:#00fff7; border:none; color:#0f0f20; font-weight:700;
+  border-radius:8px; cursor:pointer; box-shadow:0 0 20px #00fff7; margin-top:0.5rem;
+}
+button:hover { background:#00c6b6; }
 #canvas-container { margin-top:1rem; width:100%; text-align:center; }
-canvas { max-width:100%; border:2px solid #00fff7; border-radius:12px; box-shadow:0 0 20px #00fff7; cursor:crosshair;}
+canvas { max-width:100%; border:2px solid #00fff7; border-radius:12px; box-shadow:0 0 20px #00fff7; cursor:crosshair; }
+
+/* Media Queries */
+@media (max-width: 400px) {
+  .container { font-size: 12px; padding: 5px; width: 100%; }
+}
+@media (max-width: 240px) {
+  .container { font-size: 12px; padding: 5px; width: 100%; }
+}
+@media (max-width: 239px) {
+  .container { font-size: 10px; padding: 3px; width: 100%; }
+}
+@media (max-width: 150px) {
+  .container { font-size: 8px; padding: 5px; width: 100%; }
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Drag-to-Crop Image</h1>
+  <h1>Image Resizer & Cropper</h1>
 
   <div class="file-input-wrapper">
     <label class="file-input-label" for="upload">Upload Image</label>
     <input type="file" id="upload" accept="image/*">
   </div>
 
+  <div class="resize-controls">
+    <input type="number" id="resizeWidth" placeholder="Width">
+    <input type="number" id="resizeHeight" placeholder="Height">
+  </div>
+
+  <button id="resizeBtn">Resize Image</button>
   <button id="cropBtn">Crop Selected Area</button>
-  <button id="downloadBtn">Download Cropped Image</button>
+  <button id="downloadBtn">Download Image</button>
 
   <div id="canvas-container">
     <canvas id="canvas"></canvas>
@@ -39,16 +79,23 @@ canvas { max-width:100%; border:2px solid #00fff7; border-radius:12px; box-shado
 </div>
 
 <script>
+let cropRatio = 1; // 1 for square, 16/9 for widescreen
 const upload = document.getElementById("upload");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const cropBtn = document.getElementById("cropBtn");
 const downloadBtn = document.getElementById("downloadBtn");
+const resizeBtn = document.getElementById("resizeBtn");
+const resizeWidth = document.getElementById("resizeWidth");
+const resizeHeight = document.getElementById("resizeHeight");
 
 let img = new Image();
 let startX, startY, endX, endY;
 let isDragging = false;
 let selection = null;
+let scale = 1;
+let originalWidth = 0;
+let originalHeight = 0;
 
 // Load image
 upload.addEventListener("change", e => {
@@ -60,12 +107,45 @@ upload.addEventListener("change", e => {
 });
 
 img.onload = () => {
-  canvas.width = img.width;
-  canvas.height = img.height;
-  ctx.drawImage(img,0,0);
+  originalWidth = img.width;
+  originalHeight = img.height;
+
+  const maxWidth = 380;
+  const maxHeight = 380;
+  scale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+
+  canvas.width = img.width * scale;
+  canvas.height = img.height * scale;
+  redrawCanvas();
+  updateResizeInputs();
+};
+
+// Redraw canvas
+function redrawCanvas(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(img,0,0, canvas.width, canvas.height);
 }
 
-// Mouse events for drag-to-crop
+// Draw selection rectangle
+function drawSelection(){
+  const sel = isDragging 
+              ? {x: Math.min(startX,endX), y: Math.min(startY,endY), w: Math.abs(endX-startX), h: Math.abs(endY-startY)}
+              : selection;
+  if(!sel) return;
+  ctx.strokeStyle = "#00fff7";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6]);
+  ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
+  ctx.setLineDash([]);
+}
+
+// Update inputs to current canvas size
+function updateResizeInputs() {
+  resizeWidth.value = canvas.width;
+  resizeHeight.value = canvas.height;
+}
+
+// Mouse events
 canvas.addEventListener("mousedown", e => {
   const rect = canvas.getBoundingClientRect();
   startX = e.clientX - rect.left;
@@ -76,64 +156,99 @@ canvas.addEventListener("mousedown", e => {
 canvas.addEventListener("mousemove", e => {
   if(!isDragging) return;
   const rect = canvas.getBoundingClientRect();
-  endX = e.clientX - rect.left;
-  endY = e.clientY - rect.top;
+  let mx = e.clientX - rect.left;
+  let my = e.clientY - rect.top;
+
+  let w = mx - startX;
+  let h = my - startY;
+
+  // Adjust width or height to maintain aspect ratio
+  if(Math.abs(w) > Math.abs(h * cropRatio)) {
+    h = w / cropRatio;
+  } else {
+    w = h * cropRatio;
+  }
+
+  endX = startX + w;
+  endY = startY + h;
+
   redrawCanvas();
   drawSelection();
 });
 
+
 canvas.addEventListener("mouseup", e => {
   isDragging = false;
+  const rect = canvas.getBoundingClientRect();
+  endX = e.clientX - rect.left;
+  endY = e.clientY - rect.top;
   selection = { x: Math.min(startX,endX), y: Math.min(startY,endY), w: Math.abs(endX-startX), h: Math.abs(endY-startY) };
+  redrawCanvas();
+  drawSelection();
 });
-
-// Redraw original image
-function redrawCanvas(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(img,0,0);
-}
-
-// Draw selection rectangle
-function drawSelection(){
-  if(!isDragging) return;
-  ctx.strokeStyle = "#00fff7";
-  ctx.lineWidth = 2;
-  ctx.setLineDash([6]);
-  ctx.strokeRect(Math.min(startX,endX), Math.min(startY,endY), Math.abs(endX-startX), Math.abs(endY-startY));
-  ctx.setLineDash([]);
-}
 
 // Crop
 cropBtn.addEventListener("click", () => {
   if(!selection) return alert("Drag to select an area first!");
   const {x,y,w,h} = selection;
-  const croppedData = ctx.getImageData(x,y,w,h);
+
+  const tempCanvas = document.createElement("canvas");
+  const tCtx = tempCanvas.getContext("2d");
+  tempCanvas.width = w / scale;
+  tempCanvas.height = h / scale;
+  tCtx.drawImage(
+    img,
+    x/scale, y/scale, w/scale, h/scale,
+    0, 0, w/scale, h/scale
+  );
+
   canvas.width = w;
   canvas.height = h;
-  ctx.putImageData(croppedData,0,0);
+  ctx.drawImage(tempCanvas,0,0, w, h);
   selection = null;
+  updateResizeInputs();
 });
 
-// Download cropped image
+// Resize button with aspect ratio
+resizeWidth.addEventListener("input", () => {
+  let w = parseInt(resizeWidth.value);
+  if(!w) return;
+  resizeHeight.value = Math.round(w * canvas.height / canvas.width);
+});
+
+resizeHeight.addEventListener("input", () => {
+  let h = parseInt(resizeHeight.value);
+  if(!h) return;
+  resizeWidth.value = Math.round(h * canvas.width / canvas.height);
+});
+
+resizeBtn.addEventListener("click", () => {
+  if(!img.src) return alert("Upload an image first!");
+  let w = parseInt(resizeWidth.value);
+  let h = parseInt(resizeHeight.value);
+  if(!w || !h) return alert("Enter valid width and height!");
+  canvas.width = w;
+  canvas.height = h;
+  ctx.drawImage(img,0,0,w,h);
+  selection = null;
+  updateResizeInputs();
+});
+
+// Download
 downloadBtn.addEventListener("click", () => {
   if(!img.src) return alert("No image to download");
-
-  // Extract original filename
   const file = upload.files[0];
   if(!file) return alert("No image selected");
-
-  const originalName = file.name; // e.g., "mypic.png"
+  const originalName = file.name;
   const dotIndex = originalName.lastIndexOf(".");
-  const name = originalName.substring(0, dotIndex); // "mypic"
-  const ext = originalName.substring(dotIndex);     // ".png"
-  const newName = name + "-resized" + ext;          // "mypic-resized.png"
-
+  const name = originalName.substring(0, dotIndex);
+  const ext = originalName.substring(dotIndex);
+  const newName = name + "-resized" + ext;
   const link = document.createElement("a");
   link.download = newName;
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
-
 </script>
 </body>
 </html>
