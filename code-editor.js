@@ -167,7 +167,8 @@ function generateFullOutput() {
     <script src="https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@17.0.0/lib/marked.umd.js"></script>
     <script type="text/javascript">
-    window.onload = brython();
+    document.addEventListener("DOMContentLoaded", () => brython());
+
     ${jsContent}
     </script>
     ${pyScript}
