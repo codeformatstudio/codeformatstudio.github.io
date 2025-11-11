@@ -845,6 +845,7 @@ document.getElementById('downloadBtn').addEventListener('click', function () {
   link.download = 'output.js';
   document.body.appendChild(link);
   link.click();
+  URL.revokeObjectURL(blob);
 })
 </script>
  
