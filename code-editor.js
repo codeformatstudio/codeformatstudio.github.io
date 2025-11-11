@@ -141,7 +141,7 @@ function generateFullOutput() {
     try {
       jsContent = ts.transpile(jsInput.value, {
         module: ts.ModuleKind.ESNext,
-        target: ts.ScriptTarget.ES2017,
+        target: ts.ScriptTarget.ESNext,
       });
     } catch (err) {
       jsContent = `console.error("TypeScript Error:", ${JSON.stringify(
