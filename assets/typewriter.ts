@@ -1,56 +1,79 @@
-function typewriter(
-  text: string,
-  speed: number | null = 50,
-  place: string | null = "body",
-  typeOfText:
-    | "innerHTML"
-    | "innerText"
-    | "textContent"
-    | "outerText"
-    | "outerHTML" = "innerHTML"
-) {
-  let element: HTMLElement | null;
+class Typewriter {
+  private text: string;
+  private speed: number;
+  private place: string;
+  private typeOfText: "innerHTML" | "innerText" | "textContent" | "outerHTML" | "outerText";
+  private element: HTMLElement | null;
+  private buffer: string = "";
+  private index: number = 0;
 
-  if (!place || place.toLowerCase() === "body") {
-    element = document.body;
-  } else if (place.toLowerCase() === "head") {
-    console.warn("Typing in <head> is not visible. Using <body> instead.");
-    element = document.body;
-  } else {
-    element = document.getElementById(place);
-  }
+  constructor(
+    text: string,
+    speed: number = 50,
+    place: string = "body",
+    typeOfText: "innerHTML" | "innerText" | "textContent" | "outerHTML" | "outerText" = "innerHTML"
+  ) {
+    this.text = text;
+    this.speed = speed > 0 ? speed : 50;
+    this.place = place;
+    this.typeOfText = typeOfText;
+    this.element = this.getElement(place);
 
-  if (!element) {
-    console.error(`Element "${place}" not found.`);
-    return;
-  }
-
-  if (!speed || speed <= 0) speed = 50;
-
-  let i = 0;
-  let buffer = "";
-
-  function type() {
-    if (i < text.length) {
-      buffer += text.charAt(i);
-      i++;
-
-      if (typeOfText === "innerHTML") {
-        element.innerHTML = buffer;
-      } else if (typeOfText === "innerText") {
-        element.innerText = buffer;
-      } else if (typeOfText === "textContent") {
-        element.textContent = buffer;
-      } else if (typeOfText === "outerText") {
-        element.outerText = buffer;
-      } else if (typeOfText === "outerHTML") {
-        element.outerHTML = buffer;
-      }
-
-      const randomSpeed = speed + Math.random() * 50 - 25;
-      setTimeout(type, Math.max(10, randomSpeed));
+    if (!this.element) {
+      console.error(`Element "${place}" not found.`);
+      return;
     }
   }
 
-  type();
+  /** Gets an element reference based on the provided place string */
+  private getElement(place: string): HTMLElement | null {
+    if (!place || place.toLowerCase() === "body") {
+      return document.body;
+    } else if (place.toLowerCase() === "head") {
+      console.warn("Typing in <head> is not visible. Using <body> instead.");
+      return document.body;
+    } else {
+      return document.getElementById(place);
+    }
+  }
+
+  /** Starts the typing effect */
+  public type(): void {
+    this.typeRecursive();
+  }
+
+  /** Private recursive typing logic */
+  private typeRecursive(): void {
+    if (!this.element) return;
+
+    if (this.index < this.text.length) {
+      this.buffer += this.text.charAt(this.index);
+      this.index++;
+
+      switch (this.typeOfText) {
+        case "innerText":
+          this.element.innerText = this.buffer;
+          break;
+        case "textContent":
+          this.element.textContent = this.buffer;
+          break;
+        case "outerText":
+          this.element.outerText = this.buffer;
+          break;
+        case "outerHTML":
+          this.element.outerHTML = this.buffer;
+          break;
+        case "innerHTML":
+        default:
+          this.element.innerHTML = this.buffer;
+      }
+
+      const randomSpeed = this.speed + Math.random() * 50 - 25;
+      setTimeout(() => this.typeRecursive(), Math.max(10, randomSpeed));
+    }
+  }
 }
+
+// Example usage:
+// const typer = new Typewriter("Hello, world!", 80, "output", "innerText");
+// typer.type();
