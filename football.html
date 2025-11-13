@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Football Legends</title>
+<style>
+html, body {margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden;font-family:'Orbitron',sans-serif;color:#0ff;}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;}
+#ui{position:absolute;top:10px;left:50%;transform:translateX(-50%);text-align:center;z-index:10;color:#0ff;font-size:24px;}
+#menu, #gameOver{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,30,0.8);border:2px solid #0ff;border-radius:20px;padding:20px 40px;text-align:center;color:#0ff;}
+button{background:#0ff;color:#000;border:none;border-radius:10px;padding:10px 20px;font-size:18px;margin:10px;cursor:pointer;font-family:'Orbitron',sans-serif;}
+button:hover{background:#0cc;}
+h1{margin-top:0;}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="ui"><div id="score">0 : 0</div></div>
+<div id="menu">
+  <h1>⚡ Cyber Football Legends ⚡</h1>
+  <p>Select Mode</p>
+  <button onclick="startGame('pvp')">Player vs Player</button>
+  <button onclick="startGame('pvai')">Player vs AI</button>
+  <button onclick="startGame('aivai')">AI vs AI</button>
+  <p>Player1: A/D move, W jump, S kick, Q power, E teleport, R atom<br>
+     Player2: ←/→ move, ↑ jump, ↓ kick, / power, . teleport, ; atom</p>
+</div>
+<div id="gameOver" style="display:none;">
+  <h1>Game Over!</h1>
+  <p id="winner"></p>
+  <button onclick="restart()">Restart</button>
+</div>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+let cw,ch;
+function resize(){cw=canvas.width=window.innerWidth;ch=canvas.height=window.innerHeight;}
+window.addEventListener("resize",resize);
+resize();
+
+let gameMode=null,running=false;
+const gravity=0.5;
+let players=[],ball,atoms=[],score=[0,0],keys={};
+
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+class Player{
+  constructor(x,color,controls,isAI=false,side=0){
+    this.startX=x; // store starting position
+    this.startY=ch-150;
+    this.x=x; this.y=ch-150; this.vx=0; this.vy=0; this.color=color;
+    this.controls=controls; this.isAI=isAI; this.side=side;
+    this.radius=40;
+    this.powerReady=true; this.tpReady=true; this.atomReady=true;
+    this.charge=0; this.teleportFlash=0;
+  }
+  update(){
+    if(this.isAI) this.AI();
+    else this.input();
+    this.vy+=gravity;
+    this.x+=this.vx; this.y+=this.vy;
+    if(this.y>ch-100){this.y=ch-100; this.vy=0;}
+    if(this.x<50) this.x=50;
+    if(this.x>cw-50) this.x=cw-50;
+    this.vx*=0.9;
+    this.checkBallCollision();
+
+    if(this.charge>0) this.charge-=0.1;
+    if(this.teleportFlash>0) this.teleportFlash-=0.05;
+  }
+  draw(){
+    ctx.shadowBlur=this.charge*15; ctx.shadowColor=this.color;
+    ctx.fillStyle=this.color;
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+
+    if(this.teleportFlash>0){
+      ctx.save();
+      ctx.globalAlpha=this.teleportFlash;
+      ctx.strokeStyle="#0ff";
+      ctx.lineWidth=5;
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.radius+10,0,Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  input(){
+    const c=this.controls;
+    if(keys[c.left]) this.vx-=1.5;
+    if(keys[c.right]) this.vx+=1.5;
+    if(keys[c.jump] && this.y>=ch-100) this.vy=-12;
+    if(keys[c.kick]) this.kick();
+    if(keys[c.power] && this.powerReady){ this.powerShoot(); this.powerReady=false; this.charge=1; setTimeout(()=>this.powerReady=true,4000);}
+    if(keys[c.tp] && this.tpReady){ this.teleport(); this.tpReady=false; this.teleportFlash=1; setTimeout(()=>this.tpReady=true,5000);}
+    if(keys[c.atom] && this.atomReady){ this.atomPower(); this.atomReady=false; setTimeout(()=>this.atomReady=true,6000);}
+  }
+  AI(){
+    if(!ball) return;
+    if(Math.random()<0.02) this.vx+=(ball.x>this.x?1:-1)*2;
+    if(ball.y<this.y-50 && this.y>=ch-100 && Math.random()<0.05) this.vy=-12;
+    if(Math.abs(ball.x-this.x)<70 && ball.y>this.y-50) this.kick();
+    if(this.powerReady && Math.random()<0.003){ this.powerShoot(); this.powerReady=false; this.charge=1; setTimeout(()=>this.powerReady=true,4000);}
+    if(this.tpReady && Math.random()<0.002){ this.teleport(); this.tpReady=false; this.teleportFlash=1; setTimeout(()=>this.tpReady=true,5000);}
+    if(this.atomReady && Math.random()<0.002){ this.atomPower(); this.atomReady=false; setTimeout(()=>this.atomReady=true,6000);}
+  }
+  kick(){
+    const dx=ball.x-this.x,dy=ball.y-this.y,dist=Math.hypot(dx,dy);
+    if(dist<70){ball.vx+=(dx/dist)*12; ball.vy-=(dy/dist)*8;}
+  }
+  powerShoot(){
+    const dx=ball.x-this.x,dy=ball.y-this.y,dist=Math.hypot(dx,dy);
+    if(dist<200){ball.vx+=(dx/dist)*20; ball.vy-=(dy/dist)*12;}
+  }
+  teleport(){
+    const offset=(this.side===0?150:-150);
+    this.x=Math.min(Math.max(ball.x+offset,50),cw-50);
+  }
+  atomPower(){
+    const dir=(this.side===0?1:-1);
+    atoms.push({x:this.x,y:this.y-50,vx:dir*10,vy:-2,color:this.color,dead:false});
+  }
+  checkBallCollision(){
+    const dx=ball.x-this.x,dy=ball.y-this.y;
+    const dist=Math.hypot(dx,dy);
+    if(dist<this.radius+ball.radius){
+      const angle=Math.atan2(dy,dx);
+      const force=15;
+      ball.vx=Math.cos(angle)*force;
+      ball.vy=Math.sin(angle)*force-5;
+    }
+  }
+  reset(){this.x=this.startX; this.y=this.startY; this.vx=0; this.vy=0;}
+}
+
+class Ball{
+  constructor(){this.reset();}
+  reset(){this.x=cw/2; this.y=ch/2; this.vx=0; this.vy=0; this.radius=30; this.trail=[];}
+  update(){
+    this.vy+=gravity; this.x+=this.vx; this.y+=this.vy;
+    if(this.y>ch-60){this.y=ch-60; this.vy*=-0.7; this.vx*=0.95;}
+    if(this.x<30){this.vx*=-0.8; this.x=30;}
+    if(this.x>cw-30){this.vx*=-0.8; this.x=cw-30;}
+    if(this.x<60 && this.y>ch-200) scoreGoal(1);
+    if(this.x>cw-60 && this.y>ch-200) scoreGoal(0);
+    this.vx*=0.99;
+    this.trail.push({x:this.x,y:this.y});
+    if(this.trail.length>10) this.trail.shift();
+  }
+  draw(){
+    for(let i=0;i<this.trail.length;i++){
+      const t=this.trail[i];
+      ctx.fillStyle=`rgba(0,255,255,${i/this.trail.length*0.5})`;
+      ctx.beginPath(); ctx.arc(t.x,t.y,this.radius*(i/this.trail.length*0.5+0.2),0,Math.PI*2); ctx.fill();
+    }
+    ctx.shadowBlur=25; ctx.shadowColor="#0ff";
+    ctx.fillStyle="#0ff"; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+  }
+}
+
+function scoreGoal(side){
+  score[side]++; updateScore();
+  flashBall();
+  ball.reset();
+}
+
+function flashBall(){ball.flashCount=6;}
+function updateScore(){document.getElementById("score").innerText=`${score[0]} : ${score[1]}`;}
+
+function startGame(mode){
+  gameMode=mode;
+  document.getElementById("menu").style.display="none";
+  document.getElementById("gameOver").style.display="none";
+  score=[0,0]; updateScore();
+  setupGame(mode);
+  running=true;
+  loop();
+}
+
+function setupGame(mode){
+  players.length=0; atoms=[];
+  const controls1={left:'a',right:'d',jump:'w',kick:'s',power:'q',tp:'e',atom:'r'};
+  const controls2={left:'arrowleft',right:'arrowright',jump:'arrowup',kick:'arrowdown',power:'/',tp:'.',atom:';'};
+  if(mode==='pvp'){players.push(new Player(cw/4,"#0ff",controls1,false,0)); players.push(new Player(cw*3/4,"#f00",controls2,false,1));}
+  else if(mode==='pvai'){players.push(new Player(cw/4,"#0ff",controls1,false,0)); players.push(new Player(cw*3/4,"#f00",controls2,true,1));}
+  else{players.push(new Player(cw/4,"#0ff",controls1,true,0)); players.push(new Player(cw*3/4,"#f00",controls2,true,1));}
+  ball=new Ball();
+}
+
+function restart(){
+  document.getElementById("gameOver").style.display="none";
+  score=[0,0]; updateScore();
+  ball.reset();
+  players.forEach(p=>p.reset());
+  running=true; loop();
+}
+
+function loop(){
+  if(!running) return;
+  ctx.clearRect(0,0,cw,ch);
+  ctx.fillStyle="#001"; ctx.fillRect(0,ch-200,cw,200);
+  ctx.strokeStyle="#0ff"; ctx.lineWidth=2; ctx.strokeRect(50,ch-200,40,200); ctx.strokeRect(cw-90,ch-200,40,200);
+
+  players.forEach(p=>{p.update();p.draw();});
+  ball.update(); ball.draw();
+  atoms.forEach(a=>{
+    a.x+=a.vx; a.y+=a.vy; a.vy+=0.1;
+    const dx=ball.x-a.x,dy=ball.y-a.y,dist=Math.hypot(dx,dy);
+    if(dist<40){ball.vx+=(dx/dist)*-15; ball.vy+=(dy/dist)*-10; a.dead=true;}
+    ctx.shadowBlur=20; ctx.shadowColor=a.color; ctx.fillStyle=a.color; ctx.beginPath(); ctx.arc(a.x,a.y,10,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+  });
+  atoms=atoms.filter(a=>!a.dead && a.x>0 && a.x<cw && a.y<ch);
+
+  if(score[0]>=5 || score[1]>=5){
+    running=false;
+    document.getElementById("winner").innerText = score[0]>score[1] ? "Left Player Wins!" : "Right Player Wins!";
+    document.getElementById("gameOver").style.display="block";
+    return;
+  }
+  updateScore();
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
