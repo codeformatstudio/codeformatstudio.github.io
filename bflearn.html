@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Learn Brainfuck Tutorial & Interpreter</title>
+<style>
+  :root {
+    --bg: #f9f9f9;
+    --text: #222;
+    --btn-bg: #eee;
+    --btn-hover-bg: #ddd;
+    --accent: #0066cc;
+    --memory-cell-bg: #fff;
+    --memory-pointer-bg: #cce6ff;
+  }
+  body.dark {
+    --bg: #1e1e1e;
+    --text: #ddd;
+    --btn-bg: #333;
+    --btn-hover-bg: #444;
+    --accent: #3399ff;
+    --memory-cell-bg: #2a2a2a;
+    --memory-pointer-bg: #3a72d1;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1, h2, h3 {
+    margin-top: 0;
+  }
+  .container {
+    max-width: 800px;
+    width: 100%;
+  }
+  .lesson-text {
+    white-space: pre-wrap;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+  button.btn {
+    background: var(--btn-bg);
+    border: 1px solid #999;
+    padding: 0.4rem 0.9rem;
+    margin: 0.2rem;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+  }
+  button.btn:hover {
+    background: var(--btn-hover-bg);
+  }
+  button.btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  #progress-container {
+    width: 100%;
+    height: 18px;
+    background: #ccc;
+    border-radius: 9px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  #progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  #content-area {
+    background: var(--memory-cell-bg);
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
+  textarea {
+    width: 100%;
+    font-family: monospace;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #aaa;
+    padding: 0.4rem;
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+  }
+  #bf-editor {
+    height: 150px;
+  }
+  #input-textarea {
+    height: 40px;
+  }
+  #output-console {
+    min-height: 60px;
+    background: #222;
+    color: #0f0;
+    font-family: monospace;
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  #memory-visualizer {
+    margin-top: 1rem;
+    font-family: monospace;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    border: 1px solid #999;
+    padding: 0.2rem;
+    border-radius: 4px;
+    user-select: none;
+    background: var(--memory-cell-bg);
+  }
+  .memory-cell {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    border: 1px solid #aaa;
+    margin-right: 2px;
+    text-align: center;
+    border-radius: 3px;
+    background: var(--memory-cell-bg);
+    color: var(--text);
+  }
+  .memory-cell.pointer {
+    background: var(--memory-pointer-bg);
+    font-weight: 700;
+  }
+  label {
+    font-weight: 600;
+    display: block;
+    margin-top: 1rem;
+  }
+  .control-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .control-row > * {
+    margin-right: 0.5rem;
+  }
+  .quiz-question-block {
+    margin-bottom: 1rem;
+  }
+  .quiz-question {
+    font-weight: 700;
+  }
+  .quiz-options label {
+    display: block;
+    margin-left: 1rem;
+    cursor: pointer;
+  }
+  #dark-mode-toggle {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--btn-bg);
+    border: 1px solid #999;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<button id="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+<div class="container" role="main" aria-live="polite" aria-atomic="true">
+  <h1>Learn Brainfuck</h1>
+  <div id="progress-container" aria-label="Progress">
+    <div id="progress-fill"></div>
+  </div>
+  <div id="content-area"></div>
+  <div style="margin-top:1rem;">
+    <button id="btn-prev" class="btn" aria-label="Previous page">← Previous</button>
+    <button id="btn-next" class="btn" aria-label="Next page">Next →</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const lessons = [
+    {
+      title: "What is Brainfuck?",
+      text: `Brainfuck is an esoteric programming language created in 1993 by Urban Müller. It consists of only 8 commands and an instruction pointer. It operates on an array of memory cells (usually 30,000 bytes initialized to zero).\n\nIts purpose was to create the smallest possible compiler while still being Turing-complete. The language is known for its extreme minimalism and challenge to program in.`
+    },
+    {
+      title: "Brainfuck Commands",
+      text: `Brainfuck uses 8 commands:\n\n>  : Move the pointer to the right\n<  : Move the pointer to the left\n+  : Increment the memory cell at the pointer\n-  : Decrement the memory cell at the pointer\n.  : Output the character signified by the cell at the pointer\n,  : Input a character and store it in the cell at the pointer\n[  : Jump past matching ] if the cell at the pointer is 0\n]  : Jump back to matching [ if the cell at the pointer is not 0\n\nAll other characters are ignored.`
+    },
+    {
+      title: "Memory and Pointer",
+      text: `Brainfuck operates on a simple array of bytes (cells) initially set to zero. The pointer starts at the first cell.\n\nYou can move the pointer left or right to access different cells, and increment or decrement the values in those cells.\n\nThis simplicity makes Brainfuck quite challenging but also fascinating.`
+    },
+    {
+      title: "Loops in Brainfuck",
+      text: `Loops are formed with [ and ] commands:\n- When the interpreter reaches a '[' and the current cell is zero, it jumps forward to the command after the matching ']'.\n- When the interpreter reaches a ']' and the current cell is nonzero, it jumps back to the command after the matching '['.\n\nThis allows you to create loops and repeat instructions while the cell at the pointer is not zero.`
+    },
+    {
+      title: "Example: Hello World",
+      text: `Here's a famous Brainfuck program that prints "Hello World!":\n\n++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.\n\nTry running this program in the editor below to see how Brainfuck works!`
+    }
+  ];
+
+  const quiz = [
+    {
+      question: "How many commands does Brainfuck have?",
+      options: ["6", "8", "10", "12"],
+      answer: 1
+    },
+    {
+      question: "What does the '>' command do?",
+      options: ["Increment the memory cell", "Move pointer to the right", "Output a character", "Input a character"],
+      answer: 1
+    },
+    {
+      question: "What happens when '[' encounters a zero cell?",
+      options: ["It loops indefinitely", "It jumps forward past matching ']'", "It throws an error", "It skips next command"],
+      answer: 1
+    },
+    {
+      question: "Brainfuck was created to:",
+      options: ["Be easy to read", "Be Turing-complete with minimal commands", "Replace C language", "Create web applications"],
+      answer: 1
+    },
+    {
+      question: "What character outputs a character in Brainfuck?",
+      options: ["+", ".", ",", "-"],
+      answer: 1
+    }
+  ];
+
+  let quizAnswers = Array(quiz.length).fill(null);
+  let currentPage = 0; // lessons, then quiz, then results
+
+  const btnPrev = document.getElementById("btn-prev");
+  const btnNext = document.getElementById("btn-next");
+  const contentArea = document.getElementById("content-area");
+  const progressFill = document.getElementById("progress-fill");
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+
+  // Brainfuck interpreter state variables
+  let memory = [];
+  let pointer = 0;
+  let bfCode = "";
+  let bfInput = "";
+  let output = "";
+  let codeIndex = 0;
+  let inputIndex = 0;
+  let loopStack = [];
+  let history = [];
+  let autoRunInterval = null;
+
+  // Elements for BF interpreter controls
+  let bfTextarea, inputTextarea, outputConsole;
+  let stepBtn, stepBackBtn, resetBtn, runBtn, autoRunToggle, speedInput;
+  let saveSelect, saveBtn, loadBtn, deleteBtn, downloadBtn;
+  let memoryVisualizer;
+
+  // Dark mode persistence
+  function loadDarkMode() {
+    if(localStorage.getItem("dark-mode") === "true") {
+      document.body.classList.add("dark");
+      darkModeToggle.textContent = "☀️";
+    } else {
+      document.body.classList.remove("dark");
+      darkModeToggle.textContent = "🌙";
+    }
+  }
+  darkModeToggle.onclick = () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("dark-mode", document.body.classList.contains("dark"));
+    loadDarkMode();
+  };
+  loadDarkMode();
+
+  btnPrev.onclick = () => {
+    if(currentPage > 0) {
+      currentPage--;
+      render();
+    }
+  };
+  btnNext.onclick = () => {
+    if(currentPage < lessons.length + 1) {
+      currentPage++;
+      render();
+    }
+  };
+
+  function render() {
+    // Update buttons
+    btnPrev.disabled = currentPage === 0;
+    btnNext.disabled = currentPage === lessons.length + 1;
+
+    // Update progress bar
+    const progressPercent = (currentPage) / (lessons.length + 1) * 100;
+    progressFill.style.width = progressPercent + "%";
+
+    contentArea.innerHTML = "";
+
+    if(currentPage < lessons.length) {
+      // Show lesson page
+      const lesson = lessons[currentPage];
+      const title = document.createElement("h2");
+      title.textContent = lesson.title;
+      const text = document.createElement("div");
+      text.className = "lesson-text";
+      text.textContent = lesson.text;
+
+      contentArea.appendChild(title);
+      contentArea.appendChild(text);
+
+      // If last lesson, add note
+      if(currentPage === lessons.length - 1) {
+        const note = document.createElement("p");
+        note.style.fontStyle = "italic";
+        note.textContent = "After finishing lessons, click Next to take a quiz and try the Brainfuck editor below.";
+        contentArea.appendChild(note);
+      }
+    } else if(currentPage === lessons.length) {
+      // Quiz page
+      const title = document.createElement("h2");
+      title.textContent = "Quiz: Test your knowledge";
+      contentArea.appendChild(title);
+
+      quiz.forEach((q, i) => {
+        const qBlock = document.createElement("div");
+        qBlock.className = "quiz-question-block";
+
+        const qTitle = document.createElement("div");
+        qTitle.className = "quiz-question";
+        qTitle.textContent = (i + 1) + ". " + q.question;
+        qBlock.appendChild(qTitle);
+
+        const optionsDiv = document.createElement("div");
+        optionsDiv.className = "quiz-options";
+
+        q.options.forEach((opt, idx) => {
+          const id = `quiz-${i}-${idx}`;
+          const label = document.createElement("label");
+          label.htmlFor = id;
+
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "quiz-" + i;
+          radio.id = id;
+          radio.value = idx;
+          if(quizAnswers[i] === idx) radio.checked = true;
+
+          radio.onchange = () => {
+            quizAnswers[i] = idx;
+          };
+
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(" " + opt));
+          optionsDiv.appendChild(label);
+        });
+
+        qBlock.appendChild(optionsDiv);
+        contentArea.appendChild(qBlock);
+      });
+
+      const submitBtn = document.createElement("button");
+      submitBtn.className = "btn";
+      submitBtn.textContent = "Submit Quiz";
+      submitBtn.onclick = () => {
+        if(quizAnswers.includes(null)) {
+          alert("Please answer all questions before submitting.");
+          return;
+        }
+        currentPage++;
+        render();
+      };
+      contentArea.appendChild(submitBtn);
+    } else {
+      // Results + Brainfuck editor
+
+      // Calculate quiz score
+      const correctCount = quizAnswers.reduce((acc, ans, i) => {
+        return acc + (ans === quiz[i].answer ? 1 : 0);
+      }, 0);
+
+      const resultTitle = document.createElement("h2");
+      resultTitle.textContent = `Quiz Results: ${correctCount} out of ${quiz.length} correct`;
+      contentArea.appendChild(resultTitle);
+
+      // Show some encouragement
+      const msg = document.createElement("p");
+      if(correctCount === quiz.length) {
+        msg.textContent = "Excellent! You're ready to try Brainfuck programming yourself!";
+      } else if(correctCount >= quiz.length / 2) {
+        msg.textContent = "Good job! Review lessons and try the editor below.";
+      } else {
+        msg.textContent = "Keep practicing! The editor below will help you learn.";
+      }
+      contentArea.appendChild(msg);
+
+      // Add BF editor UI
+      addBrainfuckEditorUI();
+    }
+  }
+
+  function addBrainfuckEditorUI() {
+    // Clear content area before adding
+    //contentArea.innerHTML = "";
+
+    // Editor label & textarea
+    const codeLabel = document.createElement("label");
+    codeLabel.textContent = "Brainfuck Code:";
+    codeLabel.setAttribute("for", "bf-editor");
+    contentArea.appendChild(codeLabel);
+
+    bfTextarea = document.createElement("textarea");
+    bfTextarea.id = "bf-editor";
+    bfTextarea.setAttribute("aria-label", "Brainfuck code editor");
+    bfTextarea.placeholder = "Enter your Brainfuck code here...";
+    bfTextarea.spellcheck = false;
+    contentArea.appendChild(bfTextarea);
+
+    // Input label & textarea
+    const inputLabel = document.createElement("label");
+    inputLabel.textContent = "Input (optional):";
+    inputLabel.setAttribute("for", "input-textarea");
+    contentArea.appendChild(inputLabel);
+
+    inputTextarea = document.createElement("textarea");
+    inputTextarea.id = "input-textarea";
+    inputTextarea.setAttribute("aria-label", "Input for Brainfuck program");
+    inputTextarea.placeholder = "Input characters for ',' commands";
+    inputTextarea.rows = 1;
+    inputTextarea.style.resize = "horizontal";
+    contentArea.appendChild(inputTextarea);
+
+    // Output console
+    const outputLabel = document.createElement("label");
+    outputLabel.textContent = "Output:";
+    outputLabel.setAttribute("for", "output-console");
+    contentArea.appendChild(outputLabel);
+
+    outputConsole = document.createElement("pre");
+    outputConsole.id = "output-console";
+    outputConsole.setAttribute("aria-live", "polite");
+    outputConsole.setAttribute("aria-label", "Brainfuck program output");
+    contentArea.appendChild(outputConsole);
+
+    // Memory visualizer
+    const memoryLabel = document.createElement("label");
+    memoryLabel.textContent = "Memory (cells around pointer):";
+    contentArea.appendChild(memoryLabel);
+
+    memoryVisualizer = document.createElement("div");
+    memoryVisualizer.id = "memory-visualizer";
+    contentArea.appendChild(memoryVisualizer);
+
+    // Controls container
+    const controlsDiv = document.createElement("div");
+    controlsDiv.className = "control-row";
+
+    // Buttons: Run, Step Forward, Step Back, Reset
+    runBtn = document.createElement("button");
+    runBtn.className = "btn";
+    runBtn.textContent = "Run ▶";
+    runBtn.title = "Run entire program";
+    runBtn.onclick = () => {
+      stopAutoRun();
+      runBrainfuck();
+    };
+    controlsDiv.appendChild(runBtn);
+
+    stepBtn = document.createElement("button");
+    stepBtn.className = "btn";
+    stepBtn.textContent = "Step ▶";
+    stepBtn.title = "Step forward one command";
+    stepBtn.onclick = () => {
+      stopAutoRun();
+      stepForward();
+    };
+    controlsDiv.appendChild(stepBtn);
+
+    stepBackBtn = document.createElement("button");
+    stepBackBtn.className = "btn";
+    stepBackBtn.textContent = "Step ◀";
+    stepBackBtn.title = "Step backward one command";
+    stepBackBtn.disabled = true;
+    stepBackBtn.onclick = () => {
+      stopAutoRun();
+      stepBackward();
+    };
+    controlsDiv.appendChild(stepBackBtn);
+
+    resetBtn = document.createElement("button");
+    resetBtn.className = "btn";
+    resetBtn.textContent = "Reset ⟳";
+    resetBtn.title = "Reset interpreter state";
+    resetBtn.onclick = () => {
+      stopAutoRun();
+      resetInterpreter();
+    };
+    controlsDiv.appendChild(resetBtn);
+
+    // Auto Run toggle + speed input
+    const speedLabel = document.createElement("label");
+    speedLabel.textContent = "Speed (ms):";
+    speedLabel.style.marginLeft = "1rem";
+    speedLabel.htmlFor = "speed-input";
+    controlsDiv.appendChild(speedLabel);
+
+    speedInput = document.createElement("input");
+    speedInput.id = "speed-input";
+    speedInput.type = "number";
+    speedInput.min = "10";
+    speedInput.value = "100";
+    speedInput.style.width = "70px";
+    speedInput.title = "Delay between auto-run steps in milliseconds";
+    controlsDiv.appendChild(speedInput);
+
+    autoRunToggle = document.createElement("button");
+    autoRunToggle.className = "btn";
+    autoRunToggle.textContent = "Auto Run ▶▶";
+    autoRunToggle.title = "Start/stop auto-run";
+    autoRunToggle.onclick = () => {
+      if(autoRunInterval) {
+        stopAutoRun();
+      } else {
+        startAutoRun();
+      }
+    };
+    controlsDiv.appendChild(autoRunToggle);
+
+    contentArea.appendChild(controlsDiv);
+
+    // Save/Load section
+    const saveLoadDiv = document.createElement("div");
+    saveLoadDiv.style.marginTop = "1rem";
+
+    saveSelect = document.createElement("select");
+    saveSelect.title = "Select saved program";
+    saveLoadDiv.appendChild(saveSelect);
+
+    saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.title = "Save current code";
+    saveBtn.onclick = () => {
+      const name = prompt("Enter a name to save your program:");
+      if(name) {
+        saveProgram(name);
+      }
+    };
+// Wait to the second Chunk
+    saveLoadDiv.appendChild(saveBtn);
+
+    loadBtn = document.createElement("button");
+    loadBtn.className = "btn";
+    loadBtn.textContent = "Load";
+    loadBtn.title = "Load selected program";
+    loadBtn.onclick = () => {
+      loadProgram();
+    };
+    saveLoadDiv.appendChild(loadBtn);
+
+    deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.title = "Delete selected saved program";
+    deleteBtn.onclick = () => {
+      deleteProgram();
+    };
+    saveLoadDiv.appendChild(deleteBtn);
+
+    downloadBtn = document.createElement("button");
+    downloadBtn.className = "btn";
+    downloadBtn.textContent = "Download .bf";
+    downloadBtn.title = "Download current code as .bf file";
+    downloadBtn.onclick = () => {
+      downloadProgram();
+    };
+    const exportBtn = document.createElement("button");
+exportBtn.className = "btn";
+exportBtn.textContent = "Export Memory";
+exportBtn.title = "Download memory state";
+exportBtn.onclick = exportMemoryDump;
+saveLoadDiv.appendChild(exportBtn);
+
+const importBtn = document.createElement("button");
+importBtn.className = "btn";
+importBtn.textContent = "Import Memory";
+importBtn.title = "Upload memory state";
+importBtn.onclick = importMemoryDump;
+saveLoadDiv.appendChild(importBtn);
+
+    saveLoadDiv.appendChild(downloadBtn);
+
+    contentArea.appendChild(saveLoadDiv);
+
+    // Initialize interpreter with empty code
+    resetInterpreter();
+    loadSavedPrograms();
+    createWatchUI();
+  }
+
+  // Interpreter functions
+
+  function resetInterpreter() {
+    memory = new Array(30000).fill(0);
+    pointer = 0;
+    output = "";
+    codeIndex = 0;
+    inputIndex = 0;
+    loopStack = [];
+    history = [];
+    outputConsole.textContent = "";
+    updateMemoryVisualizer();
+    bfTextarea.disabled = false;
+    inputTextarea.disabled = false;
+    stepBackBtn.disabled = true;
+  }
+
+  function runBrainfuck() {
+    bfCode = bfTextarea.value
+  .split('\n')
+  .map(line => line.split('#')[0]) // remove comments
+  .join('');
+
+    bfInput = inputTextarea.value;
+    resetInterpreter();
+    bfTextarea.disabled = true;
+    inputTextarea.disabled = true;
+    try {
+      while(codeIndex < bfCode.length) {
+        stepForward();
+      }
+    } catch(e) {
+      alert("Error: " + e.message);
+      bfTextarea.disabled = false;
+      inputTextarea.disabled = false;
+    }
+  }
+
+  function stepForward() {
+    bfCode = bfTextarea.value;
+    bfInput = inputTextarea.value;
+
+    if(codeIndex >= bfCode.length) return;
+
+    const cmd = bfCode[codeIndex];
+    history.push({
+      codeIndex,
+      pointer,
+      memory: memory.slice(),
+      output,
+      inputIndex,
+      loopStack: loopStack.slice()
+    });
+
+    switch(cmd) {
+      case '>':
+        pointer++;
+        if(pointer >= memory.length) pointer = 0;
+        break;
+      case '<':
+        pointer--;
+        if(pointer < 0) pointer = memory.length - 1;
+        break;
+      case '+':
+        memory[pointer] = (memory[pointer] + 1) & 255;
+        break;
+      case '-':
+        memory[pointer] = (memory[pointer] - 1) & 255;
+        break;
+      case '.':
+        output += String.fromCharCode(memory[pointer]);
+        outputConsole.textContent = output;
+        break;
+      case ',':
+        if(inputIndex < bfInput.length) {
+          memory[pointer] = bfInput.charCodeAt(inputIndex);
+          inputIndex++;
+        } else {
+          memory[pointer] = 0;
+        }
+        break;
+      case '[':
+        if(memory[pointer] === 0) {
+          // jump forward to after matching ]
+          let loop = 1;
+          while(loop > 0) {
+            codeIndex++;
+            if(codeIndex >= bfCode.length) throw new Error("Loop '[' without matching ']'");
+            if(bfCode[codeIndex] === '[') loop++;
+            else if(bfCode[codeIndex] === ']') loop--;
+          }
+        } else {
+          loopStack.push(codeIndex);
+        }
+        break;
+      case ']':
+        if(memory[pointer] !== 0) {
+          if(loopStack.length === 0) throw new Error("Loop ']' without matching '['");
+          codeIndex = loopStack[loopStack.length - 1];
+        } else {
+          loopStack.pop();
+        }
+        break;
+    }
+
+    codeIndex++;
+    updateMemoryVisualizer();
+
+    stepBackBtn.disabled = history.length === 0;
+  }
+
+  function stepBackward() {
+    if(history.length === 0) return;
+    const prev = history.pop();
+    codeIndex = prev.codeIndex;
+    pointer = prev.pointer;
+    memory = prev.memory;
+    output = prev.output;
+    inputIndex = prev.inputIndex;
+    loopStack = prev.loopStack;
+
+    outputConsole.textContent = output;
+    updateMemoryVisualizer();
+    stepBackBtn.disabled = history.length === 0;
+  }
+
+  // Auto-run controls
+  function startAutoRun() {
+    if(autoRunInterval) return;
+    autoRunToggle.textContent = "Stop ⏸";
+    bfTextarea.disabled = true;
+    inputTextarea.disabled = true;
+    autoRunInterval = setInterval(() => {
+      if(codeIndex >= bfTextarea.value.length) {
+        stopAutoRun();
+        return;
+      }
+      try {
+        stepForward();
+      } catch(e) {
+        alert("Error: " + e.message);
+        stopAutoRun();
+      }
+    }, parseInt(speedInput.value));
+  }
+
+  function stopAutoRun() {
+    if(autoRunInterval) {
+      clearInterval(autoRunInterval);
+      autoRunInterval = null;
+      autoRunToggle.textContent = "Auto Run ▶▶";
+      bfTextarea.disabled = false;
+      inputTextarea.disabled = false;
+    }
+  }
+
+  // Memory visualizer updates
+ function updateMemoryVisualizer() {
+  const cellsToShow = 10;
+  const start = Math.max(0, pointer - Math.floor(cellsToShow / 2));
+  const end = Math.min(memory.length, start + cellsToShow);
+
+  memoryVisualizer.innerHTML = "";
+  for (let i = start; i < end; i++) {
+    const cell = document.createElement("div");
+    cell.className = "memory-cell" + (i === pointer ? " pointer" : "");
+    const val = memory[i];
+    const char = (val >= 32 && val <= 126) ? String.fromCharCode(val) : '.';
+    cell.innerHTML = `<div>${val}</div><div style="font-size:0.75em;color:gray;">${char}</div>`;
+    memoryVisualizer.appendChild(cell);
+  }
+  updateWatchOutput();
+}
+
+  // === Debug Watch Mode ===
+const watchList = [0, 1, 2, 10, 20]; // You can customize this
+let watchOutputDiv;
+
+function createWatchUI() {
+  const label = document.createElement("label");
+  label.textContent = "🔍 Watched Cells:";
+  contentArea.appendChild(label);
+
+  watchOutputDiv = document.createElement("div");
+  watchOutputDiv.style.fontFamily = "monospace";
+  watchOutputDiv.style.whiteSpace = "pre";
+  watchOutputDiv.style.padding = "0.5rem";
+  watchOutputDiv.style.background = "#f0f0f0";
+  watchOutputDiv.style.border = "1px solid #aaa";
+  watchOutputDiv.style.borderRadius = "4px";
+  contentArea.appendChild(watchOutputDiv);
+
+  updateWatchOutput();
+}
+
+function updateWatchOutput() {
+  if (!watchOutputDiv) return;
+  const lines = watchList.map(i => {
+    const val = memory[i];
+    return `Cell[${i.toString().padStart(3)}]: ${val.toString().padStart(3)} = '${(val >= 32 && val <= 126) ? String.fromCharCode(val) : '.'}'`;
+  });
+  watchOutputDiv.textContent = lines.join('\n');
+}
+
+
+  // Save/load programs to localStorage
+  function loadSavedPrograms() {
+    saveSelect.innerHTML = "";
+    const keys = Object.keys(localStorage).filter(k => k.startsWith("bf_prog_"));
+    if(keys.length === 0) {
+      const opt = document.createElement("option");
+      opt.textContent = "(No saved programs)";
+      opt.disabled = true;
+      saveSelect.appendChild(opt);
+      return;
+    }
+    keys.forEach(k => {
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = k.slice(8);
+      saveSelect.appendChild(opt);
+    });
+  }
+
+  function saveProgram(name) {
+    const code = bfTextarea.value;
+    if(!code) {
+      alert("Code is empty, cannot save.");
+      return;
+    }
+    localStorage.setItem("bf_prog_" + name, code);
+    loadSavedPrograms();
+    alert(`Program "${name}" saved.`);
+  }
+
+  function loadProgram() {
+    const key = saveSelect.value;
+    if(!key || key === "(No saved programs)") {
+      alert("No program selected to load.");
+      return;
+    }
+    const code = localStorage.getItem(key);
+    if(code === null) {
+      alert("Selected program not found.");
+      loadSavedPrograms();
+      return;
+    }
+    bfTextarea.value = code;
+    resetInterpreter();
+  }
+
+  function deleteProgram() {
+    const key = saveSelect.value;
+    if(!key || key === "(No saved programs)") {
+      alert("No program selected to delete.");
+      return;
+    }
+    if(confirm(`Are you sure you want to delete program "${key.slice(8)}"?`)) {
+      localStorage.removeItem(key);
+      loadSavedPrograms();
+      resetInterpreter();
+    }
+  }
+
+  function downloadProgram() {
+    const code = bfTextarea.value;
+    if(!code) {
+      alert("No code to download.");
+      return;
+    }
+    const blob = new Blob([code], {type: "text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "program.bf";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  }
+  function exportMemoryDump() {
+  const dump = memory.map((v, i) => `${i}:${v}`).join('\n');
+  const blob = new Blob([dump], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "memory_dump.txt";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 0);
+}
+
+function importMemoryDump() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".txt";
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const lines = reader.result.split('\n');
+      lines.forEach(line => {
+        const [idx, val] = line.split(':').map(s => s.trim());
+        if (!isNaN(idx) && !isNaN(val)) {
+          memory[parseInt(idx)] = parseInt(val) & 255;
+        }
+      });
+      updateMemoryVisualizer();
+      updateWatchOutput();
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+  // Initial render
+  render();
+})();
+</script>
+</body>
+</html>
