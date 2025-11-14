@@ -303,6 +303,21 @@ btnRotate.onclick = () => { hideAllPanels(); panelRotate.style.display='block'; 
 btnFlip.onclick = () => { hideAllPanels(); panelFlip.style.display='block'; };
 btnFilters.onclick = () => { hideAllPanels(); panelFilters.style.display='block'; };
 btnZoom.onclick = () => { hideAllPanels(); panelZoom.style.display='block'; };
+// ------------------------------
+// HIDE ALL PANELS WHEN CLICKING OUTSIDE
+// ------------------------------
+document.addEventListener('click', (e) => {
+    const panels = [panelCrop, panelRotate, panelFlip, panelFilters, panelZoom];
+
+    // Check if the clicked element is inside any panel or toolbar button
+    const clickedInsidePanel = panels.some(panel => panel.contains(e.target));
+    const clickedToolbarButton = e.target.classList.contains('tool-btn');
+
+    if (!clickedInsidePanel && !clickedToolbarButton) {
+        hideAllPanels(); // hide all panels
+    }
+});
+
 
 // ------------------------------
 // IMAGE UPLOAD
@@ -389,10 +404,10 @@ function applyFiltersToCanvas() {
     // Build filter string
     const cssFilter = Object.entries(currentFilterSettings)
                             .map(([k,v])=>`${k}(${v})`).join(' ');
-    tCtx.filter = cssFilter;  // <- apply filters to canvas context
+    tCtx.filter = cssFilter;  // Apply filters to canvas pixels
     tCtx.drawImage(img, 0, 0);
 
-    // Update main image
+    // Update main image and redraw
     img.src = tempCanvas.toDataURL();
     drawCanvas();
     saveState();
@@ -476,14 +491,37 @@ btnRedo.onclick = () => {
 // ------------------------------
 btnDownload.onclick = () => {
     if(!fileInput.files[0]) return alert("Upload image first!");
-    applyFiltersToCanvas();  // <-- apply filters permanently
-    const ext = fileInput.files[0].name.split('.').pop();
-    const name = fileInput.files[0].name.replace('.'+ext,'');
-    const link = document.createElement('a');
-    link.download = `${name}-edited.${ext}`;
-    link.href = canvas.toDataURL(`image/${ext}`);
-    link.click();
+
+    // Create filtered image on a temp canvas
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = img.width;
+    tempCanvas.height = img.height;
+    const tCtx = tempCanvas.getContext('2d');
+
+    // Build filter string
+    const cssFilter = Object.entries(currentFilterSettings)
+                            .map(([k,v])=>`${k}(${v})`).join(' ');
+    tCtx.filter = cssFilter;
+    tCtx.drawImage(img, 0, 0);
+
+    // Create a new Image to ensure it finishes loading
+    const filteredImg = new Image();
+    filteredImg.onload = () => {
+        // Draw the filtered image onto the main canvas
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        ctx.drawImage(filteredImg, 0, 0);
+
+        // Now download works correctly
+        const ext = fileInput.files[0].name.split('.').pop();
+        const name = fileInput.files[0].name.replace('.'+ext,'');
+        const link = document.createElement('a');
+        link.download = `${name}-edited.${ext}`;
+        link.href = canvas.toDataURL(`image/${ext}`);
+        link.click();
+    };
+    filteredImg.src = tempCanvas.toDataURL();
 };
+
 
 
 </script>
