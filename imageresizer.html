@@ -380,6 +380,23 @@ const zoomFactor = 1.2;
 document.getElementById('zoomIn').onclick = () => { scale*=zoomFactor; drawCanvas(); };
 document.getElementById('zoomOut').onclick = () => { scale/=zoomFactor; drawCanvas(); };
 document.getElementById('zoomReset').onclick = () => { resetCanvas(); drawCanvas(); };
+function applyFiltersToCanvas() {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = img.width;
+    tempCanvas.height = img.height;
+    const tCtx = tempCanvas.getContext('2d');
+
+    // Build filter string
+    const cssFilter = Object.entries(currentFilterSettings)
+                            .map(([k,v])=>`${k}(${v})`).join(' ');
+    tCtx.filter = cssFilter;  // <- apply filters to canvas context
+    tCtx.drawImage(img, 0, 0);
+
+    // Update main image
+    img.src = tempCanvas.toDataURL();
+    drawCanvas();
+    saveState();
+}
 
 // ------------------------------
 // ROTATE
@@ -459,6 +476,7 @@ btnRedo.onclick = () => {
 // ------------------------------
 btnDownload.onclick = () => {
     if(!fileInput.files[0]) return alert("Upload image first!");
+    applyFiltersToCanvas();  // <-- apply filters permanently
     const ext = fileInput.files[0].name.split('.').pop();
     const name = fileInput.files[0].name.replace('.'+ext,'');
     const link = document.createElement('a');
@@ -466,6 +484,7 @@ btnDownload.onclick = () => {
     link.href = canvas.toDataURL(`image/${ext}`);
     link.click();
 };
+
 
 </script>
 <script>
