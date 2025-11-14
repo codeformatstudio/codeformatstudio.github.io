@@ -43,14 +43,14 @@
       const outputArea = document.getElementById("outputArea");
       bfArea.addEventListener('change', function () {
               const bf = new BF();
-      const output = bf.encode(bfArea.value);
-      output = output.replace(">", "01001001");
-      output = output.replace("<", "10101001");
-      output = output.replace("+", "00100101");
-      output = output.replace("-", "10010101");
-      output = output.replace(".", "11100001");
-      output = output.replace("[", "00000001");
-      output = output.replace("]", "11111101");
+      let output = bf.encode(bfArea.value);
+      output = output.replaceAll(">", "01001001");
+      output = output.replaceAll("<", "10101001");
+      output = output.replaceAll("+", "00100101");
+      output = output.replaceAll("-", "10010101");
+      output = output.replaceAll(".", "11100001");
+      output = output.replaceAll("[", "00000001");
+      output = output.replaceAll("]", "11111101");
       outputArea.value = output;
       outputArea.click();
       })
