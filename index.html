@@ -1,293 +1,408 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <meta charset="UTF-8" />
-    <link rel="icon" href="icons/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Format Studio</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      @import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css);
-      @import url("assets/Orbitron.css"); /* Reset & base */
+      /* -----------------------
+ GLOBAL STYLE
+------------------------ */
       * {
-        box-sizing: border-box;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.9);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-      body,
-      html {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Orbitron", sans-serif;
+        background: #0a0a12;
+        color: #00fff7;
+        overflow-x: hidden;
+      }
+
+      /* -----------------------
+ DARK / LIGHT MODE
+------------------------ */
+      body.light {
+        background: #f3faff;
+        color: #0a0a12;
+      }
+      body.light .sidebar {
+        background: #fff;
+        border-right: 2px solid #00c8c8;
+      }
+      body.light .tool-button {
+        background: #00e0e0;
+        color: #001010;
+      }
+      body.light .tool-button:hover {
+        background: #00bdbd;
+      }
+      body.light .neon-logo {
+        color: #008b8b !important;
+        text-shadow: 0 0 10px #00bebe;
+      }
+
+      /* -----------------------
+ BACKGROUND GRID ANIMATION
+------------------------ */
+      .grid-bg {
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(#0ff2 1px, transparent 1px),
+          linear-gradient(90deg, #0ff2 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: gridMove 25s linear infinite;
+        z-index: -2;
+        opacity: 0.25;
+      }
+      @keyframes gridMove {
+        from {
+          background-position: 0 0;
+        }
+        to {
+          background-position: 500px 500px;
+        }
+      }
+
+      /* -----------------------
+ STAR PARTICLES
+------------------------ */
+      .stars {
+        position: fixed;
+        width: 100%;
         height: 100%;
-        background: #0f0f20;
-        font-family: "Orbitron", "Segoe UI", sans-serif;
-        color: #00fff7;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
+        background: transparent;
+        z-index: -1;
       }
-      .container h1 {
-  width: 100%;
-  text-align: center; /* optional but keeps it centered */
-}
-
-.container {
-  animation: fadeIn 0.6s ease;
-  font-family: "Orbitron", "Segoe UI", sans-serif;
-  background: #111122;
-  border: 2px solid #00fff7;
-  border-radius: 12px;
-  padding: 2.5rem 2rem 3rem;
-  width: 100%;
-  box-shadow: 0 0 30px #00fff7;
-}
-      .container h1 {
-  width: 100%;
-  text-align: center;
-  flex-basis: 100%;
-}
-
-      h1 {
-        margin-bottom: 1.5rem;
-        text-shadow: 0 0 12px #00fff7;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-      }
-      label {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: block;
-      }
-      .file-input-wrapper {
-        position: relative;
-        width: 100%;
-        margin-bottom: 1.5rem;
-      }
-      input[type="file"] {
-        opacity: 0;
-        width: 100%;
-        height: 45px;
+      .stars::before,
+      .stars::after {
+        content: "";
         position: absolute;
-        left: 0;
-        top: 0;
-        cursor: pointer;
+        inset: 0;
+        background-image: radial-gradient(#ffffffcc 1px, transparent 1px);
+        background-size: 3px 3px;
+        animation: starMove 60s linear infinite;
+        opacity: 0.4;
       }
-      .file-input-label {
-        border: 1.5px solid #00fff7;
-        padding: 0.8rem 1rem;
+      .stars::after {
+        background-size: 2px 2px;
+        animation-duration: 120s;
+        opacity: 0.3;
+      }
+      @keyframes starMove {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-2000px);
+        }
+      }
+
+      /* -----------------------
+ SIDEBAR
+------------------------ */
+      .sidebar {
+        width: 240px;
+        height: 100vh;
+        background: #0d0d20;
+        border-right: 2px solid #00fff7;
+        padding: 20px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        box-shadow: 0 0 20px #00fff766;
+      }
+
+      .neon-logo {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #00fff7;
+        text-shadow: 0 0 15px #00fff7, 0 0 30px #00fff7;
+        animation: glowPulse 2.5s infinite alternate;
+      }
+      @keyframes glowPulse {
+        from {
+          text-shadow: 0 0 25px #00fff7;
+        }
+        to {
+          text-shadow: 0 0 45px #00fff7;
+        }
+      }
+
+      .sidebar a {
+        display: block;
+        text-decoration: none;
+        color: #00fff7;
+        font-size: 1rem;
+        margin: 8px 0;
+        transition: 0.25s;
+      }
+      .sidebar a:hover {
+        transform: translateX(6px);
+        color: #fff;
+      }
+
+      /* -----------------------
+ NAVBAR
+------------------------ */
+      .navbar {
+        margin-left: 240px;
+        padding: 15px 25px;
+        background: #0d1326aa;
+        backdrop-filter: blur(6px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #00fff7;
+      }
+
+      .mode-toggle {
+        cursor: pointer;
+        padding: 10px 16px;
+        border: 2px solid #00fff7;
+        border-radius: 10px;
+        transition: 0.25s;
+      }
+      .mode-toggle:hover {
+        background: #00fff7;
+        color: #001010;
+      }
+
+      /* -----------------------
+ MAIN CONTENT
+------------------------ */
+      .main {
+        margin-left: 240px;
+        padding: 40px;
+      }
+
+      .typing-title {
+        font-size: 2.2rem;
+        font-weight: bold;
+        height: 55px;
+        margin-bottom: 25px;
+        border-right: 2px solid #00fff7;
+        animation: blink 1s infinite;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      @keyframes blink {
+        50% {
+          border-color: transparent;
+        }
+      }
+
+      /* -----------------------
+ SEARCH BAR
+------------------------ */
+      .search-container {
+        margin-bottom: 20px;
+      }
+      .search-input {
+        width: 100%;
+        padding: 14px;
         border-radius: 8px;
+        border: 2px solid #00fff7;
         background: #0f0f20;
         color: #00fff7;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-block;
-        width: 100%;
-        user-select: none;
-        transition: background 0.3s ease, color 0.3s ease;
-        text-align: center;
-        box-shadow: 0 0 15px #00fff7;
+        font-size: 1rem;
       }
-      .file-input-label:hover {
+
+      /* -----------------------
+ TOOL GRID
+------------------------ */
+      .tool-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .tool-button {
+        padding: 1rem;
         background: #00fff7;
         color: #0f0f20;
-        box-shadow: 0 0 25px #00fff7;
-      }
-      select {
-        width: 100%;
-        font-family: "Orbitron", "Segoe UI", sans-serif;
-        padding: 0.6rem 1rem;
-        font-size: 1rem;
-        border-radius: 8px;
-        border: 1.5px solid #00fff7;
-        background: #0f0f20;
-        color: #00fff7;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 0 15px #00fff7 inset;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
+        border-radius: 10px;
+        font-weight: 700;
         text-align: center;
+        text-decoration: none;
+        box-shadow: 0 0 20px #00fff788;
+        transition: 0.25s;
       }
-      button,
-.button {
-  width: 400px;
-  max-width: 90%;
-  padding: 0.75rem 1rem;
-  font-size: 1.1rem;
-  background: #00fff7;
-  border: none;
-  color: #0f0f20;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 0 20px #00fff7;
-  transition: background 0.3s ease;
-  margin: 0;
-  text-align: center;        /* ✅ centers text inside the button */
-}
-      button:hover,
-      .button:hover {
-        background: #00c6b6;
+      .tool-button:hover {
+        transform: translateY(-4px) scale(1.04);
+        background: #00dcd0;
+        box-shadow: 0 0 30px #00fff7;
       }
-      .note {
-        font-size: 0.85rem;
-        color: #0ff;
-        margin: 1rem 0 1.5rem 0;
-      }
-      #result {
-        width: 100%;
-        margin-top: 1rem;
-      }
-      #result img,
-      #result svg,
-      #result iframe {
-        max-width: 100%;
-        max-height: 320px;
+
+      /* -----------------------
+ INFO SECTION
+------------------------ */
+      .info-box {
+        margin-top: 35px;
+        padding: 20px;
+        background: #0d0d20cc;
         border: 2px solid #00fff7;
         border-radius: 12px;
-        box-shadow: 0 0 20px #00fff7;
+        box-shadow: 0 0 30px #00fff744;
       }
-      a {
-        display: inline-block;
-        margin-top: 0.75rem;
-        color: #0ff;
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 0.3s ease;
-      }
-      a:hover {
-        color: #00fff7;
-        text-shadow: 0 0 8px #00fff7;
-      }
-      option {
-        font-family: "Orbitron", "Segoe UI", sans-serif;
-      }
-      @media (max-width: 400px) {
-        .container {
-          font-size: 12px;
-          padding: 5px;
-          width: 100%;
-        }
-      }
-      @media (max-width: 240px) {
-        .container {
-          font-size: 12px;
-          padding: 5px;
-          width: 100%;
-        }
-      }
-      @media (max-width: 239px) {
-        .container {
-          font-size: 10px;
-          padding: 3px;
-          width: 100%;
-        }
-      }
-      @media (max-width: 150px) {
-        .container {
-          font-size: 8px;
-          padding: 5px;
-          width: 100%;
-        }
-      }
-      @media (max-width: 850px) {
-  .button {
-    width: 90%;
-  }
-}
 
-      option {
-        display: flex;
-        justify-content: center;
+      /* -----------------------
+ FOOTER
+------------------------ */
+      footer {
+        margin-top: 30px;
         text-align: center;
-      }
-      input[type="file"] {
-        display: flex;
-        justify-content: center;
+        opacity: 0.7;
       }
     </style>
-    <title>Code Format Studio</title>
-    <link rel="manifest" href="manifest.json" />
   </head>
   <body>
-    <div class="container">
-      <h1>Welcome To Code Format Studio</h1> <br />
-      <a href="imageresizer.html" class="button" target="_blank">Image Editor</a>
-      <a href="imageconverter.html" class="button" target="_blank">
-         Image Converter
-      </a>
-      <!-- <a href="videoconverter.html" class="button" target="_blank"> Video Converter</a> -->
+    <div class="grid-bg"></div>
+    <div class="stars"></div>
 
-      <a href="pdfmerger.html" class="button" target="_blank">
-         PDF Merger
-      </a>
-      <a href="pdfsplitter.html" class="button" target="_blank">
-         PDF Splitter
-      </a>
-      <!-- <a href="pdfeditor.html" class="button" target="_blank"> PDF Editor</a> -->
-      <a href="paddle.html" class="button" target="_blank"> Ping Pong Game </a>
-      <a href="fight.html" class="button" target="_blank"> Fighting Game </a>
-      <!-- <a href="info.html" class="button" target="_blank"> Information Generator </a> -->
-      <a href="painxl.html" class="button" target="_blank">PAINXL Language Tutorial</a>
-      <a href="squaregame.html" class="button" target="_blank"> SquareGame </a>
-      <a href="add.html" class="button" target="_blank">A Mathematical Game</a>
-      <a href="py2js.html" class="button" target="_blank">Python ➜ JavaScript Translator</a>
-      <a href="jsf.html" class="button" target="_blank">JSF**k Encoder</a>
-      <a href="code-editor.html" class="button" target="_blank">Code Editor</a>
-      <a href="bfencoder.html" class="button" target="_blank">Brainf**k Encoder</a>
-      <a href="painxlencoder.html" class="button" target="_blank">PAINXL Encoder</a>
-      <a href="bflearn.html" class="button" target="_blank">Brainf**k Tutorial</a>
-      <a href="football.html" class="button" target="_blank">Football Game</a>
-      <!-- <a class="button" href="dist-linux.zip" download="dist-linux.zip"
-        >Download Desktop For Linux</a
-      > -->
-      <!-- <a href="dist-windows.zip" download="dist-windows.zip" -->
-      <!-- >Download Desktop For Windows</a -->
-      <!-- > -->
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="neon-logo">Code Format Studio</div>
+
+      <a href="#">Home</a>
+      <a href="#tools">Tools</a>
+      <a href="#about">About</a>
+      <a href="#how">How to Use</a>
     </div>
 
-    <button
-      id="closeIframe"
-      style="
-        display: none;
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        padding: 10px 15px;
-        background: #00fff7;
-        color: #0f0f20;
-        font-weight: 700;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        z-index: 9999;
-        box-shadow: 0 0 15px #00fff7;
-      "
-    >
-      X
-    </button>
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div></div>
+      <div class="mode-toggle" onclick="toggleMode()">🌗 Mode</div>
+    </div>
 
-    <iframe
-      id="iframe"
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        justify-content: center;
-        align-items: center;
-      "
-    ></iframe>
+    <!-- MAIN CONTENT -->
+    <div class="main">
+      <div class="typing-title" id="typing"></div>
+
+      <!-- SEARCH BAR -->
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-input"
+          id="search"
+          placeholder="Search tools..."
+        />
+      </div>
+
+      <!-- TOOL GRID -->
+      <div class="tool-grid" id="tools">
+        <a href="imageresizer.html" class="tool-button" target="_blank"
+          >Image Editor</a
+        >
+        <a href="imageconverter.html" class="tool-button" target="_blank"
+          >Image Converter</a
+        >
+        <a href="pdfmerger.html" class="tool-button" target="_blank"
+          >PDF Merger</a
+        >
+        <a href="pdfsplitter.html" class="tool-button" target="_blank"
+          >PDF Splitter</a
+        >
+        <a href="paddle.html" class="tool-button" target="_blank"
+          >Ping Pong Game</a
+        >
+        <a href="fight.html" class="tool-button" target="_blank"
+          >Fighting Game</a
+        >
+        <a href="painxl.html" class="tool-button" target="_blank"
+          >PAINXL Tutorial</a
+        >
+        <a href="squaregame.html" class="tool-button" target="_blank"
+          >Square Game</a
+        >
+        <a href="add.html" class="tool-button" target="_blank">Math Game</a>
+        <a href="py2js.html" class="tool-button" target="_blank">Python → JS</a>
+        <a href="jsf.html" class="tool-button" target="_blank"
+          >JSF**k Encoder</a
+        >
+        <a href="code-editor.html" class="tool-button" target="_blank"
+          >Code Editor</a
+        >
+        <a href="bfencoder.html" class="tool-button" target="_blank"
+          >Brainf**k Encoder</a
+        >
+        <a href="painxlencoder.html" class="tool-button" target="_blank"
+          >PAINXL Encoder</a
+        >
+        <a href="bflearn.html" class="tool-button" target="_blank"
+          >Brainf**k Tutorial</a
+        >
+        <a href="football.html" class="tool-button" target="_blank"
+          >Football Game</a
+        >
+      </div>
+
+      <!-- ABOUT SECTION -->
+      <div class="info-box" id="about">
+        <h2>About Code Format Studio</h2>
+        <p>
+          Code Format Studio is a powerful collection of online tools designed
+          for developers, creators, and learners. It includes encoders,
+          converters, editors, games, tutorials, and utilities — all crafted
+          with a cyber-themed, modern user experience.
+        </p>
+      </div>
+
+      <!-- HOW TO USE -->
+      <div class="info-box" id="how">
+        <h2>How to Use This Site</h2>
+        <p>
+          1. Use the sidebar or the search bar to find any tool.<br />
+          2. Click a tool to open it instantly.<br />
+          3. Enjoy fast, responsive apps with a futuristic UI.<br />
+          4. Switch to Dark or Light mode at any time using the toggle.<br />
+          5. Tools open in new tabs, so you never lose your place.<br />
+        </p>
+      </div>
+
+      <footer>© 2025 Code Format Studio — All Rights Reserved.</footer>
+    </div>
+
+    <script>
+      /* TYPING EFFECT */
+      let text = "Welcome to Code Format Studio";
+      let i = 0;
+      function typeWriter() {
+        if (i < text.length) {
+          document.getElementById("typing").textContent += text.charAt(i);
+          i++;
+          setTimeout(typeWriter, 70);
+        }
+      }
+      typeWriter();
+
+      /* SEARCH FILTER */
+      document.getElementById("search").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        document.querySelectorAll(".tool-button").forEach((btn) => {
+          if (btn.textContent.toLowerCase().includes(filter)) {
+            btn.style.display = "block";
+          } else {
+            btn.style.display = "none";
+          }
+        });
+      });
+
+      /* MODE TOGGLE */
+      function toggleMode() {
+        document.body.classList.toggle("light");
+      }
+    </script>
     <script src="script.js"></script>
   </body>
 </html>
