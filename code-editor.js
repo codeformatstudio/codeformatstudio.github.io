@@ -279,4 +279,22 @@ function generateFullOutput() {
 closePreviewBtn.addEventListener("click", function () {
   previewStyle.display = "none";
 });
-downloadBtn.addEventListener("click", generateFullOutput);
+downloadBtn.addEventListener("click", () => {
+  cyberPrompt("Enter your project name:", (value) => {
+    if (!value) value = "project"; // default name
+
+    // --- Generate full HTML output ---
+    const fullOutput = generateFullOutput();
+
+    // --- Create download link ---
+    const a = document.createElement("a");
+    const blob = new Blob([fullOutput], { type: "text/html" });
+    const downloadURL = URL.createObjectURL(blob);
+    a.href = downloadURL;
+    a.download = value + ".html"; // use entered name
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+});
+
