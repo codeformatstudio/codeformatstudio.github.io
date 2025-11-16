@@ -905,7 +905,7 @@
           tempCanvas.height
         );
         const originalName =
-          fileInput.files[0]?.name.replace(/\.[^/.]+$/, "-edited") || "-image";
+          fileInput.files[0]?.name.replace(/\.[^/.]+$/, "-edited") || "edited-image";
 
         // Handle GIF separately using GIF.js
         if (format === "image/gif") {
