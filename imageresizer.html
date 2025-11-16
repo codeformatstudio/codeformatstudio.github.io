@@ -1,167 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Advanced Image Editor</title>
-   <link rel="icon" href="icons/icon.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <title>Advanced Image Editor</title>
+    <link rel="icon" href="icons/icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-/* ---------------------------
+    <style>
+      /* ---------------------------
    GLOBAL STYLE
 -----------------------------*/
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: #0a0a12;
-    color: #00f5ff;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-}
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #0a0a12;
+        color: #00f5ff;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+      }
 
-/* ---------------------------
+      /* ---------------------------
    LAYOUT
 -----------------------------*/
-.editor-container {
-    display: flex;
-    height: 100%;
-    width: 100%;
-}
+      .editor-container {
+        display: flex;
+        height: 100%;
+        width: 100%;
+      }
 
-/* ---------------------------
+      /* ---------------------------
    LEFT TOOLBAR
 -----------------------------*/
-.toolbar {
-    width: 100px;
-    background: #111827;
-    border-right: 2px solid #00f5ff;
-    box-shadow: 4px 0 15px #00f5ff55;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 12px;
-    gap: 12px;
-}
+      .toolbar {
+        width: 100px;
+        background: #111827;
+        border-right: 2px solid #00f5ff;
+        box-shadow: 4px 0 15px #00f5ff55;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 12px;
+        gap: 12px;
+      }
 
-.tool-btn {
-    width: 80px;
-    height: 80px;
-    background: #0f1626;
-    border: 1.5px solid #00f5ff;
-    border-radius: 14px;
-    cursor: pointer;
-    display: flex;
-    font-size: 35px;
-    justify-content: center;
-    align-items: center;
-    transition: 0.2s;
-    box-shadow: 0 0 10px #00f5ffaa;
-}
+      .tool-btn {
+        width: 80px;
+        height: 80px;
+        background: #0f1626;
+        border: 1.5px solid #00f5ff;
+        border-radius: 14px;
+        cursor: pointer;
+        display: flex;
+        font-size: 35px;
+        justify-content: center;
+        align-items: center;
+        transition: 0.2s;
+        box-shadow: 0 0 10px #00f5ffaa;
+      }
 
-.tool-btn:hover {
-    background: #00f5ff;
-    color: #0f1626;
-    box-shadow: 0 0 18px #00f5ff;
-}
+      .tool-btn:hover {
+        background: #00f5ff;
+        color: #0f1626;
+        box-shadow: 0 0 18px #00f5ff;
+      }
 
-/* ---------------------------
+      /* ---------------------------
    MAIN CANVAS AREA
 -----------------------------*/
-.canvas-area {
-    flex: 1;
-    position: relative;
-    background: #111;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+      .canvas-area {
+        flex: 1;
+        position: relative;
+        background: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-#editorCanvas {
-    border: 2px solid #00f5ff;
-    border-radius: 10px;
-    box-shadow: 0 0 25px #00f5ff;
-    background: #000;
-    cursor: grab;
-}
+      #editorCanvas {
+        border: 2px solid #00f5ff;
+        border-radius: 10px;
+        box-shadow: 0 0 25px #00f5ff;
+        background: #000;
+        cursor: grab;
+      }
 
-/* During panning */
-#editorCanvas:active {
-    cursor: grabbing;
-}
+      /* During panning */
+      #editorCanvas:active {
+        cursor: grabbing;
+      }
 
-/* ---------------------------
+      /* ---------------------------
    PANELS (Filters / Crop / Rotate etc.)
 -----------------------------*/
-.side-panel {
-    position: absolute;
-    left: 110px;
-    top: 10px;
-    background: #0d1220;
-    border: 2px solid #00f5ff;
-    border-radius: 12px;
-    padding: 12px;
-    width: 260px;
-    max-height: 90%;
-    overflow-y: auto;
-    box-shadow: 0 0 20px #00f5ff;
-    display: none;
-}
+      .side-panel {
+        position: absolute;
+        left: 110px;
+        top: 10px;
+        background: #0d1220;
+        border: 2px solid #00f5ff;
+        border-radius: 12px;
+        padding: 12px;
+        width: 260px;
+        max-height: 90%;
+        overflow-y: auto;
+        box-shadow: 0 0 20px #00f5ff;
+        display: none;
+      }
 
-.side-panel h2 {
-    font-size: 20px;
-    text-align: center;
-    margin-top: 4px;
-    margin-bottom: 14px;
-    text-shadow: 0 0 8px #00f5ff;
-}
+      .side-panel h2 {
+        font-size: 20px;
+        text-align: center;
+        margin-top: 4px;
+        margin-bottom: 14px;
+        text-shadow: 0 0 8px #00f5ff;
+      }
 
-.panel-btn {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border: 1.5px solid #00f5ff;
-    background: #0e1523;
-    color: #00f5ff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.2s;
-}
+      .panel-btn {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: 1.5px solid #00f5ff;
+        background: #0e1523;
+        color: #00f5ff;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
 
-.panel-btn:hover {
-    background: #00f5ff;
-    color: #0e1523;
-}
+      .panel-btn:hover {
+        background: #00f5ff;
+        color: #0e1523;
+      }
 
-/* Slider controls */
-.filter-control {
-    margin-bottom: 14px;
-}
+      /* Slider controls */
+      .filter-control {
+        margin-bottom: 14px;
+      }
 
-.filter-control label {
-    font-size: 14px;
-}
+      .filter-control label {
+        font-size: 14px;
+      }
 
-.filter-control input[type=range] {
-    width: 100%;
-}
+      .filter-control input[type="range"] {
+        width: 100%;
+      }
 
-/* History + download buttons at bottom */
-.bottom-controls {
-    margin-top: 12px;
-}
+      /* History + download buttons at bottom */
+      .bottom-controls {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
 
-</style>
-</head>
-
-<body>
-
-<div class="editor-container">
-
-    <!-- LEFT TOOLBAR -->
-    <div class="toolbar">
-
+  <body>
+    <div class="editor-container">
+      <!-- LEFT TOOLBAR -->
+      <div class="toolbar">
         <!-- Upload -->
         <button class="tool-btn" id="btnUpload">📁</button>
 
@@ -190,479 +187,893 @@ body, html {
         <button class="tool-btn" id="btnRedo">↪️</button>
 
         <!-- Download -->
-        <button class="tool-btn" id="btnDownload">⬇️</button>
-    </div>
+        <!-- <button class="tool-btn" id="btnDownload">⬇️</button> -->
 
-    <!-- MAIN CANVAS AREA -->
-    <div class="canvas-area">
+        <!-- Save As -->
+        <button class="tool-btn" id="btnSaveAs">💾</button>
+      </div>
+
+      <!-- MAIN CANVAS AREA -->
+      <div class="canvas-area">
         <canvas id="editorCanvas" width="900" height="600"></canvas>
+      </div>
     </div>
 
-</div>
+    <!-- PANELS START -->
 
-<!-- PANELS START -->
+    <!-- Crop Panel -->
+    <div class="side-panel" id="panelCrop">
+      <h2>Crop</h2>
+      <button class="panel-btn" data-ratio="free">Freeform</button>
+      <button class="panel-btn" data-ratio="1">1:1</button>
+      <button class="panel-btn" data-ratio="4/3">4:3</button>
+      <button class="panel-btn" data-ratio="16/9">16:9</button>
+      <button class="panel-btn" id="applyCrop">Apply Crop</button>
+    </div>
+    <!-- Save As Panel -->
+    <div class="side-panel" id="panelSaveAs">
+      <h2>Save As</h2>
+      <select id="saveFormat" class="panel-btn">
+        <option value="image/webp" selected="selected">WebP</option>
+        <option value="image/png">PNG</option>
+        <option value="image/bmp">BMP</option>
+        <option value="image/jpeg">JPEG</option>
+        <option value="image/tiff">TIFF</option>
+        <option value="image/qoi">QOI</option>
+        <option value="image/x-icon">ICO</option>
+        <option value="image/vnd-ms.dds">DDS</option>
+        <option value="image/rgb">RGB</option>
+        <option value="image/x-portable-pixmap">PPM</option>
+        <option value="image/x-tga">TGA</option>
+        <option value="application/pdf">PDF</option>
+        <!-- 
+          <optgroup label="Common Formats">
+            <option value="image/bmp">BMP</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/gif">GIF</option>
+            <option value="image/tiff">TIFF</option>
+            <option value="image/x-icon">ICO</option>
+            <option value="image/webp">WebP</option>
+            <option value="image/svg">SVG</option>
+          </optgroup>
+          <optgroup label="Document Formats">
+            <option value="application/pdf">PDF</option>
+          </optgroup>
+          <optgroup label="Developer Formats">
+            <option value="image/rgb">RGB</option>
+            <option value="application/octet-stream">Unit8Array</option>
+          </optgroup>
+          <optgroup label="Databases">
+            <option value="image/b64">Base64</option>
+            <option value="text/xml">XML</option>
+            <option value="text/yaml">YAML</option>
+            <option value="application/json">JSON</option>
+          </optgroup>
+          <optgroup label="Tables">
+            <option value="text/tsv">TSV</option>
+          </optgroup>
+          <optgroup label="Markup Languages">
+            <option value="canvas/html">Canvas</option>
+            <option value="text/html">HTML</option>
+            <option value="application/vml">VML</option>
+          </optgroup>
+          <optgroup label="Uncommon Formats">
+            <option value="image/dds">DDS</option>
+            <option value="image/ppm">PPM</option>
+            <option value="image/pgm">PGM</option>
+            <option value="image/pbm">PBM</option>
+            <option value="image/qoi">QOI</option>
+            <option value="image/tga">TGA</option>
+          </optgroup>
+        -->
+      </select>
+      <button class="panel-btn" id="applySaveAs">Save</button>
+    </div>
 
-<!-- Crop Panel -->
-<div class="side-panel" id="panelCrop">
-    <h2>Crop</h2>
-    <button class="panel-btn" data-ratio="free">Freeform</button>
-    <button class="panel-btn" data-ratio="1">1:1</button>
-    <button class="panel-btn" data-ratio="4/3">4:3</button>
-    <button class="panel-btn" data-ratio="16/9">16:9</button>
-    <button class="panel-btn" id="applyCrop">Apply Crop</button>
-</div>
+    <!-- Rotate Panel -->
+    <div class="side-panel" id="panelRotate">
+      <h2>Rotate</h2>
+      <button class="panel-btn" data-rot="90">Rotate 90°</button>
+      <button class="panel-btn" data-rot="180">Rotate 180°</button>
+      <button class="panel-btn" data-rot="270">Rotate 270°</button>
+      <button class="panel-btn" id="customRotateBtn">Custom Angle</button>
+      <input type="number" id="customRotateInput" class="panel-btn" placeholder="Angle (°)">
+      <button class="panel-btn" id="applyRotate">Apply Rotate</button>
+    </div>
 
-<!-- Rotate Panel -->
-<div class="side-panel" id="panelRotate">
-    <h2>Rotate</h2>
-    <button class="panel-btn" data-rot="90">Rotate 90°</button>
-    <button class="panel-btn" data-rot="180">Rotate 180°</button>
-    <button class="panel-btn" data-rot="270">Rotate 270°</button>
-    <button class="panel-btn" id="customRotateBtn">Custom Angle</button>
-    <input type="number" id="customRotateInput" class="panel-btn" placeholder="Angle (°)">
-</div>
+    <!-- Flip Panel -->
+    <div class="side-panel" id="panelFlip">
+      <h2>Flip</h2>
+      <button class="panel-btn" data-flip="horizontal">Flip Horizontal</button>
+      <button class="panel-btn" data-flip="vertical">Flip Vertical</button>
+      <button class="panel-btn" id="applyFlip">Apply Flip</button>
+    </div>
 
-<!-- Flip Panel -->
-<div class="side-panel" id="panelFlip">
-    <h2>Flip</h2>
-    <button class="panel-btn" data-flip="horizontal">Flip Horizontal</button>
-    <button class="panel-btn" data-flip="vertical">Flip Vertical</button>
-</div>
+    <!-- Filters Panel -->
+    <div class="side-panel" id="panelFilters">
+      <h2>Filters (20)</h2>
 
-<!-- Filters Panel -->
-<div class="side-panel" id="panelFilters">
-    <h2>Filters (20)</h2>
+      <!-- Placeholders (JS will generate 20 sliders here) -->
+      <div id="filtersContainer"><div class="filter-control"><label>brightness</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="brightness" data-unit="%"></div><div class="filter-control"><label>contrast</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="contrast" data-unit="%"></div><div class="filter-control"><label>saturate</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="saturate" data-unit="%"></div><div class="filter-control"><label>hue-rotate</label>
+                   <input type="range" min="0" max="360" value="0" data-filter="hue-rotate" data-unit="deg"></div><div class="filter-control"><label>blur</label>
+                   <input type="range" min="0" max="10" value="0" data-filter="blur" data-unit="px"></div><div class="filter-control"><label>grayscale</label>
+                   <input type="range" min="0" max="100" value="0" data-filter="grayscale" data-unit="%"></div><div class="filter-control"><label>invert</label>
+                   <input type="range" min="0" max="100" value="0" data-filter="invert" data-unit="%"></div><div class="filter-control"><label>sepia</label>
+                   <input type="range" min="0" max="100" value="0" data-filter="sepia" data-unit="%"></div><div class="filter-control"><label>opacity</label>
+                   <input type="range" min="0" max="100" value="100" data-filter="opacity" data-unit="%"></div><div class="filter-control"><label>brightness</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="brightness" data-unit="%"></div><div class="filter-control"><label>contrast</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="contrast" data-unit="%"></div><div class="filter-control"><label>saturate</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="saturate" data-unit="%"></div><div class="filter-control"><label>hue-rotate</label>
+                   <input type="range" min="0" max="360" value="0" data-filter="hue-rotate" data-unit="deg"></div><div class="filter-control"><label>blur</label>
+                   <input type="range" min="0" max="10" value="0" data-filter="blur" data-unit="px"></div><div class="filter-control"><label>grayscale</label>
+                   <input type="range" min="0" max="100" value="0" data-filter="grayscale" data-unit="%"></div><div class="filter-control"><label>invert</label>
+                   <input type="range" min="0" max="100" value="0" data-filter="invert" data-unit="%"></div><div class="filter-control"><label>sepia</label>
+                   <input type="range" min="0" max="100" value="0" data-filter="sepia" data-unit="%"></div><div class="filter-control"><label>opacity</label>
+                   <input type="range" min="0" max="100" value="100" data-filter="opacity" data-unit="%"></div><div class="filter-control"><label>contrast</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="contrast" data-unit="%"></div><div class="filter-control"><label>brightness</label>
+                   <input type="range" min="0" max="200" value="100" data-filter="brightness" data-unit="%"></div></div>
+    </div>
 
-    <!-- Placeholders (JS will generate 20 sliders here) -->
-    <div id="filtersContainer"></div>
+    <!-- Zoom Panel -->
+    <div class="side-panel" id="panelZoom">
+      <h2>Zoom</h2>
+      <button class="panel-btn" id="zoomIn">Zoom In +</button>
+      <button class="panel-btn" id="zoomOut">Zoom Out -</button>
+      <button class="panel-btn" id="zoomReset">Fit to Screen</button>
+      <button class="panel-btn" id="customZoom">Custom Zoom</button>
+      <input type="number" id="customZoomInput" class="panel-btn" placeholder="Pixels (px)">
+      <button class="panel-btn" id="applyZoom">Apply Zoom</button>
+    </div>
+    <script>
+      // ------------------------------
+      // DRAG AND DROP
+      // ------------------------------
+      // Enable drag-and-drop to populate the file input
+      const canvasArea = document.querySelector(".canvas-area");
 
-</div>
+      canvasArea.addEventListener("dragover", (e) => {
+        e.preventDefault(); // necessary to allow drop
+        canvasArea.style.border = "2px dashed #00f5ff"; // optional visual feedback
+      });
 
-<!-- Zoom Panel -->
-<div class="side-panel" id="panelZoom">
-    <h2>Zoom</h2>
-    <button class="panel-btn" id="zoomIn">Zoom In +</button>
-    <button class="panel-btn" id="zoomOut">Zoom Out -</button>
-    <button class="panel-btn" id="zoomReset">Fit to Screen</button>
-</div>
-<script>
-// ------------------------------
-// GLOBAL VARIABLES
-// ------------------------------
-const canvas = document.getElementById("editorCanvas");
-const ctx = canvas.getContext("2d");
+      canvasArea.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        canvasArea.style.border = ""; // reset border
+      });
 
-let img = new Image();
-let imgOriginal = null; // store original image
-let scale = 1;           // zoom factor
-let offsetX = 0;         // pan x
-let offsetY = 0;         // pan y
-let isDragging = false;
-let dragStart = {x:0, y:0};
-let undoStack = [];
-let redoStack = [];
-let currentFilterSettings = {}; // store 20 filters
+      canvasArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        canvasArea.style.border = ""; // reset border
 
-// ------------------------------
-// TOOLBAR BUTTONS
-// ------------------------------
-const btnUpload = document.getElementById("btnUpload");
-const btnCrop = document.getElementById("btnCrop");
-const btnRotate = document.getElementById("btnRotate");
-const btnFlip = document.getElementById("btnFlip");
-const btnFilters = document.getElementById("btnFilters");
-const btnZoom = document.getElementById("btnZoom");
-const btnMove = document.getElementById("btnMove");
-const btnUndo = document.getElementById("btnUndo");
-const btnRedo = document.getElementById("btnRedo");
-const btnDownload = document.getElementById("btnDownload");
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) return;
 
-// ------------------------------
-// PANELS
-// ------------------------------
-const panelCrop = document.getElementById("panelCrop");
-const panelRotate = document.getElementById("panelRotate");
-const panelFlip = document.getElementById("panelFlip");
-const panelFilters = document.getElementById("panelFilters");
-const panelZoom = document.getElementById("panelZoom");
+        // Only take the first file
+        fileInput.files = files;
 
-// ------------------------------
-// SHOW/HIDE PANELS
-// ------------------------------
-function hideAllPanels() {
-    panelCrop.style.display = 'none';
-    panelRotate.style.display = 'none';
-    panelFlip.style.display = 'none';
-    panelFilters.style.display = 'none';
-    panelZoom.style.display = 'none';
-}
+        // Trigger the onchange event so your existing upload code runs
+        const event = new Event("change");
+        fileInput.dispatchEvent(event);
+      });
 
-btnUpload.onclick = () => fileInput.click();
-btnCrop.onclick = () => { hideAllPanels(); panelCrop.style.display='block'; };
-btnRotate.onclick = () => { hideAllPanels(); panelRotate.style.display='block'; };
-btnFlip.onclick = () => { hideAllPanels(); panelFlip.style.display='block'; };
-btnFilters.onclick = () => { hideAllPanels(); panelFilters.style.display='block'; };
-btnZoom.onclick = () => { hideAllPanels(); panelZoom.style.display='block'; };
-// ------------------------------
-// HIDE ALL PANELS WHEN CLICKING OUTSIDE
-// ------------------------------
-document.addEventListener('click', (e) => {
-    const panels = [panelCrop, panelRotate, panelFlip, panelFilters, panelZoom];
+      // ------------------------------
+      // GLOBAL VARIABLES
+      // ------------------------------
+      const canvas = document.getElementById("editorCanvas");
+      const ctx = canvas.getContext("2d");
 
-    // Check if the clicked element is inside any panel or toolbar button
-    const clickedInsidePanel = panels.some(panel => panel.contains(e.target));
-    const clickedToolbarButton = e.target.classList.contains('tool-btn');
+      let img = new Image();
+      let imgOriginal = null; // store original image
+      let scale = 1; // zoom factor
+      let offsetX = 0; // pan x
+      let offsetY = 0; // pan y
+      let isDragging = false;
+      let dragStart = { x: 0, y: 0 };
+      let undoStack = [];
+      let redoStack = [];
+      let currentFilterSettings = {}; // store 20 filters
 
-    if (!clickedInsidePanel && !clickedToolbarButton) {
-        hideAllPanels(); // hide all panels
-    }
-});
+      // ------------------------------
+      // TOOLBAR BUTTONS
+      // ------------------------------
+      const btnUpload = document.getElementById("btnUpload");
+      const btnCrop = document.getElementById("btnCrop");
+      const btnRotate = document.getElementById("btnRotate");
+      const btnFlip = document.getElementById("btnFlip");
+      const btnFilters = document.getElementById("btnFilters");
+      const btnZoom = document.getElementById("btnZoom");
+      const btnMove = document.getElementById("btnMove");
+      const btnUndo = document.getElementById("btnUndo");
+      const btnRedo = document.getElementById("btnRedo");
+      const btnDownload = document.getElementById("btnDownload");
 
+      // ------------------------------
+      // PANELS
+      // ------------------------------
+      const panelCrop = document.getElementById("panelCrop");
+      const panelRotate = document.getElementById("panelRotate");
+      const panelFlip = document.getElementById("panelFlip");
+      const panelFilters = document.getElementById("panelFilters");
+      const panelZoom = document.getElementById("panelZoom");
+      const panelSaveAs = document.getElementById("panelSaveAs");
+      const btnSaveAs = document.getElementById("btnSaveAs");
 
-// ------------------------------
-// IMAGE UPLOAD
-// ------------------------------
-const fileInput = document.createElement("input");
-fileInput.type = "file";
-fileInput.accept = "image/*";
-fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    if(!file) return;
+      btnSaveAs.onclick = () => {
+        hideAllPanels();
+        panelSaveAs.style.display = "block";
+      };
 
-    const url = URL.createObjectURL(file);
-    img.src = url;
+      // ------------------------------
+      // SHOW/HIDE PANELS
+      // ------------------------------
+      function hideAllPanels() {
+        panelCrop.style.display = "none";
+        panelRotate.style.display = "none";
+        panelFlip.style.display = "none";
+        panelFilters.style.display = "none";
+        panelZoom.style.display = "none";
+        panelSaveAs.style.display = "none";
+      }
 
-    img.onload = () => {
-        imgOriginal = document.createElement('canvas');
-        imgOriginal.width = img.width;
-        imgOriginal.height = img.height;
-        imgOriginal.getContext('2d').drawImage(img,0,0);
-        resetCanvas();
-        saveState();
-    };
-};
+      btnUpload.onclick = () => fileInput.click();
+      btnCrop.onclick = () => {
+        hideAllPanels();
+        panelCrop.style.display = "block";
+      };
+      btnRotate.onclick = () => {
+        hideAllPanels();
+        panelRotate.style.display = "block";
+      };
+      btnFlip.onclick = () => {
+        hideAllPanels();
+        panelFlip.style.display = "block";
+      };
+      btnFilters.onclick = () => {
+        hideAllPanels();
+        panelFilters.style.display = "block";
+      };
+      btnZoom.onclick = () => {
+        hideAllPanels();
+        panelZoom.style.display = "block";
+      };
+      // ------------------------------
+      // HIDE ALL PANELS WHEN CLICKING OUTSIDE
+      // ------------------------------
+      document.addEventListener("click", (e) => {
+        const panels = [
+          panelCrop,
+          panelRotate,
+          panelFlip,
+          panelFilters,
+          panelZoom,
+          panelSaveAs,
+        ];
 
-function resetCanvas() {
-    scale = 1;
-    offsetX = 0;
-    offsetY = 0;
-    drawCanvas();
-}
+        // Check if the clicked element is inside any panel or toolbar button
+        const clickedInsidePanel = panels.some((panel) =>
+          panel.contains(e.target)
+        );
+        const clickedToolbarButton = e.target.classList.contains("tool-btn");
 
-// ------------------------------
-// DRAW IMAGE ON CANVAS
-// ------------------------------
-function drawCanvas() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    ctx.save();
-    ctx.translate(offsetX, offsetY);
-    ctx.scale(scale, scale);
-    ctx.drawImage(img,0,0);
-    ctx.restore();
-}
+        if (!clickedInsidePanel && !clickedToolbarButton) {
+          hideAllPanels(); // hide all panels
+        }
+      });
 
-// ------------------------------
-// DRAG / PAN TOOL
-// ------------------------------
-let activeTool = null;
+      // ------------------------------
+      // IMAGE UPLOAD
+      // ------------------------------
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "image/*";
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (!file) return;
 
-btnMove.onclick = () => { activeTool='move'; };
+        const url = URL.createObjectURL(file);
+        img.src = url;
 
-canvas.addEventListener('mousedown', e => {
-    if(activeTool==='move'){
-        isDragging=true;
-        dragStart.x = e.clientX - offsetX;
-        dragStart.y = e.clientY - offsetY;
-    }
-});
+        img.onload = () => {
+          imgOriginal = document.createElement("canvas");
+          imgOriginal.width = img.width;
+          imgOriginal.height = img.height;
+          imgOriginal.getContext("2d").drawImage(img, 0, 0);
+          resetCanvas();
+          saveState();
+        };
+      };
 
-canvas.addEventListener('mousemove', e => {
-    if(isDragging && activeTool==='move'){
-        offsetX = e.clientX - dragStart.x;
-        offsetY = e.clientY - dragStart.y;
+      function resetCanvas() {
+        scale = 1;
+        offsetX = 0;
+        offsetY = 0;
         drawCanvas();
-    }
-});
+      }
 
-canvas.addEventListener('mouseup', e => { isDragging=false; });
-canvas.addEventListener('mouseleave', e => { isDragging=false; });
+      // ------------------------------
+      // DRAW IMAGE ON CANVAS
+      // ------------------------------
+      function drawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0);
+        ctx.restore();
+      }
 
-// ------------------------------
-// ZOOM
-// ------------------------------
-const zoomFactor = 1.2;
+      // ------------------------------
+      // DRAG / PAN TOOL
+      // ------------------------------
+      let activeTool = null;
 
-document.getElementById('zoomIn').onclick = () => { scale*=zoomFactor; drawCanvas(); };
-document.getElementById('zoomOut').onclick = () => { scale/=zoomFactor; drawCanvas(); };
-document.getElementById('zoomReset').onclick = () => { resetCanvas(); drawCanvas(); };
-function applyFiltersToCanvas() {
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = img.width;
-    tempCanvas.height = img.height;
-    const tCtx = tempCanvas.getContext('2d');
+      btnMove.onclick = () => {
+        activeTool = "move";
+      };
 
-    // Build filter string
-    const cssFilter = Object.entries(currentFilterSettings)
-                            .map(([k,v])=>`${k}(${v})`).join(' ');
-    tCtx.filter = cssFilter;  // Apply filters to canvas pixels
-    tCtx.drawImage(img, 0, 0);
+      canvas.addEventListener("mousedown", (e) => {
+        if (activeTool === "move") {
+          isDragging = true;
+          dragStart.x = e.clientX - offsetX;
+          dragStart.y = e.clientY - offsetY;
+        }
+      });
 
-    // Update main image and redraw
-    img.src = tempCanvas.toDataURL();
-    drawCanvas();
-    saveState();
-}
+      canvas.addEventListener("mousemove", (e) => {
+        if (isDragging && activeTool === "move") {
+          offsetX = e.clientX - dragStart.x;
+          offsetY = e.clientY - dragStart.y;
+          drawCanvas();
+        }
+      });
 
-// ------------------------------
-// ROTATE
-// ------------------------------
-function rotateCanvas(deg){
-    const radians = deg * Math.PI/180;
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = img.width;
-    tempCanvas.height = img.height;
-    const tCtx = tempCanvas.getContext('2d');
-    tCtx.translate(img.width/2,img.height/2);
-    tCtx.rotate(radians);
-    tCtx.drawImage(img,-img.width/2,-img.height/2);
-    img.src = tempCanvas.toDataURL();
-    saveState();
-    drawCanvas();
-}
+      canvas.addEventListener("mouseup", (e) => {
+        isDragging = false;
+      });
+      canvas.addEventListener("mouseleave", (e) => {
+        isDragging = false;
+      });
 
-// Rotate buttons
-document.querySelectorAll('#panelRotate .panel-btn[data-rot]').forEach(b => {
-    b.onclick = () => { rotateCanvas(parseInt(b.dataset.rot)); };
-});
+      // ------------------------------
+      // ZOOM
+      // ------------------------------
+      const zoomFactor = 1.2;
 
-document.getElementById('customRotateBtn').onclick = () => {
-    const angle = parseFloat(document.getElementById('customRotateInput').value)||0;
-    rotateCanvas(angle);
-};
+      document.getElementById("zoomIn").onclick = () => {
+        scale *= zoomFactor;
+        drawCanvas();
+      };
+      document.getElementById("zoomOut").onclick = () => {
+        scale /= zoomFactor;
+        drawCanvas();
+      };
+      document.getElementById("zoomReset").onclick = () => {
+        resetCanvas();
+        drawCanvas();
+      };
+      document.getElementById("applyZoom").onclick = () => {
+        const customValue = parseInt(
+          document.getElementById("customZoomInput").value
+        );
+        if (!customValue || customValue <= 0)
+          return alert("Enter valid pixels!");
 
-// ------------------------------
-// FLIP
-// ------------------------------
-function flipCanvas(axis){
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = img.width;
-    tempCanvas.height = img.height;
-    const tCtx = tempCanvas.getContext('2d');
-    tCtx.translate(axis==='horizontal'?img.width:0, axis==='vertical'?img.height:0);
-    tCtx.scale(axis==='horizontal'?-1:1, axis==='vertical'?-1:1);
-    tCtx.drawImage(img,0,0);
-    img.src = tempCanvas.toDataURL();
-    saveState();
-    drawCanvas();
-}
+        // Create temporary canvas with new size
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = customValue;
+        tempCanvas.height = (customValue / img.width) * img.height; // preserve aspect ratio
+        const tCtx = tempCanvas.getContext("2d");
+        tCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+        img.src = tempCanvas.toDataURL();
 
-document.querySelectorAll('#panelFlip .panel-btn[data-flip]').forEach(b => {
-    b.onclick = () => { flipCanvas(b.dataset.flip); };
-});
+        // Reset scale and offsets
+        scale = 1;
+        offsetX = 0;
+        offsetY = 0;
+        saveState();
+        drawCanvas();
+      };
 
-// ------------------------------
-// UNDO / REDO
-// ------------------------------
-function saveState(){
-    undoStack.push(canvas.toDataURL());
-    if(undoStack.length>20) undoStack.shift();
-}
+      function applyFiltersToCanvas() {
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tCtx = tempCanvas.getContext("2d");
 
-btnUndo.onclick = () => {
-    if(undoStack.length<2) return;
-    const last = undoStack.pop();
-    redoStack.push(last);
-    const previous = undoStack[undoStack.length-1];
-    let tmp = new Image();
-    tmp.onload = () => { img.src=tmp.src; drawCanvas(); };
-    tmp.src = previous;
-};
+        const cssFilter = Object.entries(currentFilterSettings)
+          .map(([k, v]) => `${k}(${v})`)
+          .join(" ");
+        tCtx.filter = cssFilter;
+        tCtx.drawImage(img, 0, 0);
 
-btnRedo.onclick = () => {
-    if(redoStack.length===0) return;
-    const next = redoStack.pop();
-    let tmp = new Image();
-    tmp.onload = () => { img.src=tmp.src; drawCanvas(); };
-    tmp.src = next;
-};
+        img.src = tempCanvas.toDataURL();
+        drawCanvas();
+        saveState();
+      }
 
-// ------------------------------
-// DOWNLOAD
-// ------------------------------
-btnDownload.onclick = () => {
-    if(!fileInput.files[0]) return alert("Upload image first!");
+      // Call applyFiltersToCanvas on slider change if you want filters to be permanent
+      filtersContainer
+        .querySelectorAll("input[type=range]")
+        .forEach((slider) => {
+          slider.addEventListener("change", () => {
+            applyFiltersToCanvas();
+          });
+        });
 
-    // Create filtered image on a temp canvas
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = img.width;
-    tempCanvas.height = img.height;
-    const tCtx = tempCanvas.getContext('2d');
+      // ------------------------------
+      // ROTATE
+      // ------------------------------
+      function rotateCanvas(deg) {
+        const radians = (deg * Math.PI) / 180;
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tCtx = tempCanvas.getContext("2d");
+        tCtx.translate(img.width / 2, img.height / 2);
+        tCtx.rotate(radians);
+        tCtx.drawImage(img, -img.width / 2, -img.height / 2);
+        img.src = tempCanvas.toDataURL();
+        saveState();
+        drawCanvas();
+      }
 
-    // Build filter string
-    const cssFilter = Object.entries(currentFilterSettings)
-                            .map(([k,v])=>`${k}(${v})`).join(' ');
-    tCtx.filter = cssFilter;
-    tCtx.drawImage(img, 0, 0);
+      // Rotate buttons
+      document
+        .querySelectorAll("#panelRotate .panel-btn[data-rot]")
+        .forEach((b) => {
+          b.onclick = () => {
+            rotateCanvas(parseInt(b.dataset.rot));
+          };
+        });
 
-    // Create a new Image to ensure it finishes loading
-    const filteredImg = new Image();
-    filteredImg.onload = () => {
-        // Draw the filtered image onto the main canvas
-        ctx.clearRect(0,0,canvas.width, canvas.height);
-        ctx.drawImage(filteredImg, 0, 0);
+      document.getElementById("customRotateBtn").onclick = () => {
+        const angle =
+          parseFloat(document.getElementById("customRotateInput").value) || 0;
+        rotateCanvas(angle);
+      };
+      document.getElementById("applyRotate").onclick = () => {
+        const angle =
+          parseFloat(document.getElementById("customRotateInput").value) || 0;
+        rotateCanvas(angle);
+      };
 
-        // Now download works correctly
-        const ext = fileInput.files[0].name.split('.').pop();
-        const name = fileInput.files[0].name.replace('.'+ext,'');
-        const link = document.createElement('a');
-        link.download = `${name}-edited.${ext}`;
-        link.href = canvas.toDataURL(`image/${ext}`);
-        link.click();
-    };
-    filteredImg.src = tempCanvas.toDataURL();
-};
+      // ------------------------------
+      // FLIP
+      // ------------------------------
+      function flipCanvas(axis) {
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tCtx = tempCanvas.getContext("2d");
+        tCtx.translate(
+          axis === "horizontal" ? img.width : 0,
+          axis === "vertical" ? img.height : 0
+        );
+        tCtx.scale(
+          axis === "horizontal" ? -1 : 1,
+          axis === "vertical" ? -1 : 1
+        );
+        tCtx.drawImage(img, 0, 0);
+        img.src = tempCanvas.toDataURL();
+        saveState();
+        drawCanvas();
+      }
 
+      document
+        .querySelectorAll("#panelFlip .panel-btn[data-flip]")
+        .forEach((b) => {
+          b.onclick = () => {
+            flipCanvas(b.dataset.flip);
+          };
+        });
+      document.getElementById("applyFlip").onclick = () => {
+        const selectedFlip = panelFlip.querySelector(
+          "button[data-flip].selected"
+        );
+        if (!selectedFlip) return alert("Choose horizontal or vertical first!");
+        flipCanvas(selectedFlip.dataset.flip);
+      };
 
+      // ------------------------------
+      // UNDO / REDO
+      // ------------------------------
+      function saveState() {
+        undoStack.push(canvas.toDataURL());
+        if (undoStack.length > 20) undoStack.shift();
+      }
 
-</script>
-<script>
-// ------------------------------
-// FILTERS SETUP
-// ------------------------------
-const filtersContainer = document.getElementById('filtersContainer');
+      btnUndo.onclick = () => {
+        if (undoStack.length < 2) return;
+        const last = undoStack.pop();
+        redoStack.push(last);
+        const previous = undoStack[undoStack.length - 1];
+        let tmp = new Image();
+        tmp.onload = () => {
+          img.src = tmp.src;
+          drawCanvas();
+        };
+        tmp.src = previous;
+      };
 
-// 20 filters with default values
-const filterList = [
-  {name:'brightness', unit:'%', min:0, max:200, value:100},
-  {name:'contrast', unit:'%', min:0, max:200, value:100},
-  {name:'saturate', unit:'%', min:0, max:200, value:100},
-  {name:'hue-rotate', unit:'deg', min:0, max:360, value:0},
-  {name:'blur', unit:'px', min:0, max:10, value:0},
-  {name:'grayscale', unit:'%', min:0, max:100, value:0},
-  {name:'invert', unit:'%', min:0, max:100, value:0},
-  {name:'sepia', unit:'%', min:0, max:100, value:0},
-  {name:'opacity', unit:'%', min:0, max:100, value:100},
-  {name:'brightness', unit:'%', min:0, max:200, value:100}, // duplicate to make 10
-  {name:'contrast', unit:'%', min:0, max:200, value:100},
-  {name:'saturate', unit:'%', min:0, max:200, value:100},
-  {name:'hue-rotate', unit:'deg', min:0, max:360, value:0},
-  {name:'blur', unit:'px', min:0, max:10, value:0},
-  {name:'grayscale', unit:'%', min:0, max:100, value:0},
-  {name:'invert', unit:'%', min:0, max:100, value:0},
-  {name:'sepia', unit:'%', min:0, max:100, value:0},
-  {name:'opacity', unit:'%', min:0, max:100, value:100},
-  {name:'contrast', unit:'%', min:0, max:200, value:100},
-  {name:'brightness', unit:'%', min:0, max:200, value:100},
-];
+      btnRedo.onclick = () => {
+        if (redoStack.length === 0) return;
+        const next = redoStack.pop();
+        let tmp = new Image();
+        tmp.onload = () => {
+          img.src = tmp.src;
+          drawCanvas();
+        };
+        tmp.src = next;
+      };
 
-// generate sliders dynamically
-filterList.forEach(f => {
-  const div = document.createElement('div');
-  div.classList.add('filter-control');
-  div.innerHTML = `<label>${f.name}</label>
+      // ------------------------------
+      // DOWNLOAD
+      // ------------------------------
+      btnDownload.onclick = () => {
+        if (!fileInput.files[0]) return alert("Upload image first!");
+
+        // Create filtered image on a temp canvas
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tCtx = tempCanvas.getContext("2d");
+
+        // Build filter string
+        const cssFilter = Object.entries(currentFilterSettings)
+          .map(([k, v]) => `${k}(${v})`)
+          .join(" ");
+        tCtx.filter = cssFilter;
+        tCtx.drawImage(img, 0, 0);
+
+        // Create a new Image to ensure it finishes loading
+        const filteredImg = new Image();
+        filteredImg.onload = () => {
+          // Draw the filtered image onto the main canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(filteredImg, 0, 0);
+
+          // Now download works correctly
+          const ext = fileInput.files[0].name.split(".").pop();
+          const name = fileInput.files[0].name.replace("." + ext, "");
+          const link = document.createElement("a");
+          link.download = `${name}-edited.${ext}`;
+          link.href = canvas.toDataURL(`image/${ext}`);
+          link.click();
+        };
+        filteredImg.src = tempCanvas.toDataURL();
+      };
+    </script>
+    <script>
+      // ------------------------------
+      // FILTERS SETUP
+      // ------------------------------
+      const filtersContainer = document.getElementById("filtersContainer");
+
+      // 20 filters with default values
+      const filterList = [
+        { name: "brightness", unit: "%", min: 0, max: 200, value: 100 },
+        { name: "contrast", unit: "%", min: 0, max: 200, value: 100 },
+        { name: "saturate", unit: "%", min: 0, max: 200, value: 100 },
+        { name: "hue-rotate", unit: "deg", min: 0, max: 360, value: 0 },
+        { name: "blur", unit: "px", min: 0, max: 10, value: 0 },
+        { name: "grayscale", unit: "%", min: 0, max: 100, value: 0 },
+        { name: "invert", unit: "%", min: 0, max: 100, value: 0 },
+        { name: "sepia", unit: "%", min: 0, max: 100, value: 0 },
+        { name: "opacity", unit: "%", min: 0, max: 100, value: 100 },
+        { name: "brightness", unit: "%", min: 0, max: 200, value: 100 }, // duplicate to make 10
+        { name: "contrast", unit: "%", min: 0, max: 200, value: 100 },
+        { name: "saturate", unit: "%", min: 0, max: 200, value: 100 },
+        { name: "hue-rotate", unit: "deg", min: 0, max: 360, value: 0 },
+        { name: "blur", unit: "px", min: 0, max: 10, value: 0 },
+        { name: "grayscale", unit: "%", min: 0, max: 100, value: 0 },
+        { name: "invert", unit: "%", min: 0, max: 100, value: 0 },
+        { name: "sepia", unit: "%", min: 0, max: 100, value: 0 },
+        { name: "opacity", unit: "%", min: 0, max: 100, value: 100 },
+        { name: "contrast", unit: "%", min: 0, max: 200, value: 100 },
+        { name: "brightness", unit: "%", min: 0, max: 200, value: 100 },
+      ];
+
+      // generate sliders dynamically
+      filterList.forEach((f) => {
+        const div = document.createElement("div");
+        div.classList.add("filter-control");
+        div.innerHTML = `<label>${f.name}</label>
                    <input type="range" min="${f.min}" max="${f.max}" value="${f.value}" data-filter="${f.name}" data-unit="${f.unit}">`;
-  filtersContainer.appendChild(div);
-});
+        filtersContainer.appendChild(div);
+      });
 
-// apply filters
-filtersContainer.querySelectorAll('input[type=range]').forEach(slider=>{
-  slider.addEventListener('input', ()=>{
-      const name = slider.dataset.filter;
-      const unit = slider.dataset.unit;
-      currentFilterSettings[name] = slider.value + unit;
-      applyFilters();
-  });
-});
+      // apply filters
+      filtersContainer
+        .querySelectorAll("input[type=range]")
+        .forEach((slider) => {
+          slider.addEventListener("input", () => {
+            const name = slider.dataset.filter;
+            const unit = slider.dataset.unit;
+            currentFilterSettings[name] = slider.value + unit;
+            applyFilters();
+          });
+        });
 
-function applyFilters(){
-    const cssFilter = Object.entries(currentFilterSettings).map(([k,v])=>`${k}(${v})`).join(' ');
-    canvas.style.filter = cssFilter;
-}
+      function applyFilters() {
+        const cssFilter = Object.entries(currentFilterSettings)
+          .map(([k, v]) => `${k}(${v})`)
+          .join(" ");
+        canvas.style.filter = cssFilter;
+      }
 
-// ------------------------------
-// CROP TOOL
-// ------------------------------
-let cropMode = 'free';
-let cropStart={x:0,y:0}, cropEnd={x:0,y:0}, isCropping=false;
+      // ------------------------------
+      // CROP TOOL
+      // ------------------------------
+      let cropMode = "free";
+      let cropStart = { x: 0, y: 0 },
+        cropEnd = { x: 0, y: 0 },
+        isCropping = false;
 
-// crop buttons
-panelCrop.querySelectorAll('.panel-btn[data-ratio]').forEach(b=>{
-    b.onclick = () => { cropMode = b.dataset.ratio; };
-});
+      // crop buttons
+      panelCrop.querySelectorAll(".panel-btn[data-ratio]").forEach((b) => {
+        b.onclick = () => {
+          cropMode = b.dataset.ratio;
+        };
+      });
 
-// mouse events for crop
-canvas.addEventListener('mousedown', e=>{
-    if(activeTool==='crop'){
-        isCropping=true;
-        const rect = canvas.getBoundingClientRect();
-        cropStart.x = (e.clientX-rect.left)/scale - offsetX/scale;
-        cropStart.y = (e.clientY-rect.top)/scale - offsetY/scale;
-        cropEnd = {...cropStart};
-    }
-});
+      // mouse events for crop
+      canvas.addEventListener("mousedown", (e) => {
+        if (activeTool === "crop") {
+          isCropping = true;
+          const rect = canvas.getBoundingClientRect();
+          cropStart.x = (e.clientX - rect.left) / scale - offsetX / scale;
+          cropStart.y = (e.clientY - rect.top) / scale - offsetY / scale;
+          cropEnd = { ...cropStart };
+        }
+      });
 
-canvas.addEventListener('mousemove', e=>{
-    if(isCropping && activeTool==='crop'){
-        const rect = canvas.getBoundingClientRect();
-        let x = (e.clientX-rect.left)/scale - offsetX/scale;
-        let y = (e.clientY-rect.top)/scale - offsetY/scale;
+      canvas.addEventListener("mousemove", (e) => {
+        if (isCropping && activeTool === "crop") {
+          const rect = canvas.getBoundingClientRect();
+          let x = (e.clientX - rect.left) / scale - offsetX / scale;
+          let y = (e.clientY - rect.top) / scale - offsetY / scale;
 
-        // aspect ratio adjustment
-        if(cropMode!=='free'){
-            let w = x-cropStart.x;
-            let h = y-cropStart.y;
-            let ratio = cropMode==='1'?1:cropMode==='4/3'?4/3:16/9;
-            if(Math.abs(w)>Math.abs(h*ratio)) h = w/ratio; else w = h*ratio;
+          // aspect ratio adjustment
+          if (cropMode !== "free") {
+            let w = x - cropStart.x;
+            let h = y - cropStart.y;
+            let ratio =
+              cropMode === "1" ? 1 : cropMode === "4/3" ? 4 / 3 : 16 / 9;
+            if (Math.abs(w) > Math.abs(h * ratio)) h = w / ratio;
+            else w = h * ratio;
             cropEnd.x = cropStart.x + w;
             cropEnd.y = cropStart.y + h;
-        } else { cropEnd.x = x; cropEnd.y = y; }
+          } else {
+            cropEnd.x = x;
+            cropEnd.y = y;
+          }
 
-        drawCanvas();
-        drawCropRect();
-    }
-});
+          drawCanvas();
+          drawCropRect();
+        }
+      });
 
-canvas.addEventListener('mouseup', e=>{
-    if(activeTool==='crop'){ isCropping=false; }
-});
+      canvas.addEventListener("mouseup", (e) => {
+        if (activeTool === "crop") {
+          isCropping = false;
+        }
+      });
 
-// draw crop rectangle
-function drawCropRect(){
-    ctx.save();
-    ctx.translate(offsetX, offsetY);
-    ctx.scale(scale, scale);
-    ctx.strokeStyle = "#00f5ff";
-    ctx.lineWidth = 2/scale;
-    ctx.setLineDash([6]);
-    ctx.strokeRect(cropStart.x, cropStart.y, cropEnd.x-cropStart.x, cropEnd.y-cropStart.y);
-    ctx.setLineDash([]);
-    ctx.restore();
-}
+      // draw crop rectangle
+      function drawCropRect() {
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+        ctx.strokeStyle = "#00f5ff";
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([6]);
+        ctx.strokeRect(
+          cropStart.x,
+          cropStart.y,
+          cropEnd.x - cropStart.x,
+          cropEnd.y - cropStart.y
+        );
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+      document.getElementById("applySaveAs").onclick = async () => {
+        if (!img.src) return alert("Upload image first!");
 
-// apply crop
-document.getElementById('applyCrop').onclick = ()=>{
-    if(cropStart && cropEnd){
-        const x = Math.min(cropStart.x, cropEnd.x);
-        const y = Math.min(cropStart.y, cropEnd.y);
-        const w = Math.abs(cropEnd.x - cropStart.x);
-        const h = Math.abs(cropEnd.y - cropStart.y);
-        if(w<1 || h<1) return alert("Invalid crop area");
-        const temp = document.createElement('canvas');
-        temp.width = w;
-        temp.height = h;
-        temp.getContext('2d').drawImage(img, x, y, w, h, 0, 0, w, h);
-        img.src = temp.toDataURL();
-        cropStart=null;
-        cropEnd=null;
-        saveState();
-        drawCanvas();
-    }
-};
+        const format = document.getElementById("saveFormat").value; // MIME type
+        const ext = format.split("/")[1];
 
-// activate crop tool
-btnCrop.onclick = ()=>{ activeTool='crop'; hideAllPanels(); panelCrop.style.display='block'; };
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tCtx = tempCanvas.getContext("2d");
 
-</script>
+        // Apply filters if needed
+        const cssFilter = Object.entries(currentFilterSettings)
+          .map(([k, v]) => `${k}(${v})`)
+          .join(" ");
+        tCtx.filter = cssFilter;
+        tCtx.drawImage(img, 0, 0);
 
-</body>
-</html>
+        const imageData = tCtx.getImageData(
+          0,
+          0,
+          tempCanvas.width,
+          tempCanvas.height
+        );
+        const originalName =
+          fileInput.files[0]?.name.replace(/\.[^/.]+$/, "-edited") || "-image";
+
+        // Handle GIF separately using GIF.js
+        if (format === "image/gif") {
+          const gifQuality = 10; // Adjust if needed
+          const gif = new GIF({
+            workers: 6,
+            quality: gifQuality,
+            width: img.width,
+            height: img.height,
+            workerScript: "assets/gif.js/dist/gif.worker.js",
+          });
+
+          gif.addFrame(img, { delay: 500 });
+          gif.on("finished", (blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = originalName + ".gif";
+            link.click();
+            URL.revokeObjectURL(url);
+          });
+          gif.render();
+          return;
+        }
+
+        // Custom formats using your functions
+        let blob;
+        // Save as PDF using PDF-Lib
+        if (format === "application/pdf") {
+          const { PDFDocument } = PDFLib;
+
+          // Create PDF
+          const pdfDoc = await PDFDocument.create();
+          const page = pdfDoc.addPage([img.width, img.height]);
+
+          // Convert canvas to PNG bytes
+          const pngData = tempCanvas.toDataURL("image/png");
+          const pngBytes = await fetch(pngData).then((res) =>
+            res.arrayBuffer()
+          );
+
+          const pngImage = await pdfDoc.embedPng(pngBytes);
+
+          // Draw image on PDF
+          page.drawImage(pngImage, {
+            x: 0,
+            y: 0,
+            width: img.width,
+            height: img.height,
+          });
+
+          // Serialize to bytes
+          const pdfBytes = await pdfDoc.save();
+
+          // Trigger download
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = originalName + ".pdf";
+          link.click();
+
+          return; // stop here so we do not continue to other formats
+        }
+
+        switch (format) {
+          case "image/bmp":
+            const bmpString = encodeBMP(imageData);
+            blob = new Blob([bmpString], { type: "image/bmp" }); // should return a Blob
+            break;
+          case "image/tiff":
+            const tiffString = encodeTIFF(imageData);
+            blob = new Blob([tiffString], { type: "image/tiff" }); // should return a Blob
+            break;
+          case "image/qoi":
+            const qoiString = encodeQOI(imageData);
+            blob = new Blob([qoiString], { type: "image/qoi" });
+            break;
+          case "image/x-icon":
+            const icoData = await encodeICO(imageData); // returns Uint8Array
+            blob = new Blob([icoData], { type: "image/x-icon" });
+            break;
+          case "image/vnd-ms.dds":
+            const ddsString = encodeDDS(imageData);
+            blob = new Blob([ddsString], { type: "image/dds" });
+            break;
+          case "image/rgb":
+            const rgbString = encodeRGB(imageData);
+            blob = new Blob([rgbString], { type: "image/rgb" });
+            break;
+          case "image/x-portable-pixmap":
+            const ppmString = encodePPM(imageData);
+            blob = new Blob([ppmString], { type: "image/x-portable-pixmap" });
+            break;
+          case "image/x-tga":
+            const tgaString = await encodeTGA(imageData);
+            blob = new Blob([tgaString], { type: "image/tga" });
+            break;
+
+          /*
+        <option value="image/qoi">QOI</option>
+        <option value="image/x-icon">ICO</option>
+        <option value="image/vmd-ms.dds">DDS</option>
+        <option value="image/rgb">RGB</option>
+        <option value="image/x-portable-pixmap">PPM</option>
+        <option value="image/x-tga">TGA</option>
+        */
+          case "image/png":
+          case "image/jpeg":
+          case "image/webp":
+            // Native formats
+            tempCanvas.toBlob(
+              (b) => {
+                blob = b;
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `${originalName}.${ext}`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+              },
+              format,
+              1 // quality (1 = max for JPEG/WebP)
+            );
+            return;
+          default:
+            return alert("Unsupported format");
+        }
+
+        // For BMP / TIFF
+        if (blob) {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${originalName}.${ext}`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+        }
+      };
+
+      // apply crop
+      document.getElementById("applyCrop").onclick = () => {
+        if (cropStart && cropEnd) {
+          const x = Math.min(cropStart.x, cropEnd.x);
+          const y = Math.min(cropStart.y, cropEnd.y);
+          const w = Math.abs(cropEnd.x - cropStart.x);
+          const h = Math.abs(cropEnd.y - cropStart.y);
+          if (w < 1 || h < 1) return alert("Invalid crop area");
+          const temp = document.createElement("canvas");
+          temp.width = w;
+          temp.height = h;
+          temp.getContext("2d").drawImage(img, x, y, w, h, 0, 0, w, h);
+          img.src = temp.toDataURL();
+          cropStart = null;
+          cropEnd = null;
+          saveState();
+          drawCanvas();
+        }
+      };
+
+      // activate crop tool
+      btnCrop.onclick = () => {
+        activeTool = "crop";
+        hideAllPanels();
+        panelCrop.style.display = "block";
+      };
+    </script>
+    <script src="assets/encode-func.js"></script>
+    <script src="assets/gif.js"></script>
+    <script src="assets/gif.worker.js"></script>
+    <script src="assets/pdf-lib.min.js"></script>
+  
+
+</body></html>
