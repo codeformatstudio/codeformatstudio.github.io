@@ -1,3 +1,85 @@
+// Helper Function \\
+function cyberPrompt(message, callback) {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.background = 'rgba(0,0,10,0.95)';
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.style.zIndex = '10000';
+  overlay.style.color = '#00ffff';
+  overlay.style.fontFamily = '"Orbitron", "Segoe UI", Tahoma, Roboto, sans-serif';
+  overlay.style.textAlign = 'center';
+  
+  // Message
+  const msg = document.createElement('div');
+  msg.textContent = message;
+  msg.style.marginBottom = '20px';
+  msg.style.fontSize = '20px';
+  msg.style.textShadow = '0 0 10px #00ffff';
+  overlay.appendChild(msg);
+  
+  // Input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.style.padding = '10px';
+  input.style.border = '2px solid #00ffff';
+  input.style.borderRadius = '10px';
+  input.style.background = 'rgba(0,20,30,0.9)';
+  input.style.color = '#00ffff';
+  input.style.fontSize = '16px';
+  input.style.width = '300px';
+  input.style.marginBottom = '20px';
+  input.style.textAlign = 'center';
+  overlay.appendChild(input);
+  
+  // Buttons
+  const btnContainer = document.createElement('div');
+  btnContainer.style.display = 'flex';
+  btnContainer.style.gap = '10px';
+  
+  const okBtn = document.createElement('button');
+  okBtn.textContent = 'OK';
+  okBtn.style.padding = '8px 16px';
+  okBtn.style.background = '#000010';
+  okBtn.style.color = '#00ffff';
+  okBtn.style.border = '2px solid #00ffff';
+  okBtn.style.borderRadius = '8px';
+  okBtn.style.cursor = 'pointer';
+  okBtn.style.boxShadow = '0 0 10px #00ffff55';
+  okBtn.onclick = () => {
+    callback(input.value);
+    document.body.removeChild(overlay);
+  };
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.style.padding = '8px 16px';
+  cancelBtn.style.background = '#000010';
+  cancelBtn.style.color = '#00ffff';
+  cancelBtn.style.border = '2px solid #00ffff';
+  cancelBtn.style.borderRadius = '8px';
+  cancelBtn.style.cursor = 'pointer';
+  cancelBtn.style.boxShadow = '0 0 10px #00ffff55';
+  cancelBtn.onclick = () => {
+    callback(null);
+    document.body.removeChild(overlay);
+  };
+  
+  btnContainer.appendChild(okBtn);
+  btnContainer.appendChild(cancelBtn);
+  overlay.appendChild(btnContainer);
+  
+  document.body.appendChild(overlay);
+  input.focus();
+}
+
 // === DOM ELEMENTS === \\
 const htmlSelect = document.getElementById("htmlSelect");
 const pySelect = document.getElementById("pySelect");
@@ -173,7 +255,11 @@ function generateFullOutput() {
     </script>
     ${pyScript}
   `;
-  const name = prompt("Name your project");
+  cyberPrompt("Enter your project name:", (name) => {
+    if (name === null) {
+      name = 'project'
+    }
+  })
   const a = document.createElement("a");
   generateOutput();
   const blob = new Blob([fullOutput], { type: "text/html" });
