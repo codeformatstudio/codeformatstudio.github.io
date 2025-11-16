@@ -371,8 +371,15 @@
         </p>
       </div>
 
-      <footer>© 2025 Code Format Studio — All Rights Reserved.</footer>
+      <footer>© <span id="year"></span> Code Format Studio — All Rights Reserved.</footer>
     </div>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const yearSpan = document.getElementById("year");
+    yearSpan.textContent = new Date().getFullYear();
+  });
+</script>
+
 
     <script>
       /* TYPING EFFECT */
