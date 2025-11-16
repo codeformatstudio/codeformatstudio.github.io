@@ -255,9 +255,11 @@ function generateFullOutput() {
     </script>
     ${pyScript}
   `;
-  cyberPrompt("Enter your project name:", (name) => {
-    if (name === null) {
-      name = 'project'
+  let name
+  cyberPrompt("Enter your project name:", (value) => {
+    if (value === null) {
+      value = 'project'
+      name = value
     }
   })
   const a = document.createElement("a");
