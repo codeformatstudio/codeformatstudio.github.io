@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta charset="UTF-8">
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8" />
     <title>Advanced Image Editor</title>
-    <link rel="icon" href="icons/icon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="icons/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
       /* ---------------------------
@@ -152,6 +153,120 @@
       .bottom-controls {
         margin-top: 12px;
       }
+      /* -----------------------
+LARGE SCREENS (>=1200px)
+------------------------ */
+      .editor-container {
+        display: flex;
+        flex-direction: row; /* toolbar on the left */
+        height: 100vh;
+      }
+
+      .toolbar {
+        width: 120px;
+        display: flex;
+        flex-direction: column;
+        border-right: 2px solid #00fff7;
+        box-shadow: 4px 0 15px #00fff755;
+        padding: 20px 10px;
+        gap: 15px;
+      }
+
+      .tool-btn {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+      }
+
+      .canvas-area {
+        flex: 1;
+        padding: 20px;
+      }
+
+      #editorCanvas {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* -----------------------
+MEDIUM SCREENS (<=900px)
+------------------------ */
+      @media (max-width: 900px) {
+        .toolbar {
+          width: 80px;
+          padding: 15px 5px;
+          gap: 10px;
+        }
+
+        .tool-btn {
+          width: 60px;
+          height: 60px;
+          font-size: 1.2rem;
+        }
+
+        .canvas-area {
+          padding: 15px;
+        }
+      }
+
+      /* -----------------------
+SMALL SCREENS (<=600px)
+------------------------ */
+      @media (max-width: 600px) {
+        .editor-container {
+          flex-direction: column; /* toolbar moves on top */
+        }
+
+        .toolbar {
+          width: 100%;
+          height: auto;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          border-right: none;
+          border-bottom: 2px solid #00fff7;
+          box-shadow: 0 4px 15px #00fff755;
+          padding: 10px;
+          gap: 5px;
+        }
+
+        .tool-btn {
+          width: 50px;
+          height: 50px;
+          font-size: 1rem;
+          margin: 3px;
+        }
+
+        .canvas-area {
+          padding: 10px;
+        }
+      }
+
+      /* -----------------------
+VERY SMALL SCREENS (<=150px)
+------------------------ */
+      @media (max-width: 150px) {
+        body {
+          font-size: 8px;
+        }
+
+        .toolbar {
+          flex-direction: column;
+          padding: 5px;
+          gap: 2px;
+        }
+
+        .tool-btn {
+          width: 35px;
+          height: 35px;
+          font-size: 0.7rem;
+          margin: 1px 0;
+        }
+
+        .canvas-area {
+          padding: 5px;
+        }
+      }
     </style>
   </head>
 
@@ -278,7 +393,12 @@
       <button class="panel-btn" data-rot="180">Rotate 180°</button>
       <button class="panel-btn" data-rot="270">Rotate 270°</button>
       <button class="panel-btn" id="customRotateBtn">Custom Angle</button>
-      <input type="number" id="customRotateInput" class="panel-btn" placeholder="Angle (°)">
+      <input
+        type="number"
+        id="customRotateInput"
+        class="panel-btn"
+        placeholder="Angle (°)"
+      />
       <button class="panel-btn" id="applyRotate">Apply Rotate</button>
     </div>
 
@@ -295,27 +415,228 @@
       <h2>Filters (20)</h2>
 
       <!-- Placeholders (JS will generate 20 sliders here) -->
-      <div id="filtersContainer"><div class="filter-control"><label>brightness</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="brightness" data-unit="%"></div><div class="filter-control"><label>contrast</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="contrast" data-unit="%"></div><div class="filter-control"><label>saturate</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="saturate" data-unit="%"></div><div class="filter-control"><label>hue-rotate</label>
-                   <input type="range" min="0" max="360" value="0" data-filter="hue-rotate" data-unit="deg"></div><div class="filter-control"><label>blur</label>
-                   <input type="range" min="0" max="10" value="0" data-filter="blur" data-unit="px"></div><div class="filter-control"><label>grayscale</label>
-                   <input type="range" min="0" max="100" value="0" data-filter="grayscale" data-unit="%"></div><div class="filter-control"><label>invert</label>
-                   <input type="range" min="0" max="100" value="0" data-filter="invert" data-unit="%"></div><div class="filter-control"><label>sepia</label>
-                   <input type="range" min="0" max="100" value="0" data-filter="sepia" data-unit="%"></div><div class="filter-control"><label>opacity</label>
-                   <input type="range" min="0" max="100" value="100" data-filter="opacity" data-unit="%"></div><div class="filter-control"><label>brightness</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="brightness" data-unit="%"></div><div class="filter-control"><label>contrast</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="contrast" data-unit="%"></div><div class="filter-control"><label>saturate</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="saturate" data-unit="%"></div><div class="filter-control"><label>hue-rotate</label>
-                   <input type="range" min="0" max="360" value="0" data-filter="hue-rotate" data-unit="deg"></div><div class="filter-control"><label>blur</label>
-                   <input type="range" min="0" max="10" value="0" data-filter="blur" data-unit="px"></div><div class="filter-control"><label>grayscale</label>
-                   <input type="range" min="0" max="100" value="0" data-filter="grayscale" data-unit="%"></div><div class="filter-control"><label>invert</label>
-                   <input type="range" min="0" max="100" value="0" data-filter="invert" data-unit="%"></div><div class="filter-control"><label>sepia</label>
-                   <input type="range" min="0" max="100" value="0" data-filter="sepia" data-unit="%"></div><div class="filter-control"><label>opacity</label>
-                   <input type="range" min="0" max="100" value="100" data-filter="opacity" data-unit="%"></div><div class="filter-control"><label>contrast</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="contrast" data-unit="%"></div><div class="filter-control"><label>brightness</label>
-                   <input type="range" min="0" max="200" value="100" data-filter="brightness" data-unit="%"></div></div>
+      <div id="filtersContainer">
+        <div class="filter-control">
+          <label>brightness</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="brightness"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>contrast</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="contrast"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>saturate</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="saturate"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>hue-rotate</label>
+          <input
+            type="range"
+            min="0"
+            max="360"
+            value="0"
+            data-filter="hue-rotate"
+            data-unit="deg"
+          />
+        </div>
+        <div class="filter-control">
+          <label>blur</label>
+          <input
+            type="range"
+            min="0"
+            max="10"
+            value="0"
+            data-filter="blur"
+            data-unit="px"
+          />
+        </div>
+        <div class="filter-control">
+          <label>grayscale</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            data-filter="grayscale"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>invert</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            data-filter="invert"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>sepia</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            data-filter="sepia"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>opacity</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            data-filter="opacity"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>brightness</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="brightness"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>contrast</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="contrast"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>saturate</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="saturate"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>hue-rotate</label>
+          <input
+            type="range"
+            min="0"
+            max="360"
+            value="0"
+            data-filter="hue-rotate"
+            data-unit="deg"
+          />
+        </div>
+        <div class="filter-control">
+          <label>blur</label>
+          <input
+            type="range"
+            min="0"
+            max="10"
+            value="0"
+            data-filter="blur"
+            data-unit="px"
+          />
+        </div>
+        <div class="filter-control">
+          <label>grayscale</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            data-filter="grayscale"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>invert</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            data-filter="invert"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>sepia</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            data-filter="sepia"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>opacity</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            data-filter="opacity"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>contrast</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="contrast"
+            data-unit="%"
+          />
+        </div>
+        <div class="filter-control">
+          <label>brightness</label>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value="100"
+            data-filter="brightness"
+            data-unit="%"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Zoom Panel -->
@@ -325,7 +646,12 @@
       <button class="panel-btn" id="zoomOut">Zoom Out -</button>
       <button class="panel-btn" id="zoomReset">Fit to Screen</button>
       <button class="panel-btn" id="customZoom">Custom Zoom</button>
-      <input type="number" id="customZoomInput" class="panel-btn" placeholder="Pixels (px)">
+      <input
+        type="number"
+        id="customZoomInput"
+        class="panel-btn"
+        placeholder="Pixels (px)"
+      />
       <button class="panel-btn" id="applyZoom">Apply Zoom</button>
     </div>
     <script>
@@ -905,7 +1231,8 @@
           tempCanvas.height
         );
         const originalName =
-          fileInput.files[0]?.name.replace(/\.[^/.]+$/, "-edited") || "edited-image";
+          fileInput.files[0]?.name.replace(/\.[^/.]+$/, "-edited") ||
+          "edited-image";
 
         // Handle GIF separately using GIF.js
         if (format === "image/gif") {
@@ -1074,6 +1401,5 @@
     <script src="assets/gif.js/dist/gif.js"></script>
     <script src="assets/gif.js/dist/gif.worker.js"></script>
     <script src="assets/pdf-lib/dist/pdf-lib.js"></script>
-  
-
-</body></html>
+  </body>
+</html>
