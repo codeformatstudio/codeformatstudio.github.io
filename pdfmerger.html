@@ -327,15 +327,18 @@
     const deleteBtn = document.createElement("button");
     deleteBtn.innerHTML = "✖";
     deleteBtn.style.cssText = `
-      background: #ff00ff;
+      background: transparent;
       border: 1px solid #00fff7;
       color: #fff;
       font-size: 1rem;
       border-radius: 6px;
-      padding: 0.25rem 0.5rem;
+      padding: 0.5rem 0.5rem;
       cursor: pointer;
       box-shadow: 0 0 10px #ff00ff;
       transition: 0.3s;
+      width: fit-content;
+      border: none !important;
+      outline: none !important;
     `;
     deleteBtn.addEventListener("mouseenter", () => {
       deleteBtn.style.background = "#ff4c4c";
