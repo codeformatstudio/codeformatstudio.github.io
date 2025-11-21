@@ -288,47 +288,75 @@
         renderPreviews();
       }
 
-      // Render previews
       function renderPreviews() {
-        preview.innerHTML = "";
-        filesList.forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "preview-item";
-          div.draggable = true;
-          div.dataset.id = item.id;
-          div.style.cssText = `
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.5rem;
-            border: 1px solid #00fff7;
-            border-radius: 6px;
-            background: #121229;
-            cursor: grab;
-          `;
+  preview.innerHTML = "";
+  filesList.forEach((item) => {
+    const div = document.createElement("div");
+    div.className = "preview-item";
+    div.draggable = true;
+    div.dataset.id = item.id;
+    div.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #00fff7;
+      border-radius: 6px;
+      background: #121229;
+      cursor: grab;
+      justify-content: space-between;
+    `;
 
-          const name = document.createElement("span");
-          name.textContent = item.file.name;
-          name.style.flex = "1";
+    const name = document.createElement("span");
+    name.textContent = item.file.name;
+    name.style.flex = "1";
 
-          const thumb = document.createElement("div");
-          if (item.file.type.startsWith("image/")) {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(item.file);
-            img.style.maxHeight = "50px";
-            thumb.appendChild(img);
-          } else {
-            const pdfIcon = document.createElement("div");
-            pdfIcon.textContent = "📄 PDF";
-            thumb.appendChild(pdfIcon);
-          }
+    const thumb = document.createElement("div");
+    if (item.file.type.startsWith("image/")) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(item.file);
+      img.style.maxHeight = "50px";
+      thumb.appendChild(img);
+    } else {
+      const pdfIcon = document.createElement("div");
+      pdfIcon.textContent = "📄 PDF";
+      thumb.appendChild(pdfIcon);
+    }
 
-          div.appendChild(thumb);
-          div.appendChild(name);
-          preview.appendChild(div);
-        });
-        enableReorder();
-      }
+    // DELETE BUTTON
+    const deleteBtn = document.createElement("button");
+    deleteBtn.innerHTML = "✖";
+    deleteBtn.style.cssText = `
+      background: #ff00ff;
+      border: 1px solid #00fff7;
+      color: #fff;
+      font-size: 1rem;
+      border-radius: 6px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff00ff;
+      transition: 0.3s;
+    `;
+    deleteBtn.addEventListener("mouseenter", () => {
+      deleteBtn.style.background = "#ff4c4c";
+      deleteBtn.style.boxShadow = "0 0 15px #ff4c4c";
+    });
+    deleteBtn.addEventListener("mouseleave", () => {
+      deleteBtn.style.background = "#ff00ff";
+      deleteBtn.style.boxShadow = "0 0 10px #ff00ff";
+    });
+    deleteBtn.addEventListener("click", () => {
+      filesList = filesList.filter((f) => f.id !== item.id);
+      renderPreviews();
+    });
+
+    div.appendChild(thumb);
+    div.appendChild(name);
+    div.appendChild(deleteBtn); // append delete button
+    preview.appendChild(div);
+  });
+  enableReorder();
+}
 
       // Drag & drop reorder
       function enableReorder() {
