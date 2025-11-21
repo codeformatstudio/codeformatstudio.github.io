@@ -160,7 +160,10 @@
         margin-left: 240px;
         padding: 15px 25px;
         background: #0d1326aa;
-        backdropt-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px); /* Safari, Chrome, Edge */
+        -moz-backdrop-filter: blur(6px);    /* Firefox (experimental) */
+         backdrop-filter: blur(6px);
+  
         display: flex;
         justify-content: space-between;
         align-items: center;
