@@ -268,6 +268,116 @@
         text-align: center;
         opacity: 0.7;
       }
+      /* -----------------------
+BASE STYLES
+------------------------ */
+/* Your current styles apply to large screens by default */
+
+/* -----------------------
+LARGE SCREENS
+------------------------ */
+@media (max-width: 1200px) {
+  .main {
+    padding: 30px;
+  }
+  .tool-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+/* -----------------------
+MEDIUM SCREENS (tablets)
+------------------------ */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 200px;
+    padding: 15px;
+  }
+  .navbar {
+    margin-left: 200px;
+  }
+  .main {
+    margin-left: 200px;
+    padding: 25px;
+  }
+  .tool-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  .typing-title {
+    font-size: 1.8rem;
+  }
+}
+
+/* -----------------------
+SMALL SCREENS (phones)
+------------------------ */
+@media (max-width: 600px) {
+  .sidebar {
+    width: 150px;
+    padding: 10px;
+  }
+  .navbar {
+    margin-left: 150px;
+    padding: 10px 15px;
+  }
+  .main {
+    margin-left: 150px;
+    padding: 15px;
+  }
+  .tool-grid {
+    grid-template-columns: 1fr; /* stack buttons vertically */
+    gap: 0.5rem;
+  }
+  .typing-title {
+    font-size: 1.2rem;
+  }
+  .tool-button {
+    font-size: 0.85rem;
+    padding: 0.8rem;
+  }
+  .search-input {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+}
+
+/* -----------------------
+VERY SMALL SCREENS (<=150px)
+------------------------ */
+@media (max-width: 150px) {
+  body {
+    font-size: 8px;
+  }
+  .sidebar {
+    width: 100px;
+    padding: 5px;
+  }
+  .navbar {
+    margin-left: 100px;
+    padding: 5px;
+  }
+  .main {
+    margin-left: 100px;
+    padding: 8px;
+  }
+  .typing-title {
+    font-size: 0.8rem;
+    border-right: 1px solid #00fff7;
+  }
+  .tool-button {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+  }
+  .info-box {
+    padding: 5px;
+    font-size: 0.7rem;
+  }
+  .search-input {
+    padding: 5px;
+    font-size: 0.7rem;
+  }
+}
+
     </style>
   </head>
   <body>
