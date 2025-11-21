@@ -44,6 +44,7 @@
         align-items: center;
         padding-top: 12px;
         gap: 12px;
+        overflow: scroll;
       }
 
       .tool-btn {
@@ -266,6 +267,18 @@ VERY SMALL SCREENS (<=150px)
         .canvas-area {
           padding: 5px;
         }
+      }
+      .sidebar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 255, 247, 0.5);
+        border-radius: 3px;
+      }
+
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
       }
     </style>
   </head>
