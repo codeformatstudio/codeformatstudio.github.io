@@ -6,10 +6,7 @@
     <title>Code Format Studio</title>
     <link rel="icon" href="icons/icon.png" />
     <link rel="manifest" href="manifest.json" />
-    <link
-      href="assets/Orbitron.css"
-      rel="stylesheet"
-    />
+    <link href="assets/Orbitron.css" rel="stylesheet" />
 
     <style>
       /* -----------------------
@@ -161,9 +158,9 @@
         padding: 15px 25px;
         background: #0d1326aa;
         -webkit-backdrop-filter: blur(6px); /* Safari, Chrome, Edge */
-        -moz-backdrop-filter: blur(6px);    /* Firefox (experimental) */
-         backdrop-filter: blur(6px);
-  
+        -moz-backdrop-filter: blur(6px); /* Firefox (experimental) */
+        backdrop-filter: blur(6px);
+
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -189,17 +186,19 @@
         margin-left: 240px;
         padding: 40px;
       }
-
       .typing-title {
-        font-size: 2.2rem;
+        font-size: clamp(0.6rem, 5vw, 2.2rem);
         font-weight: bold;
-        height: 55px;
+        height: auto; /* adjust height so it grows with multiple lines */
         margin-bottom: 25px;
         border-right: 2px solid #00fff7;
         animation: blink 1s infinite;
-        white-space: nowrap;
-        overflow: hidden;
+        white-space: normal; /* allow wrapping */
+        overflow: visible; /* show all text */
+        word-wrap: break-word; /* break long words if needed */
+        text-align: center; /* optional: center text */
       }
+
       @keyframes blink {
         50% {
           border-color: transparent;
@@ -269,153 +268,147 @@
         opacity: 0.7;
       }
       /* -----------------------
-BASE STYLES
------------------------- */
-/* Your current styles apply to large screens by default */
-
-/* -----------------------
-LARGE SCREENS
------------------------- */
 /* -----------------------
 RESPONSIVE MEDIA QUERIES
 ------------------------ */
 
-/* -----------------------
+      /* -----------------------
 LARGE SCREENS (<=1200px)
 ------------------------ */
-@media (max-width: 1200px) {
-  .main {
-    padding: 30px;
-  }
-  .tool-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-}
+      @media (max-width: 1200px) {
+        .main {
+          padding: 30px;
+        }
+        .tool-grid {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+        .typing-title {
+          font-size: clamp(1.5rem, 4vw, 2.2rem);
+        }
+      }
 
-/* -----------------------
+      /* -----------------------
 MEDIUM SCREENS (<=900px)
 ------------------------ */
-@media (max-width: 900px) {
-  .sidebar {
-    width: 200px;
-    padding: 15px;
-  }
-  .navbar {
-    margin-left: 200px;
-  }
-  .main {
-    margin-left: 200px;
-    padding: 25px;
-  }
-  .tool-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-  .typing-title {
-    font-size: 1.8rem;
-  }
-}
+      @media (max-width: 900px) {
+        .sidebar {
+          width: 200px;
+          padding: 15px;
+        }
+        .navbar {
+          margin-left: 200px;
+        }
+        .main {
+          margin-left: 200px;
+          padding: 25px;
+        }
+        .tool-grid {
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        .typing-title {
+          font-size: clamp(1.3rem, 4.5vw, 1.8rem);
+        }
+      }
 
-/* -----------------------
+      /* -----------------------
 SMALL SCREENS (<=600px)
 ------------------------ */
-@media (max-width: 600px) {
-  /* Sidebar becomes a top toolbar */
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 2px solid #00fff7;
-    box-shadow: none;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 10px;
-  }
+      @media (max-width: 600px) {
+        /* Sidebar becomes a top toolbar */
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+          border-right: none;
+          border-bottom: 2px solid #00fff7;
+          box-shadow: none;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          padding: 10px;
+        }
 
-  .sidebar a {
-    margin: 5px 10px;
-  }
+        .sidebar a {
+          margin: 5px 10px;
+        }
 
-  /* Navbar and main content full width */
-  .navbar {
-    margin-left: 0;
-  }
-  .main {
-    margin-left: 0;
-    padding: 15px;
-  }
+        /* Navbar and main content full width */
+        .navbar {
+          margin-left: 0;
+        }
+        .main {
+          margin-left: 0;
+          padding: 15px;
+        }
 
-  .tool-grid {
-    grid-template-columns: 1fr; /* stack buttons vertically */
-    gap: 0.5rem;
-  }
+        .tool-grid {
+          grid-template-columns: 1fr; /* stack buttons vertically */
+          gap: 0.5rem;
+        }
 
-  .typing-title {
-    font-size: 14px;
-  }
-  .tool-button {
-    font-size: 0.85rem;
-    padding: 0.8rem;
-  }
-  .search-input {
-    font-size: 0.85rem;
-    padding: 10px;
-  }
-  .info-box {
-    font-size: 0.85rem;
-    padding: 10px;
-  }
-}
+        .typing-title {
+          font-size: clamp(1rem, 6vw, 1.4rem);
+        }
+        .tool-button {
+          font-size: 0.85rem;
+          padding: 0.8rem;
+        }
+        .search-input {
+          font-size: 0.85rem;
+          padding: 10px;
+        }
+        .info-box {
+          font-size: 0.85rem;
+          padding: 10px;
+        }
+      }
 
-/* -----------------------
+      /* -----------------------
 VERY SMALL SCREENS (<=150px)
 ------------------------ */
-@media (max-width: 150px) {
-  body {
-    font-size: 8px;
-  }
+      @media (max-width: 150px) {
+        body {
+          font-size: 8px;
+        }
 
-  .sidebar {
-    font-size: 0.7rem;
-    flex-direction: column;
-    padding: 5px;
-  }
+        .sidebar {
+          font-size: 0.7rem;
+          flex-direction: column;
+          padding: 5px;
+        }
 
-  .sidebar a {
-    margin: 3px 0;
-  }
+        .sidebar a {
+          margin: 3px 0;
+        }
 
-  .navbar {
-    padding: 5px;
-  }
+        .navbar {
+          padding: 5px;
+        }
 
-  .main {
-    padding: 8px;
-  }
+        .main {
+          padding: 8px;
+        }
 
-  .typing-title {
-    font-size: 8px;
-    border-right: 1px solid #00fff7;
-  }
+        .typing-title {
+          font-size: clamp(0.6rem, 10vw, 1rem);
+          border-right: 1px solid #00fff7;
+        }
 
-  .tool-button {
-    padding: 0.5rem;
-    font-size: 0.7rem;
-  }
+        .tool-button {
+          padding: 0.5rem;
+          font-size: 0.7rem;
+        }
 
-  .info-box {
-    padding: 5px;
-    font-size: 0.7rem;
-  }
+        .info-box {
+          padding: 5px;
+          font-size: 0.7rem;
+        }
 
-  .search-input {
-    padding: 5px;
-    font-size: 0.7rem;
-  }
-}
-
-
+        .search-input {
+          padding: 5px;
+          font-size: 0.7rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -523,15 +516,16 @@ VERY SMALL SCREENS (<=150px)
         </p>
       </div>
 
-      <footer>© <span id="year"></span> Code Format Studio — All Rights Reserved.</footer>
+      <footer>
+        © <span id="year"></span> Code Format Studio — All Rights Reserved.
+      </footer>
     </div>
     <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const yearSpan = document.getElementById("year");
-    yearSpan.textContent = new Date().getFullYear();
-  });
-</script>
-
+      document.addEventListener("DOMContentLoaded", () => {
+        const yearSpan = document.getElementById("year");
+        yearSpan.textContent = new Date().getFullYear();
+      });
+    </script>
 
     <script>
       /* TYPING EFFECT */
