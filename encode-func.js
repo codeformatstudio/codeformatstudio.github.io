@@ -491,11 +491,13 @@ function encodeXPM(imageData) {
   colorMap.set("transparent", ".");
 
   const pixels = [];
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    const a = data[i + 3];
+  const expectedPixels = width * height;
+  for (let i = 0; i < expectedPixels; i++) {
+    const idx = i * 4;
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
 
     const key =
       a === 0
@@ -505,8 +507,9 @@ function encodeXPM(imageData) {
             .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 
     if (!colorMap.has(key)) {
-      // assign new symbol
-      if (nextCharCode > 126) nextCharCode = 33; // wrap back if > '~'
+      // assign new symbol, skip quote (34) and comma (44)
+      if (nextCharCode > 126) nextCharCode = 33;
+      if (nextCharCode === 34 || nextCharCode === 44) nextCharCode++;
       const symbol = String.fromCharCode(nextCharCode++);
       colorMap.set(key, symbol);
     }
@@ -519,7 +522,9 @@ function encodeXPM(imageData) {
   const expected = width * height;
   if (pixels.length < expected) {
     console.warn(
-      `Pixels too few (${pixels.length}), filling ${expected - pixels.length} transparent`
+      `Pixels too few (${pixels.length}), filling ${
+        expected - pixels.length
+      } transparent`
     );
     while (pixels.length < expected) {
       pixels.push(colorMap.get("transparent"));
@@ -532,14 +537,13 @@ function encodeXPM(imageData) {
   }
 
   // === HEADER LINE ===
-  const header = `"${width} ${height} ${colorMap.size} ${charsPerPixel}",`;
+  const numColors = colorMap.size;
+  const header = `"${width} ${height} ${numColors} ${charsPerPixel}",`;
 
   // === COLOR TABLE ===
   const colors = [];
   for (const [color, symbol] of colorMap.entries()) {
-    colors.push(
-      `"${symbol} c ${color === "transparent" ? "None" : color}",`
-    );
+    colors.push(`"${symbol} c ${color === "transparent" ? "None" : color}",`);
   }
 
   // === PIXEL ROWS ===
@@ -562,11 +566,23 @@ function encodeXPM(imageData) {
   ];
 
   // === Validation ===
+  if (pixels.length !== expected) {
+    console.error(
+      `Total pixels mismatch: expected ${expected} (${width}×${height}), got ${pixels.length}`
+    );
+  }
+
+  if (rows.length !== height) {
+    console.error(`Row count mismatch: expected ${height}, got ${rows.length}`);
+  }
+
   for (let i = 0; i < height; i++) {
-    const rowStr = rows[i].replace(/["",]/g, "");
+    const rowStr = rows[i].replace(/[",]/g, "");
     if (rowStr.length !== width * charsPerPixel) {
       console.error(
-        `Row ${i} invalid: expected ${width * charsPerPixel}, got ${rowStr.length}`
+        `Row ${i} invalid: expected ${width * charsPerPixel}, got ${
+          rowStr.length
+        }`
       );
     }
   }
@@ -574,18 +590,14 @@ function encodeXPM(imageData) {
   return lines.join("\n");
 }
 
-
 function encodeYAML(imageData) {
   const { width, height, data } = imageData;
   let yaml = `width: ${width}\nheight: ${height}\npixels:\n`;
 
   for (let i = 0; i < data.length; i += 4) {
-    yaml += `  - [${data[i]}, ${data[i+1]}, ${data[i+2]}, ${data[i+3]}]\n`;
+    yaml += `  - [${data[i]}, ${data[i + 1]}, ${data[i + 2]}, ${
+      data[i + 3]
+    }]\n`;
   }
   return yaml;
 }
-
-const yamlText = encodeYAML(imageData);
-resultDiv.innerHTML = `
-  <textarea readonly style="width:100%; height:200px;">${yamlText}</textarea>
-`;
