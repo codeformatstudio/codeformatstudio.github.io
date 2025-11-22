@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Massive Programming Information Generator</title>
+    <style>
+      body {
+        background: #0d0d0d;
+        color: #00ffff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+        padding: 40px;
+        overflow-y: auto;
+      }
+      h1 {
+        font-size: 2.5rem;
+        text-shadow: 0 0 15px #00ffff;
+        margin-bottom: 30px;
+      }
+      input {
+        background: transparent;
+        border: 2px solid #00ffff;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 18px;
+        color: #00ffff;
+        box-shadow: 0 0 10px #00ffff;
+        outline: none;
+        transition: 0.3s;
+        text-align: left;
+        margin-bottom: 20px;
+        width: 280px;
+      }
+      button {
+        display: block;
+        background: transparent;
+        border: 2px solid #00ffff;
+        color: #00ffff;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 0 12px #00ffff;
+        transition: 0.5s ease;
+        margin: 0 auto 20px auto;
+        width: 180px;
+      }
+      button:hover {
+        background: #00ffff;
+        color: #000;
+        box-shadow: 0 0 25px #00ffff;
+      }
+      img {
+        margin-top: 30px;
+        max-width: 320px;
+        max-height: 160px;
+        border-radius: 10px;
+        border: 3px solid #00ffff;
+        box-shadow: 0 0 30px #00ffff;
+        object-fit: contain;
+        background: white; /* show original background */
+      }
+      .msg {
+        color: yellow;
+        margin-top: 20px;
+        font-size: 1.1rem;
+      }
+      body {
+        background: #0d0d0d;
+        color: #00ffff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+        padding: 40px;
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      .light-mode {
+        background: #ffffff;
+        color: #111;
+      }
+
+      .light-mode input,
+      .light-mode button {
+        border-color: #222;
+        color: #222;
+        background: #f9f9f9;
+        box-shadow: 0 0 10px #ccc;
+      }
+
+      .light-mode img {
+        background: white;
+        border-color: #ccc;
+        box-shadow: 0 0 20px #aaa;
+      }
+
+      .light-mode #logoContainer,
+      .light-mode #codeBlockWrapper div {
+        background-color: #f2f2f2 !important;
+        color: #111 !important;
+      }
+
+      .light-mode #copyCodeBtn {
+        background: #222;
+        color: white;
+      }
+      .logo-title {
+        margin-top: 5px; /* or padding-top: 5px if you prefer */
+        margin-bottom: 20px; /* keep your existing bottom margin */
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <button id="toggleModeBtn" style="position: absolute; top: 20px; right: 20px; z-index: 999;">🌙 Dark Mode</button> -->
+    <h1>
+      🌐 Programming Languages Information Generator
+      <p style="font-size: medium">Powered By AI</p>
+    </h1>
+    <input
+      id="langInput"
+      list="langList"
+      type="text"
+      placeholder="Enter a programming language "
+    />
+    <button onclick="generateLogo()" id="generateBtn">Generate Info</button>
+    <div id="logoContainer"></div>
+    <datalist
+      id="langList"
+      style="background-color: black; color: white"
+    ></datalist>
+    <script>
+      const logoData = {
+        Chapel: {
+          name: "Chapel",
+          year_created: 2009,
+          reason_for_creation: "To support productive parallel programming.",
+          how_created:
+            "Developed by Cray Inc. as part of the DARPA HPCS program.",
+          creator: "Cray Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/3c/Chapel_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Agda: {
+          name: "Agda",
+          year_created: 2007,
+          reason_for_creation:
+            "To serve as a dependently typed functional programming language and proof assistant.",
+          how_created:
+            "Developed by the Department of Computer Science at Chalmers University.",
+          creator: "Ulf Norell",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e6/Agda_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Turing: {
+          name: "Turing",
+          year_created: 1982,
+          reason_for_creation:
+            "To teach structured programming in high schools and universities.",
+          how_created: "Developed in Canada.",
+          creator: "Ric Holt and James Cordy",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/19/Turing_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        REBOL: {
+          name: "REBOL",
+          year_created: 1997,
+          reason_for_creation:
+            "To create a lightweight messaging and scripting language.",
+          how_created: "Designed to be minimal and human-centric.",
+          creator: "Carl Sassenrath",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f0/REBOL_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Eiffel: {
+          name: "Eiffel",
+          year_created: 1985,
+          reason_for_creation:
+            "To support software engineering with design by contract.",
+          how_created: "Developed with strong typing and OO features.",
+          creator: "Bertrand Meyer",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f9/Eiffel_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Julia: {
+          name: "Julia",
+          year_created: 2012,
+          reason_for_creation:
+            "To combine performance of C with usability of Python for scientific computing.",
+          how_created: "Created by a team at MIT.",
+          creator:
+            "Jeff Bezanson, Stefan Karpinski, Viral B. Shah, Alan Edelman",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1f/Julia_Programming_Language_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Ring: {
+          name: "Ring",
+          year_created: 2016,
+          reason_for_creation:
+            "To create a simple and flexible language for education and application development.",
+          how_created:
+            "Designed for natural language-like syntax and multi-paradigm support.",
+          creator: "Mahmoud Fayed",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/b/b5/Ring_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        MoonScript: {
+          name: "MoonScript",
+          year_created: 2011,
+          reason_for_creation: "To provide a cleaner syntax for Lua.",
+          how_created: "Compiled to Lua, meant for better readability.",
+          creator: "Leah Neukirchen",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/dc/MoonScript_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Red: {
+          name: "Red",
+          year_created: 2011,
+          reason_for_creation:
+            "To extend Rebol and support system programming.",
+          how_created: "Created with cross-compilation in mind.",
+          creator: "Nenad Rakocevic",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f5/Red_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Io: {
+          name: "Io",
+          year_created: 2002,
+          reason_for_creation:
+            "To explore prototype-based programming and concurrency.",
+          how_created:
+            "Minimalist language influenced by Smalltalk, Self, and Lisp.",
+          creator: "Steve Dekorte",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6a/Io_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        NATURAL: {
+          name: "NATURAL",
+          year_created: 1979,
+          reason_for_creation:
+            "To allow non-technical users to access data on IBM mainframes easily.",
+          how_created: "Developed by Software AG for business users.",
+          creator: "Software AG",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/5b/Natural_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Clarion: {
+          name: "Clarion",
+          year_created: 1986,
+          reason_for_creation:
+            "To rapidly create business applications with database access.",
+          how_created: "Designed as a 4GL with code generation capabilities.",
+          creator: "SoftVelocity",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/0c/Clarion_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Uniface: {
+          name: "Uniface",
+          year_created: 1984,
+          reason_for_creation:
+            "To develop enterprise apps using a model-driven approach.",
+          how_created: "Supports multiple platforms and databases.",
+          creator: "Uniface B.V.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/39/Uniface_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Datalog: {
+          name: "Datalog",
+          year_created: 1977,
+          reason_for_creation:
+            "To model logic programming with a database focus.",
+          how_created: "Subset of Prolog with database semantics.",
+          creator: "David Maier and others",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/40/Datalog_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        ClojureScript: {
+          name: "ClojureScript",
+          year_created: 2011,
+          reason_for_creation:
+            "To bring Clojure’s functional programming to JavaScript.",
+          how_created: "Compiles to JavaScript from Clojure syntax.",
+          creator: "David Nolen",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6a/ClojureScript_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Racket: {
+          name: "Racket",
+          year_created: 1995,
+          reason_for_creation:
+            "To serve as a teaching and research platform in programming languages.",
+          how_created: "Evolved from Scheme, with extensive tooling.",
+          creator: "PLT Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f4/Racket-logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Elixir: {
+          name: "Elixir",
+          year_created: 2011,
+          reason_for_creation:
+            "To bring modern syntax and tooling to Erlang’s robust VM.",
+          how_created: "Built on top of the Erlang VM (BEAM).",
+          creator: "José Valim",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/44/Elixir_logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        J: {
+          name: "J",
+          year_created: 1990,
+          reason_for_creation:
+            "To improve upon APL with ASCII-friendly syntax.",
+          how_created: "Designed for high-performance mathematical computing.",
+          creator: "Kenneth E. Iverson and Roger Hui",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/29/J_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        APL: {
+          name: "APL",
+          year_created: 1966,
+          reason_for_creation:
+            "To express algorithms concisely with a unique symbolic notation.",
+          how_created: "Used special characters for array processing.",
+          creator: "Kenneth E. Iverson",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/2e/APL_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Hack: {
+          name: "Hack",
+          year_created: 2014,
+          reason_for_creation:
+            "To add static typing to PHP while maintaining compatibility.",
+          how_created: "Developed by Facebook as part of the HHVM project.",
+          creator: "Facebook",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/37/Hack_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Nim: {
+          name: "Nim",
+          year_created: 2008,
+          reason_for_creation:
+            "To combine performance, expressiveness, and safety in a compiled language.",
+          how_created: "Uses Python-like syntax and compiles to C.",
+          creator: "Andreas Rumpf",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/3b/Nim-logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Crystal: {
+          name: "Crystal",
+          year_created: 2014,
+          reason_for_creation:
+            "To offer the performance of C with the elegance of Ruby.",
+          how_created:
+            "Statically typed with Ruby-like syntax, compiles to native code.",
+          creator: "Ary Borenszweig, Juan Wajnerman, Brian Cardiff",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/5e/Crystal_Programming_Language_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        ReasonML: {
+          name: "ReasonML",
+          year_created: 2016,
+          reason_for_creation:
+            "To make OCaml more accessible with JavaScript-friendly syntax.",
+          how_created: "Built on OCaml with a new syntax and JS tools.",
+          creator: "Jordan Walke (Facebook)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/29/ReasonML_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        OCaml: {
+          name: "OCaml",
+          year_created: 1996,
+          reason_for_creation:
+            "To support functional, imperative, and object-oriented paradigms in one language.",
+          how_created: "Extension of Caml language with OO features.",
+          creator: "INRIA",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6f/Ocaml_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Ada: {
+          name: "Ada",
+          year_created: 1980,
+          reason_for_creation:
+            "To standardize and modernize embedded systems programming for the U.S. military.",
+          how_created:
+            "Created through a competition by the Department of Defense.",
+          creator: "Jean Ichbiah and team at CII Honeywell Bull",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/d6/Ada_lovelace_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "Modula-2": {
+          name: "Modula-2",
+          year_created: 1978,
+          reason_for_creation:
+            "To improve on Pascal with support for modular programming.",
+          how_created: "Created as a systems programming language.",
+          creator: "Niklaus Wirth",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6f/Modula-2_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        D: {
+          name: "D",
+          year_created: 2001,
+          reason_for_creation:
+            "To modernize C++ with simpler syntax and better safety.",
+          how_created:
+            "Built from scratch with C-style syntax and memory safety.",
+          creator: "Walter Bright",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4f/D_Programming_Language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Zig: {
+          name: "Zig",
+          year_created: 2016,
+          reason_for_creation:
+            "To replace C with a safer, more modern alternative for systems programming.",
+          how_created: "Developed from scratch with no hidden control flow.",
+          creator: "Andrew Kelley",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/20/Zig_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Nasal: {
+          name: "Nasal",
+          year_created: 2004,
+          reason_for_creation:
+            "To embed a scripting language in FlightGear flight simulator.",
+          how_created:
+            "Lightweight language designed for extensibility and scripting.",
+          creator: "Curtis Olson",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/0f/Nasal_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        LiveScript: {
+          name: "LiveScript",
+          year_created: 2011,
+          reason_for_creation:
+            "To offer a more expressive, functional language compiling to JavaScript.",
+          how_created: "Fork of CoffeeScript with more features.",
+          creator: "George Zahariev",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/d0/LiveScript_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        CoffeeScript: {
+          name: "CoffeeScript",
+          year_created: 2009,
+          reason_for_creation: "To make JavaScript more readable and Pythonic.",
+          how_created: "Compiled into JavaScript with cleaner syntax.",
+          creator: "Jeremy Ashkenas",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4c/Coffeescript-logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Gosu: {
+          name: "Gosu",
+          year_created: 2009,
+          reason_for_creation:
+            "To simplify Java development with scripting and static typing.",
+          how_created: "Blends scripting and static typing on the JVM.",
+          creator: "Guidewire Software",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1c/Gosu_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Smalltalk: {
+          name: "Smalltalk",
+          year_created: 1972,
+          reason_for_creation:
+            "To pioneer object-oriented programming for educational use.",
+          how_created: "Created at Xerox PARC for children and researchers.",
+          creator: "Alan Kay, Dan Ingalls, Adele Goldberg",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6b/Smalltalk_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Self: {
+          name: "Self",
+          year_created: 1987,
+          reason_for_creation:
+            "To explore prototype-based object-oriented programming.",
+          how_created: "Developed at Stanford and Sun Microsystems.",
+          creator: "David Ungar, Randall Smith",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/b/b9/Self_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Io: {
+          name: "Io",
+          year_created: 2002,
+          reason_for_creation:
+            "To offer a minimalist, prototype-based language for concurrency.",
+          how_created: "Combines ideas from Smalltalk, Lisp, and Self.",
+          creator: "Steve Dekorte",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6a/Io_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Tcl: {
+          name: "Tcl",
+          year_created: 1988,
+          reason_for_creation:
+            "To easily embed a scripting language in C applications.",
+          how_created: "Interpreted command language with dynamic typing.",
+          creator: "John Ousterhout",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/d6/Tcl_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Forth: {
+          name: "Forth",
+          year_created: 1970,
+          reason_for_creation:
+            "To control radio telescopes with a concise language and small footprint.",
+          how_created: "Stack-based, postfix notation, minimal design.",
+          creator: "Charles H. Moore",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/18/Forth_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Falcon: {
+          name: "Falcon",
+          year_created: 2002,
+          reason_for_creation:
+            "To serve as a multi-paradigm scripting language.",
+          how_created:
+            "Combines procedural, OO, functional, and symbolic styles.",
+          creator: "Giancarlo Niccolai",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/52/Falcon_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Harbour: {
+          name: "Harbour",
+          year_created: 1999,
+          reason_for_creation: "To modernize Clipper for modern platforms.",
+          how_created: "Open-source project inspired by xBase.",
+          creator: "Harbour Project Team",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/5b/Harbour_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Logtalk: {
+          name: "Logtalk",
+          year_created: 1998,
+          reason_for_creation: "To bring object-oriented features to Prolog.",
+          how_created: "Extends Prolog with OO programming concepts.",
+          creator: "Paulo Moura",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e0/Logtalk_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        ReScript: {
+          name: "ReScript",
+          year_created: 2020,
+          reason_for_creation:
+            "To provide a fast, strongly typed language for frontend development.",
+          how_created: "Evolved from ReasonML and BuckleScript.",
+          creator: "ReScript Association",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/61/ReScript_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Pony: {
+          name: "Pony",
+          year_created: 2015,
+          reason_for_creation:
+            "To create a safe, actor-model-based, high-performance language.",
+          how_created: "Focus on correctness, safety, and concurrency.",
+          creator: "Sylvan Clebsch",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/49/Pony_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Ballerina: {
+          name: "Ballerina",
+          year_created: 2017,
+          reason_for_creation:
+            "To simplify cloud-native and network services development.",
+          how_created: "Focused on data movement and integration.",
+          creator: "WSO2",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/c/c0/Ballerina_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Starlark: {
+          name: "Starlark",
+          year_created: 2014,
+          reason_for_creation:
+            "To configure builds for the Bazel build system.",
+          how_created: "Subset of Python designed for sandboxing.",
+          creator: "Google",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/47/Starlark_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        SourcePawn: {
+          name: "SourcePawn",
+          year_created: 2005,
+          reason_for_creation: "To script Source engine mods and games.",
+          how_created: "Scripting language used in game server plugins.",
+          creator: "AlliedModders",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/68/SourcePawn_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Pawn: {
+          name: "Pawn",
+          year_created: 1998,
+          reason_for_creation:
+            "To serve as an embeddable scripting language with C-like syntax.",
+          how_created: "Compact language for scripting embedded systems.",
+          creator: "ITB CompuPhase",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/64/Pawn_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "PL/I": {
+          name: "PL/I",
+          year_created: 1964,
+          reason_for_creation:
+            "To unify scientific and business programming languages.",
+          how_created: "Designed by IBM for mainframe development.",
+          creator: "IBM",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/b/b0/PL-I_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        SPARK: {
+          name: "SPARK",
+          year_created: 1988,
+          reason_for_creation:
+            "To develop high-integrity software with provable correctness.",
+          how_created: "Subset of Ada with formal specification.",
+          creator: "Praxis",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/8f/SPARK_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        GDScript: {
+          name: "GDScript",
+          year_created: 2014,
+          reason_for_creation:
+            "To provide a Python-like scripting language tailored for the Godot game engine.",
+          how_created:
+            "Designed by the Godot Engine team for ease of use in game dev.",
+          creator: "Godot Engine contributors",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/35/Godot_Engine_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        AngelScript: {
+          name: "AngelScript",
+          year_created: 2003,
+          reason_for_creation:
+            "To embed a C++-like scripting language into applications.",
+          how_created: "Designed for scripting in game engines and apps.",
+          creator: "Andreas Jönsson",
+          logo_url: "https://angelcode.com/angelscript/media/as_logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Haxe: {
+          name: "Haxe",
+          year_created: 2005,
+          reason_for_creation:
+            "To support cross-platform development with a single codebase.",
+          how_created: "Compiled to multiple languages like JS, C++, Java.",
+          creator: "Nicolas Cannasse",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/c/c1/HaxeLogo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Idris: {
+          name: "Idris",
+          year_created: 2007,
+          reason_for_creation:
+            "To explore and use dependent types practically.",
+          how_created:
+            "Created as both a programming language and proof assistant.",
+          creator: "Edwin Brady",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/fd/Idris_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Nix: {
+          name: "Nix",
+          year_created: 2003,
+          reason_for_creation:
+            "To define reproducible and declarative system configurations.",
+          how_created: "Functional language for package management.",
+          creator: "NixOS community",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/0e/Nix-Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Yacc: {
+          name: "Yacc",
+          year_created: 1973,
+          reason_for_creation:
+            "To generate parsers from grammar specifications.",
+          how_created: "Developed by Stephen C. Johnson at Bell Labs.",
+          creator: "Stephen C. Johnson",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/9d/Yacc_logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Lex: {
+          name: "Lex",
+          year_created: 1975,
+          reason_for_creation:
+            "To generate lexical analyzers from regex-like specifications.",
+          how_created: "Developed at Bell Labs for compiler construction.",
+          creator: "Mike Lesk and Eric Schmidt",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/33/Lex_logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Raku: {
+          name: "Raku",
+          year_created: 2010,
+          reason_for_creation:
+            "To modernize and refactor Perl 6 with improved features.",
+          how_created: "Developed as a sister language to Perl 5.",
+          creator: "Larry Wall et al.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/2f/Raku_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Awk: {
+          name: "Awk",
+          year_created: 1977,
+          reason_for_creation:
+            "To support field-level text processing in Unix.",
+          how_created: "Created by Aho, Weinberger, and Kernighan.",
+          creator: "Alfred Aho, Peter Weinberger, Brian Kernighan",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6c/AWK_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        GAMS: {
+          name: "GAMS",
+          year_created: 1976,
+          reason_for_creation:
+            "To provide algebraic modeling for optimization problems.",
+          how_created: "Designed as a special-purpose modeling language.",
+          creator: "GAMS Development Corporation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/8f/GAMS_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "PL/SQL": {
+          name: "PL/SQL",
+          year_created: 1995,
+          reason_for_creation:
+            "To bring procedural extensions to SQL for Oracle.",
+          how_created: "Built by Oracle to support advanced scripting in DB.",
+          creator: "Oracle",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/86/Oracle_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Transact-SQL": {
+          name: "Transact-SQL",
+          year_created: 1987,
+          reason_for_creation:
+            "To extend SQL with programming constructs for MS SQL Server.",
+          how_created: "Developed by Microsoft for database scripting.",
+          creator: "Microsoft",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/12/Microsoft_SQL_Server_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "PL/pgSQL": {
+          name: "PL/pgSQL",
+          year_created: 1997,
+          reason_for_creation: "To add procedural features to PostgreSQL.",
+          how_created: "Developed by PostgreSQL community.",
+          creator: "PostgreSQL Global Development Group",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "T-SQL": {
+          name: "T-SQL",
+          year_created: 1987,
+          reason_for_creation:
+            "To extend SQL with procedural logic for Microsoft SQL Server.",
+          how_created: "Created by Microsoft.",
+          creator: "Microsoft",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/12/Microsoft_SQL_Server_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        MySQL: {
+          name: "MySQL",
+          year_created: 1995,
+          reason_for_creation:
+            "To provide open-source relational database management.",
+          how_created: "Developed by MySQL AB.",
+          creator: "MySQL AB",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/en/d/dd/MySQL_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "PL/SQL": {
+          name: "PL/SQL",
+          year_created: 1995,
+          reason_for_creation:
+            "To give Oracle DB procedural scripting capabilities.",
+          how_created: "Created by Oracle Corporation.",
+          creator: "Oracle",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/86/Oracle_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        MariaDB: {
+          name: "MariaDB",
+          year_created: 2009,
+          reason_for_creation:
+            "To provide a community-driven, drop-in replacement for MySQL.",
+          how_created: "Forked from MySQL by original MySQL developers.",
+          creator: "Michael “Monty” Widenius",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/en/3/30/MariaDB_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        SQLite: {
+          name: "SQLite",
+          year_created: 2000,
+          reason_for_creation:
+            "To embed a serverless, self-contained relational DB engine.",
+          how_created: "Developed by D. Richard Hipp.",
+          creator: "D. Richard Hipp",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/en/3/38/SQLite370.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Firestore SQL": {
+          name: "Firestore SQL",
+          year_created: 2019,
+          reason_for_creation:
+            "To query Firestore documents using familiar SQL-like syntax.",
+          how_created: "Implemented by Google in Firestore product.",
+          creator: "Google",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4e/Google_Cloud_Firestore_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        HiveQL: {
+          name: "HiveQL",
+          year_created: 2008,
+          reason_for_creation:
+            "To allow SQL-like queries on Hadoop data warehouse.",
+          how_created: "Developed by Facebook as part of Hive.",
+          creator: "Facebook",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/39/Apache_Hive_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Pig Latin": {
+          name: "Pig Latin",
+          year_created: 2008,
+          reason_for_creation:
+            "To simplify MapReduce jobs with a SQL-like language.",
+          how_created: "Created by Yahoo! for Hadoop Pig.",
+          creator: "Yahoo!",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1d/Apache_Pig_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "PL/V8": {
+          name: "PL/V8",
+          year_created: 2011,
+          reason_for_creation:
+            "To enable writing PostgreSQL functions in JavaScript.",
+          how_created: "Integrates V8 engine into PostgreSQL.",
+          creator: "V8 engine and Postgres contributors",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/29/Postgresql_elephant.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Cassandra CQL": {
+          name: "Cassandra CQL",
+          year_created: 2010,
+          reason_for_creation:
+            "To query Cassandra NoSQL data using SQL-like syntax.",
+          how_created: "Developed by Apache Cassandra community.",
+          creator: "Apache Software Foundation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/18/Apache_Cassandra_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Spark SQL": {
+          name: "Spark SQL",
+          year_created: 2014,
+          reason_for_creation: "To query data within Apache Spark using SQL.",
+          how_created: "Built as part of the Spark engine.",
+          creator: "Apache Software Foundation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f3/Apache_Spark_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Presto SQL": {
+          name: "Presto SQL",
+          year_created: 2013,
+          reason_for_creation:
+            "To support distributed SQL querying on big data.",
+          how_created: "Developed at Facebook.",
+          creator: "Facebook",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/27/Presto_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Google BigQuery SQL": {
+          name: "Google BigQuery SQL",
+          year_created: 2010,
+          reason_for_creation:
+            "To query large datasets in Google’s data warehouse.",
+          how_created: "Implemented by Google.",
+          creator: "Google",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4c/Google_BigQuery_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Redshift SQL": {
+          name: "Redshift SQL",
+          year_created: 2012,
+          reason_for_creation: "To query data in AWS Redshift data warehouse.",
+          how_created: "Developed by Amazon Web Services.",
+          creator: "AWS",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/40/Redshift_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Snowflake SQL": {
+          name: "Snowflake SQL",
+          year_created: 2014,
+          reason_for_creation:
+            "To provide SQL querying in Snowflake cloud data platform.",
+          how_created: "Developed by Snowflake Inc.",
+          creator: "Snowflake Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Snowflake_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "CockroachDB SQL": {
+          name: "CockroachDB SQL",
+          year_created: 2014,
+          reason_for_creation:
+            "To provide globally consistent, distributed SQL database.",
+          how_created: "Developed by Cockroach Labs.",
+          creator: "Cockroach Labs",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/a/a6/CockroachDB_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "ClickHouse SQL": {
+          name: "ClickHouse SQL",
+          year_created: 2016,
+          reason_for_creation:
+            "To support real-time OLAP queries on large volumes of data.",
+          how_created:
+            "Developed by Yandex for high-speed analytics using columnar storage.",
+          creator: "Yandex",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f0/ClickHouse_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "DuckDB SQL": {
+          name: "DuckDB SQL",
+          year_created: 2019,
+          reason_for_creation:
+            "To provide in-process analytics with no external dependencies.",
+          how_created: "Embedded SQL engine designed for analytical workloads.",
+          creator: "Hannes Mühleisen and Mark Raasveldt",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e2/DuckDB_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Trino SQL": {
+          name: "Trino SQL",
+          year_created: 2020,
+          reason_for_creation:
+            "To continue PrestoSQL development after Presto split.",
+          how_created:
+            "Forked from PrestoDB to provide fast distributed SQL query engine.",
+          creator: "Trino Software Foundation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/93/Trino_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "VoltDB SQL": {
+          name: "VoltDB SQL",
+          year_created: 2010,
+          reason_for_creation:
+            "To provide high-throughput ACID-compliant in-memory databases.",
+          how_created: "Derived from H-Store project at MIT.",
+          creator: "Michael Stonebraker and team",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e6/VoltDB_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "H2 SQL": {
+          name: "H2 SQL",
+          year_created: 2005,
+          reason_for_creation:
+            "To provide a fast, lightweight Java-based database for development/testing.",
+          how_created: "Developed in Java as an embedded SQL engine.",
+          creator: "Thomas Mueller",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/7e/H2_Database_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Firebird SQL": {
+          name: "Firebird SQL",
+          year_created: 2000,
+          reason_for_creation:
+            "To continue the development of the open-source InterBase database.",
+          how_created: "Forked from Borland InterBase 6.0 open-source release.",
+          creator: "Firebird Project",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/en/e/e1/FirebirdSQL_logo.png",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Informix SQL": {
+          name: "Informix SQL",
+          year_created: 1981,
+          reason_for_creation:
+            "To support business-critical relational database systems.",
+          how_created: "Developed as a commercial SQL RDBMS, now owned by IBM.",
+          creator: "Roger Sippl",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/b/b2/IBM_Informix_Logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Ingres SQL": {
+          name: "Ingres SQL",
+          year_created: 1980,
+          reason_for_creation:
+            "To commercialize a research relational database from UC Berkeley.",
+          how_created:
+            "Developed from Ingres project under Michael Stonebraker.",
+          creator: "Michael Stonebraker",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/8b/Ingres_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Sybase SQL": {
+          name: "Sybase SQL",
+          year_created: 1984,
+          reason_for_creation:
+            "To offer enterprise-level relational database systems.",
+          how_created:
+            "Developed as a proprietary SQL engine later acquired by SAP.",
+          creator: "Sybase Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f3/SAP_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "Apache Derby SQL": {
+          name: "Apache Derby SQL",
+          year_created: 2004,
+          reason_for_creation:
+            "To provide a lightweight, fully functional, Java-based RDBMS.",
+          how_created:
+            "Originally developed by Cloudscape Inc., later open-sourced by IBM.",
+          creator: "Apache Software Foundation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6b/Apache_Derby_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "MonetDB SQL": {
+          name: "MonetDB SQL",
+          year_created: 2002,
+          reason_for_creation:
+            "To improve performance in read-heavy analytical queries using columnar storage.",
+          how_created:
+            "Created at Centrum Wiskunde & Informatica in the Netherlands.",
+          creator: "Peter Boncz and team",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/65/MonetDB_logo.svg",
+          type: "an SQL Dialect",
+          speed_calculator: "",
+        },
+        "SQL:2003": {
+          name: "SQL:2003",
+          year_created: 2003,
+          reason_for_creation:
+            "To add XML, window functions, and sequence generators to SQL standard.",
+          how_created:
+            "Developed by ISO/IEC JTC 1 SC 32 as part of SQL standard evolution.",
+          creator: "ISO/IEC",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/ISO_icon.svg",
+          type: "an SQL Standard",
+          speed_calculator: "",
+        },
+        "SQL:2008": {
+          name: "SQL:2008",
+          year_created: 2008,
+          reason_for_creation:
+            "To expand temporal databases and MERGE statements.",
+          how_created: "Part of official SQL standard progression by ISO.",
+          creator: "ISO/IEC",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/ISO_icon.svg",
+          type: "an SQL Standard",
+          speed_calculator: "",
+        },
+        "SQL:2011": {
+          name: "SQL:2011",
+          year_created: 2011,
+          reason_for_creation:
+            "To introduce temporal features and system-versioned tables.",
+          how_created:
+            "Refined from previous SQL standards for handling time-based data.",
+          creator: "ISO/IEC",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/ISO_icon.svg",
+          type: "an SQL Standard",
+          speed_calculator: "",
+        },
+        "SQL:2016": {
+          name: "SQL:2016",
+          year_created: 2016,
+          reason_for_creation:
+            "To add JSON support, polymorphic table functions, and row pattern matching.",
+          how_created: "Latest major SQL standard from ISO.",
+          creator: "ISO/IEC",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/ISO_icon.svg",
+          type: "an SQL Standard",
+          speed_calculator: "",
+        },
+        "SQL:2019": {
+          name: "SQL:2019",
+          year_created: 2019,
+          reason_for_creation:
+            "To introduce new features like LISTAGG DISTINCT and standardized JSON improvements.",
+          how_created: "Continued evolution of the SQL standard.",
+          creator: "ISO/IEC",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/ISO_icon.svg",
+          type: "an SQL Standard",
+          speed_calculator: "",
+        },
+        GraphQL: {
+          name: "GraphQL",
+          year_created: 2015,
+          reason_for_creation:
+            "To allow clients to define the structure of the response data.",
+          how_created:
+            "Developed at Facebook for efficient and flexible API data fetching.",
+          creator: "Facebook",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/17/GraphQL_Logo.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        Gremlin: {
+          name: "Gremlin",
+          year_created: 2009,
+          reason_for_creation:
+            "To query property graph data with a graph traversal language.",
+          how_created:
+            "Developed as part of Apache TinkerPop graph computing framework.",
+          creator: "Marko Rodriguez",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/32/Apache_TinkerPop_Logo.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        Cypher: {
+          name: "Cypher",
+          year_created: 2011,
+          reason_for_creation:
+            "To make querying graph databases intuitive and readable.",
+          how_created:
+            "Created for Neo4j as a SQL-like query language for graphs.",
+          creator: "Neo4j",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/8a/Neo4j_logo.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        SPARQL: {
+          name: "SPARQL",
+          year_created: 2008,
+          reason_for_creation:
+            "To query RDF data and semantic web data structures.",
+          how_created:
+            "Standardized by W3C as part of semantic web technologies.",
+          creator: "W3C",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/a/a1/W3C_icon.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        "Node.js": {
+          name: "Node.js",
+          year_created: 2009,
+          reason_for_creation:
+            "To provide a JavaScript runtime built on Chrome's V8 engine.",
+          how_created: "Developed by Ryan Dahl and released as open-source.",
+          creator: "Ryan Dahl",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg",
+          type: "a Runtime Environment",
+          speed_calculator: "",
+        },
+        Brainfuck: {
+          name: "Brainfuck",
+          year_created: 1993,
+          reason_for_creation:
+            "To create a minimalistic esoteric programming language.",
+          how_created: "Designed by Urban Müller with only 8 commands.",
+          creator: "Urban Müller",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/3c/Brainfuck_logo.svg",
+          type: "an Esoteric Programming Language",
+          speed_calculator: "",
+        },
+        Cow: {
+          name: "Cow",
+          year_created: 2003,
+          reason_for_creation:
+            "To create a humorous, esoteric programming language.",
+          how_created: "Designed by Sean Heber with cow-themed commands.",
+          creator: "Sean Heber",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/0b/Cow_programming_language_logo.svg",
+          type: "an Esoteric Programming Language",
+          speed_calculator: "",
+        },
+        Python: {
+          name: "Python",
+          year_created: 1991,
+          reason_for_creation:
+            "To create a highly readable and beginner-friendly programming language.",
+          how_created:
+            "Designed by Guido van Rossum with emphasis on code readability.",
+          creator: "Guido van Rossum",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        JavaScript: {
+          name: "JavaScript",
+          year_created: 1995,
+          reason_for_creation:
+            "To add interactivity to web pages in Netscape Navigator.",
+          how_created: "Created in 10 days by Brendan Eich at Netscape.",
+          creator: "Brendan Eich",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Java: {
+          name: "Java",
+          year_created: 1995,
+          reason_for_creation:
+            "To create a platform-independent, object-oriented programming language.",
+          how_created:
+            "Developed at Sun Microsystems with 'write once, run anywhere' philosophy.",
+          creator: "James Gosling",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "C++": {
+          name: "C++",
+          year_created: 1985,
+          reason_for_creation:
+            "To extend C with object-oriented features while maintaining performance.",
+          how_created: "Created as an extension of the C language.",
+          creator: "Bjarne Stroustrup",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "C#": {
+          name: "C#",
+          year_created: 2000,
+          reason_for_creation:
+            "To provide a modern, object-oriented language for the .NET framework.",
+          how_created: "Designed by Anders Hejlsberg at Microsoft.",
+          creator: "Microsoft",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/b/bd/Logo_C_sharp.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        PHP: {
+          name: "PHP",
+          year_created: 1995,
+          reason_for_creation:
+            "To create dynamic web pages and server-side scripting.",
+          how_created: "Started as Personal Home Page tools by Rasmus Lerdorf.",
+          creator: "Rasmus Lerdorf",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/27/PHP-logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Ruby: {
+          name: "Ruby",
+          year_created: 1995,
+          reason_for_creation:
+            "To create a language that prioritizes programmer happiness.",
+          how_created:
+            "Designed by Yukihiro Matsumoto combining features from Perl, Lisp, and Smalltalk.",
+          creator: "Yukihiro Matsumoto",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/73/Ruby_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Go: {
+          name: "Go",
+          year_created: 2009,
+          reason_for_creation:
+            "To create a fast, compiled language with simplicity and concurrency support.",
+          how_created: "Designed at Google to improve systems programming.",
+          creator: "Google (Robert Griesemer, Rob Pike, Ken Thompson)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Rust: {
+          name: "Rust",
+          year_created: 2010,
+          reason_for_creation:
+            "To provide memory safety without garbage collection.",
+          how_created:
+            "Developed at Mozilla to create a safe systems programming language.",
+          creator: "Mozilla",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/d5/Rust_programming_language_black_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        TypeScript: {
+          name: "TypeScript",
+          year_created: 2012,
+          reason_for_creation:
+            "To add static type checking to JavaScript for large-scale applications.",
+          how_created: "Developed by Microsoft as a superset of JavaScript.",
+          creator: "Microsoft (Anders Hejlsberg)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4c/Typescript_logo_2020.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Kotlin: {
+          name: "Kotlin",
+          year_created: 2011,
+          reason_for_creation:
+            "To provide a more concise and safer alternative to Java.",
+          how_created: "Developed by JetBrains as a language for the JVM.",
+          creator: "JetBrains",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/74/Kotlin_Icon.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Swift: {
+          name: "Swift",
+          year_created: 2014,
+          reason_for_creation:
+            "To create a modern language for iOS, macOS, and Apple platforms.",
+          how_created: "Designed by Apple to replace Objective-C.",
+          creator: "Apple",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/9d/Swift_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        R: {
+          name: "R",
+          year_created: 1993,
+          reason_for_creation:
+            "To provide a language for statistical computing and data analysis.",
+          how_created: "Developed by Ross Ihaka and Robert Gentleman.",
+          creator: "Ross Ihaka, Robert Gentleman",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1b/R_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        MATLAB: {
+          name: "MATLAB",
+          year_created: 1984,
+          reason_for_creation:
+            "To provide a numerical computing environment for engineers and scientists.",
+          how_created:
+            "Developed by Cleve Moler at the University of New Mexico.",
+          creator: "Cleve Moler",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/21/Matlab_Logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Lua: {
+          name: "Lua",
+          year_created: 1993,
+          reason_for_creation:
+            "To create a lightweight, embeddable scripting language.",
+          how_created: "Designed by Tecgraf at PUC-Rio for game modding.",
+          creator: "Tecgraf, PUC-Rio",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6a/Lua-logo-nolabel.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Perl: {
+          name: "Perl",
+          year_created: 1987,
+          reason_for_creation:
+            "To create a text processing language combining features from sed, awk, and shell.",
+          how_created:
+            "Designed by Larry Wall for system administration tasks.",
+          creator: "Larry Wall",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/2/2f/Perl_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Bash: {
+          name: "Bash",
+          year_created: 1989,
+          reason_for_creation: "To provide a Unix shell and command language.",
+          how_created:
+            "Developed by Brian Fox as a free replacement for the Bourne shell.",
+          creator: "Brian Fox",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg",
+          type: "a Shell Language",
+          speed_calculator: "",
+        },
+        SQL: {
+          name: "SQL",
+          year_created: 1974,
+          reason_for_creation: "To manage and query relational databases.",
+          how_created:
+            "Developed by Donald Chamberlin and Raymond Boyce at IBM.",
+          creator: "Donald Chamberlin, Raymond Boyce",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/SQL_Diagram.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        "MongoDB Query": {
+          name: "MongoDB Query",
+          year_created: 2009,
+          reason_for_creation:
+            "To query MongoDB NoSQL documents using a JSON-like syntax.",
+          how_created:
+            "Developed by MongoDB Inc. for flexible document querying.",
+          creator: "MongoDB Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/93/MongoDB_Logo.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        XPath: {
+          name: "XPath",
+          year_created: 1999,
+          reason_for_creation: "To navigate and query XML documents.",
+          how_created: "Developed by W3C for selecting nodes in XML documents.",
+          creator: "W3C",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/a/a1/W3C_icon.svg",
+          type: "a Query Language",
+          speed_calculator: "",
+        },
+        Scala: {
+          name: "Scala",
+          year_created: 2003,
+          reason_for_creation:
+            "To combine functional and object-oriented programming on the JVM.",
+          how_created: "Designed by Martin Odersky at EPFL.",
+          creator: "Martin Odersky",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/39/Scala-full-colored.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Groovy: {
+          name: "Groovy",
+          year_created: 2003,
+          reason_for_creation:
+            "To provide a dynamic language for the Java platform.",
+          how_created:
+            "Developed with Java syntax compatibility and Python-like features.",
+          creator: "James Strachan",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/36/Groovy-logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Haskell: {
+          name: "Haskell",
+          year_created: 1990,
+          reason_for_creation:
+            "To create a pure functional programming language.",
+          how_created:
+            "Designed as a standardized language for functional programming research.",
+          creator: "Haskell Committee",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1c/Haskell-Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Lisp: {
+          name: "Lisp",
+          year_created: 1958,
+          reason_for_creation:
+            "To create a language based on mathematical logic and symbolic computation.",
+          how_created:
+            "Invented by John McCarthy as the second high-level language.",
+          creator: "John McCarthy",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1f/Lisp_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        C: {
+          name: "C",
+          year_created: 1972,
+          reason_for_creation:
+            "To create an efficient, low-level procedural language for systems programming.",
+          how_created: "Developed by Dennis Ritchie at Bell Labs.",
+          creator: "Dennis Ritchie",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/19/C_Logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "Objective-C": {
+          name: "Objective-C",
+          year_created: 1983,
+          reason_for_creation: "To add object-oriented features to C.",
+          how_created: "Created by Brad Cox and Tom Love.",
+          creator: "Brad Cox, Tom Love",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/b/b8/Objective_c_logo.gif",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "Visual Basic": {
+          name: "Visual Basic",
+          year_created: 1991,
+          reason_for_creation:
+            "To provide an easy-to-learn language for Windows development.",
+          how_created: "Developed by Microsoft as an evolution of BASIC.",
+          creator: "Microsoft",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/40/VB.NET_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Delphi: {
+          name: "Delphi",
+          year_created: 1995,
+          reason_for_creation:
+            "To provide a visual development environment for Windows.",
+          how_created: "Developed by Borland as an evolution of Turbo Pascal.",
+          creator: "Borland",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/15/Delphi_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Fortran: {
+          name: "Fortran",
+          year_created: 1957,
+          reason_for_creation:
+            "To enable high-level programming for numerical and scientific computing.",
+          how_created: "Created by IBM as the first high-level language.",
+          creator: "John Backus and team at IBM",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4e/Fortran_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        COBOL: {
+          name: "COBOL",
+          year_created: 1959,
+          reason_for_creation:
+            "To provide a language for business data processing.",
+          how_created:
+            "Developed by COBOL Committee for commercial applications.",
+          creator: "COBOL Committee",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/99/COBOL_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Assembly: {
+          name: "Assembly",
+          year_created: 1949,
+          reason_for_creation:
+            "To provide a low-level language close to machine code.",
+          how_created:
+            "Developed as a symbolic notation for machine instructions.",
+          creator: "Various (architecture-specific)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/78/Assembly_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Clojure: {
+          name: "Clojure",
+          year_created: 2007,
+          reason_for_creation:
+            "To provide a modern Lisp for the JVM with concurrency support.",
+          how_created:
+            "Designed by Rich Hickey for functional programming on the JVM.",
+          creator: "Rich Hickey",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/5d/Clojure_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Dart: {
+          name: "Dart",
+          year_created: 2011,
+          reason_for_creation:
+            "To create a fast, multi-platform language for building web and mobile apps.",
+          how_created: "Developed by Google as a language for app development.",
+          creator: "Google",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/7e/Dart-logo.png",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "F#": {
+          name: "F#",
+          year_created: 2005,
+          reason_for_creation:
+            "To bring functional programming to the .NET platform.",
+          how_created:
+            "Developed by Microsoft as a functional-first language for .NET.",
+          creator: "Microsoft (Don Syme)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e8/F_Sharp_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Erlang: {
+          name: "Erlang",
+          year_created: 1986,
+          reason_for_creation:
+            "To build fault-tolerant, distributed telecoms systems.",
+          how_created: "Developed by Ericsson for telecommunications.",
+          creator: "Joe Armstrong, Robert Virding, Mike Williams",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/04/Erlang_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Scheme: {
+          name: "Scheme",
+          year_created: 1975,
+          reason_for_creation:
+            "To create a minimalist Lisp dialect for teaching and research.",
+          how_created: "Developed by Guy Steele and Gerald Jay Sussman.",
+          creator: "Guy Steele, Gerald Jay Sussman",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/53/Scheme_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Prolog: {
+          name: "Prolog",
+          year_created: 1972,
+          reason_for_creation:
+            "To enable logic programming and AI applications.",
+          how_created:
+            "Created by Alain Colmerauer for automated theorem proving.",
+          creator: "Alain Colmerauer",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/fd/Prolog_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Apex: {
+          name: "Apex",
+          year_created: 2006,
+          reason_for_creation:
+            "To enable developers to build multi-tenant applications on Salesforce.",
+          how_created: "Developed by Salesforce as a Java-like language.",
+          creator: "Salesforce",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f9/Apex_programming_language_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        VimScript: {
+          name: "VimScript",
+          year_created: 1991,
+          reason_for_creation:
+            "To enable scripting and customization of the Vim text editor.",
+          how_created: "Developed by Bram Moolenaar for Vim editor automation.",
+          creator: "Bram Moolenaar",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/9f/Vimlogo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Cython: {
+          name: "Cython",
+          year_created: 2007,
+          reason_for_creation:
+            "To write Python code that compiles to C for performance.",
+          how_created:
+            "Created by Stefan Behnel as a way to optimize Python code.",
+          creator: "Stefan Behnel",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/6a/Cython_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Raku: {
+          name: "Raku",
+          year_created: 2018,
+          reason_for_creation:
+            "To provide a modern evolution of Perl 6 language.",
+          how_created: "Renamed from Perl 6 to better represent its direction.",
+          creator: "Larry Wall and community",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/8/8d/Raku_Camelia_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Elm: {
+          name: "Elm",
+          year_created: 2012,
+          reason_for_creation:
+            "To provide a functional language for building reliable web apps.",
+          how_created: "Designed by Evan Czaplicki for front-end development.",
+          creator: "Evan Czaplicki",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f3/Elm_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        PureScript: {
+          name: "PureScript",
+          year_created: 2013,
+          reason_for_creation:
+            "To provide a strongly-typed functional language for JavaScript.",
+          how_created:
+            "Developed by Phil Freeman for functional web development.",
+          creator: "Phil Freeman",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/64/PureScript_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Jython: {
+          name: "Jython",
+          year_created: 1997,
+          reason_for_creation: "To run Python code on the Java platform.",
+          how_created: "Created to bring Python to the JVM.",
+          creator: "Jim Hugunin",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/96/Jython_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "Groovy Shell": {
+          name: "Groovy Shell",
+          year_created: 2003,
+          reason_for_creation:
+            "To provide interactive Groovy shell for rapid scripting.",
+          how_created: "Part of Groovy language ecosystem.",
+          creator: "James Strachan",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/36/Groovy-logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Processing: {
+          name: "Processing",
+          year_created: 2001,
+          reason_for_creation:
+            "To enable visual arts and interactive graphics programming.",
+          how_created:
+            "Developed by Ben Fry and Casey Reas for artists and designers.",
+          creator: "Ben Fry, Casey Reas",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/5/59/Processing_Logo_Clipped.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        "p5.js": {
+          name: "p5.js",
+          year_created: 2014,
+          reason_for_creation:
+            "To bring Processing to JavaScript for web-based creative coding.",
+          how_created: "JavaScript version of Processing by Lauren McCarthy.",
+          creator: "Lauren McCarthy",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/3f/P5js_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Solidity: {
+          name: "Solidity",
+          year_created: 2015,
+          reason_for_creation:
+            "To write smart contracts for the Ethereum blockchain.",
+          how_created:
+            "Developed by Ethereum Foundation for blockchain development.",
+          creator: "Ethereum Foundation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/98/Solidity_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Vyper: {
+          name: "Vyper",
+          year_created: 2018,
+          reason_for_creation:
+            "To provide a safer alternative to Solidity for smart contracts.",
+          how_created: "Created as a security-focused language for Ethereum.",
+          creator: "Vitalik Buterin and team",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Vyper_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Move: {
+          name: "Move",
+          year_created: 2019,
+          reason_for_creation:
+            "To provide a safe language for blockchain smart contracts.",
+          how_created: "Developed by Facebook's Diem (formerly Libra) team.",
+          creator: "Facebook/Meta",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/0f/Move_logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        Julia: {
+          name: "Julia",
+          year_created: 2012,
+          reason_for_creation:
+            "To combine the performance of C with the usability of Python for scientific computing.",
+          how_created:
+            "Created by a team at MIT for high-performance numerical computing.",
+          creator:
+            "Jeff Bezanson, Stefan Karpinski, Viral B. Shah, Alan Edelman",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1f/Julia_Programming_Language_Logo.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        HTML: {
+          name: "HTML",
+          year_created: 1993,
+          reason_for_creation:
+            "To create a markup language for structuring content on the World Wide Web.",
+          how_created:
+            "Invented by Tim Berners-Lee at CERN as the foundation of the web.",
+          creator: "Tim Berners-Lee",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg",
+          type: "a Markup Language",
+          speed_calculator: "",
+        },
+        CSS: {
+          name: "CSS",
+          year_created: 1996,
+          reason_for_creation:
+            "To separate content structure from visual presentation on web pages.",
+          how_created: "Created by Håkon Wium Lie to style HTML documents.",
+          creator: "Håkon Wium Lie, Bert Bos",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg",
+          type: "a Style Sheet Language",
+          speed_calculator: "",
+        },
+        JavaScript: {
+          name: "JavaScript",
+          year_created: 1995,
+          reason_for_creation:
+            "To add interactivity and dynamic behavior to web pages.",
+          how_created:
+            "Created in 10 days by Brendan Eich at Netscape Communications.",
+          creator: "Brendan Eich",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg",
+          type: "a Programming Language",
+          speed_calculator: "",
+        },
+        XML: {
+          name: "XML",
+          year_created: 1998,
+          reason_for_creation:
+            "To create a human-readable and machine-readable format for storing and transporting data.",
+          how_created:
+            "Developed by the W3C as a markup language based on SGML.",
+          creator: "W3C (World Wide Web Consortium)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4d/XML_Logo.svg",
+          type: "a Markup Language",
+          speed_calculator: "",
+        },
+        JSON: {
+          name: "JSON",
+          year_created: 2001,
+          reason_for_creation:
+            "To provide a lightweight format for data interchange that is easy for both humans and machines.",
+          how_created:
+            "Created by Douglas Crockford as a language-independent data format.",
+          creator: "Douglas Crockford",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/c/c9/JSON_vector_logo.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        YAML: {
+          name: "YAML",
+          year_created: 2001,
+          reason_for_creation:
+            "To create a human-friendly data serialization format for configuration files.",
+          how_created:
+            "Designed by Clark Evans, Ingy döt Net, and Kirill Simonov.",
+          creator: "Clark Evans, Ingy döt Net, Kirill Simonov",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f8/YAML_logo.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        TOML: {
+          name: "TOML",
+          year_created: 2013,
+          reason_for_creation:
+            "To provide a minimal configuration file format that is easy to read.",
+          how_created:
+            "Created by Tom Preston-Werner as an alternative to YAML.",
+          creator: "Tom Preston-Werner",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/74/TOML_logo.png",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        CSV: {
+          name: "CSV",
+          year_created: 1972,
+          reason_for_creation:
+            "To provide a simple format for storing tabular data in plain text.",
+          how_created:
+            "Emerged from various spreadsheet and database applications.",
+          creator: "Various (informal standard)",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/3/38/CSV_icon.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        Markdown: {
+          name: "Markdown",
+          year_created: 2004,
+          reason_for_creation:
+            "To provide an easy-to-read and easy-to-write plain text format for converting to HTML.",
+          how_created:
+            "Created by John Gruber as a simple alternative to HTML.",
+          creator: "John Gruber",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/4/4a/Markdown-mark.svg",
+          type: "a Markup Language",
+          speed_calculator: "",
+        },
+        Dockerfile: {
+          name: "Dockerfile",
+          year_created: 2013,
+          reason_for_creation:
+            "To define container images using a simple scripting format.",
+          how_created:
+            "Created by Docker for specifying containerized applications.",
+          creator: "Docker Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/7/79/Docker_%28container_engine%29_logo.png",
+          type: "a Configuration Language",
+          speed_calculator: "",
+        },
+        "Swagger/OpenAPI": {
+          name: "Swagger/OpenAPI",
+          year_created: 2011,
+          reason_for_creation:
+            "To provide a standard format for documenting REST APIs.",
+          how_created:
+            "Created by Tony Tam and now maintained by the OpenAPI Initiative.",
+          creator: "Tony Tam, OpenAPI Initiative",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/a/ab/Swagger-logo.png",
+          type: "a Specification Language",
+          speed_calculator: "",
+        },
+        "Protocol Buffers": {
+          name: "Protocol Buffers",
+          year_created: 2008,
+          reason_for_creation:
+            "To provide an efficient method of serializing structured data for communication.",
+          how_created:
+            "Developed by Google for internal use and released as open-source.",
+          creator: "Google",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Protocol_Buffers_logo.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        BSON: {
+          name: "BSON",
+          year_created: 2010,
+          reason_for_creation:
+            "To provide a binary-encoded serialization format used by MongoDB.",
+          how_created: "Developed by the MongoDB team as a binary JSON format.",
+          creator: "MongoDB Inc.",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/9/93/MongoDB_Logo.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        Avro: {
+          name: "Avro",
+          year_created: 2011,
+          reason_for_creation:
+            "To provide a data serialization system for Hadoop.",
+          how_created: "Developed by Apache as part of the Hadoop ecosystem.",
+          creator: "Apache Software Foundation",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/a/a9/Apache_Avro_logo.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        MessagePack: {
+          name: "MessagePack",
+          year_created: 2008,
+          reason_for_creation:
+            "To provide a binary serialization format for fast and compact data exchange.",
+          how_created:
+            "Created by Sadayuki Furuhashi for efficient data serialization.",
+          creator: "Sadayuki Furuhashi",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f2/MessagePack_logo.svg",
+          type: "a Data Format",
+          speed_calculator: "",
+        },
+        Terraform: {
+          name: "Terraform",
+          year_created: 2014,
+          reason_for_creation:
+            "To provide infrastructure as code for provisioning cloud resources.",
+          how_created:
+            "Developed by HashiCorp for declarative infrastructure management.",
+          creator: "HashiCorp",
+          logo_url:
+            "https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg",
+          type: "a Configuration Language",
+          speed_calculator: "",
+        },
+      };
+      window.onload = function () {
+        input.focus();
+        input.innerText = "";
+      };
+      const input = document.getElementById("langInput");
+      const logoContainer = document.getElementById("logoContainer");
+      const langList = document.getElementById("langList");
+
+      // Fill datalist with languages
+      Object.values(logoData).forEach((entry) => {
+        const option = document.createElement("option");
+        option.value = entry.name;
+        langList.appendChild(option);
+      });
+
+      // Typewriter effect
+      function typeWriter(text, element, speed = 20, callback = null) {
+        element.innerHTML = "";
+        let i = 0;
+        function typing() {
+          if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typing, speed);
+          } else if (callback) {
+            callback();
+          }
+        }
+        typing();
+      }
+
+      // Hide results on typing
+      input.addEventListener("input", () => {
+        logoContainer.style.display = "none";
+      });
+      document
+        .getElementById("generateBtn")
+        .addEventListener("click", function () {
+          generateLogo();
+        });
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          generateLogo();
+        }
+      });
+      // Generate the logo, info, and code
+      function generateLogo() {
+        const value = input.value.trim();
+        const langData = Object.values(logoData).find(
+          (lang) => lang.name.toLowerCase() === value.toLowerCase()
+        );
+
+        if (!langData) {
+          if (input.value === "") {
+            logoContainer.innerHTML =
+              '<div class="msg">Please enter a language.</div>';
+            logoContainer.style.display = "block";
+          } else {
+            logoContainer.innerHTML =
+              '<div class="msg">Language not found in the database.</div>';
+            logoContainer.style.display = "block";
+          }
+          return;
+        }
+
+        const descriptionText = `${langData.name} is ${langData.type} created in ${langData.year_created} by ${langData.creator}.\n\nReason for Creation: ${langData.reason_for_creation}\n\nHow It Was Created: ${langData.how_created}\n\n\n Here is a simple code in ${langData.name}: `;
+        const codeText =
+          langData.name +
+          "\n\n\n\n" +
+          (langData.speed_calculator || "No example code provided.");
+
+        const html = `
+    <h2 style="color:white; margin-bottom: 20px;" class="logo-title">${langData.name}</h2>
+    <img src="${langData.logo_url}" alt="${langData.name} Logo Not Found" />
+    <div id="infoText" style="margin-top: 25px; font-size: 16px; text-align: left; max-width: 700px; margin-inline: auto; white-space: pre-line; color: white;"></div>
+    <div id="codeBlockWrapper" style="display: none; padding-top: 20px; text-align: left; max-width: 700px; margin-inline: auto;">
+      <div style="background-color: #1e1e1e; color: white; padding: 15px; border-radius: 10px; overflow-x: auto;position: relative;">
+              <button id="copyCodeBtn" style="position: sticky; top: 10px; right: 10px; padding: 5px 10px; background-color: #00ffff; color: black; border: none; border-radius: 5px; cursor: pointer;">Copy</button>
+        <pre id="codeOutput" style="margin-top: 50px; padding-top: 5px; white-space: pre-wrap;"></pre>
+        </div>
+        </div>
+        `;
+
+        logoContainer.innerHTML = html;
+        logoContainer.style.display = "block";
+
+        const infoDiv = document.getElementById("infoText");
+        const codeBlockWrapper = document.getElementById("codeBlockWrapper");
+        const codeOutput = document.getElementById("codeOutput");
+
+        // Animate info
+        typeWriter(descriptionText, infoDiv, 20, () => {
+          codeBlockWrapper.style.display = "block";
+          // Animate code
+          typeWriter(codeText, codeOutput, 5, () => {
+            const copyBtn = document.getElementById("copyCodeBtn");
+            copyBtn.addEventListener("click", () => {
+              navigator.clipboard
+                .writeText(
+                  langData.speed_calculator || "No example code provided."
+                )
+                .then(() => {
+                  copyBtn.textContent = "Copied";
+                  setTimeout(() => (copyBtn.textContent = "Copy"), 2000);
+                });
+            });
+
+            // Scroll down after display
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth",
+              });
+            }, 300);
+          });
+        });
+      }
+      const label = document.querySelector("label");
+      const p = document.querySelector("p");
+      // 🌗 Dark/Light Mode Toggle with localStorage
+      // const toggleBtn = document.createElement('button');
+      // toggleBtn.id = 'toggleModeBtn';
+      // toggleBtn.style.position = 'absolute';
+      // toggleBtn.style.top = '20px';
+      // toggleBtn.style.right = '20px';
+      // toggleBtn.style.zIndex = '999';
+      // toggleBtn.style.padding = '10px 16px';
+      // toggleBtn.style.border = 'none';
+      // toggleBtn.style.borderRadius = '8px';
+      // toggleBtn.style.background = '#00ffff';
+      // toggleBtn.style.color = '#000';
+      // toggleBtn.style.cursor = 'pointer';
+      // document.body.appendChild(toggleBtn);
+
+      // let darkMode = true;
+
+      // // Load theme from localStorage
+      // if (localStorage.getItem('theme') === 'light') {
+      //   document.body.classList.add('light-mode');
+      //   darkMode = false;
+      //   toggleBtn.textContent = '☀️ Light Mode';
+      // } else {
+      //   toggleBtn.textContent = '🌙 Dark Mode';
+      // }
+
+      // // Toggle theme
+      // toggleBtn.addEventListener('click', () => {
+      //   darkMode = !darkMode;
+      //   document.body.classList.toggle('light-mode', !darkMode);
+      //   localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+      //   toggleBtn.textContent = darkMode ? '🌙 Dark Mode' : '☀️ Light Mode';
+      // });
+    </script>
+  </body>
+</html>
