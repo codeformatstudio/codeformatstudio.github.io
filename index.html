@@ -567,18 +567,19 @@ VERY SMALL SCREENS (<=150px)
     "This site doesn't support Internet Explorer. Please use a modern browser."
   );
 }
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .then((registration) => {
-        console.log("ServiceWorker registered with scope:", registration.scope);
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Adjust the path based on your site
+    navigator.serviceWorker.register('/repo-name/service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registered with scope:', registration.scope);
       })
-      .catch((err) => {
-        console.log("ServiceWorker registration failed:", err);
+      .catch(error => {
+        console.error('ServiceWorker registration failed:', error);
       });
   });
 }
+
     </script>
   </body>
 </html>
