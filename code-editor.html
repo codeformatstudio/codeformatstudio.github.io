@@ -7,15 +7,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cyber Code Editor & Page Maker</title>
     <script src="https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js"></script>
-    <script src="assets/coffee-script/lib/coffee-script/coffee-script.js"></script>
+    <!-- <script src="assets/coffee-script/lib/coffee-script/coffee-script.js"></script> -->
     <script src="assets/typescript/typescript.js"></script>
-    <script src="assets/livescript/lib/index.js"></script>
+    <!-- <script src="assets/livescript/lib/index.js"></script> -->
     <script src="assets/brython/brython.js"></script>
     <script src="assets/marked/lib/marked.umd.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+
+    <!-- Syntax modes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+
+    <!-- Bracket addons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"
+    />
+
     <style>
       /* === GLOBAL CYBER STYLE === */
       @import url(assets/Orbitron.css);
-      * {
+      html {
         font-family: "Orbitron", "Segoe UI", Tahoma, Roboto, sans-serif;
         box-sizing: border-box;
       }
@@ -57,11 +80,15 @@
         padding: 10px;
         width: 100%;
         height: 200px;
-        font-family: "Consolas", monospace;
+        font-family: monospace, "Consolas", "Monaco", "Courier New", monospace;
         font-size: 14px;
         resize: vertical;
         box-shadow: 0 0 15px #00ffff33;
         transition: all 0.2s ease;
+      }
+
+      .CodeMirror {
+        font-family: "Consolas", "Monaco", "Courier New", monospace !important;
       }
       textarea:focus {
         outline: none;
