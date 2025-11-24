@@ -80,10 +80,10 @@ function cyberPrompt(message, callback) {
   document.body.appendChild(overlay);
   input.focus();
   okBtn.addEventListener("click", function (){
-    document.body.removeChild("overlay");
+    document.body.removeChild(overlay);
   })
   cancelBtn.addEventListener("click", function () {
-    document.body.removeChild("overlay");
+    document.body.removeChild(overlay);
   })
 }
 
@@ -114,7 +114,7 @@ const htmlEditor = CodeMirror.fromTextArea(htmlInput, {
   indentUnit: 2,
   indentWithTabs: false,
 });
-htmlEditor.getWrapperElement().style.fontFamily = "Consolas", "Monaco", "Courier New", monospace';
+htmlEditor.getWrapperElement().style.fontFamily = '"Consolas", "Monaco", "Courier New", monospace';
 
 const cssEditor = CodeMirror.fromTextArea(cssInput, {
   mode: "css",
