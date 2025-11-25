@@ -479,6 +479,9 @@ VERY SMALL SCREENS (<=150px)
         <a href="code-editor.html" class="tool-button" target="_blank"
           >Code Editor</a
         >
+        <a href="react.html" class="tool-button" target="_blank"
+          >HTML → React Native</a
+        >
         <a href="bfencoder.html" class="tool-button" target="_blank"
           >Brainf**k Encoder</a
         >
@@ -558,28 +561,29 @@ VERY SMALL SCREENS (<=150px)
         document.body.classList.toggle("light");
       }
     </script>
-    <script src="script.js">
-      
-    </script>
+    <script src="script.js"></script>
     <script>
       if (/MSIE|Trident/.test(window.navigator.userAgent)) {
-  alert(
-    "This site doesn't support Internet Explorer. Please use a modern browser."
-  );
-}
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // Adjust the path based on your site
-    navigator.serviceWorker.register('/repo-name/service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker registered with scope:', registration.scope);
-      })
-      .catch(error => {
-        console.error('ServiceWorker registration failed:', error);
-      });
-  });
-}
-
+        alert(
+          "This site doesn't support Internet Explorer. Please use a modern browser."
+        );
+      }
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          // Adjust the path based on your site
+          navigator.serviceWorker
+            .register("/repo-name/service-worker.js")
+            .then((registration) => {
+              console.log(
+                "ServiceWorker registered with scope:",
+                registration.scope
+              );
+            })
+            .catch((error) => {
+              console.error("ServiceWorker registration failed:", error);
+            });
+        });
+      }
     </script>
   </body>
 </html>
