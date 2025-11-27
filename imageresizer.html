@@ -661,11 +661,17 @@ VERY SMALL SCREENS (<=150px)
       <button class="panel-btn" id="customZoom">Custom Zoom</button>
       <input
         type="number"
-        id="customZoomInput"
+        id="customWidthInput"
         class="panel-btn"
-        placeholder="Pixels (px)"
+        placeholder="Width (px)"
       />
-      <button class="panel-btn" id="applyZoom">Apply Zoom</button>
+      <input
+        type="number"
+        id="customHeightInput"
+        class="panel-btn"
+        placeholder="Height (px)"
+      />
+      <button class="panel-btn" id="applyResize">Apply Resize</button>
     </div>
     <script>
       // ------------------------------
@@ -894,25 +900,33 @@ VERY SMALL SCREENS (<=150px)
         resetCanvas();
         drawCanvas();
       };
-      document.getElementById("applyZoom").onclick = () => {
-        const customValue = parseInt(
-          document.getElementById("customZoomInput").value
+      document.getElementById("applyResize").onclick = () => {
+        const width = parseInt(
+          document.getElementById("customWidthInput").value
         );
-        if (!customValue || customValue <= 0)
-          return alert("Enter valid pixels!");
+        const height = parseInt(
+          document.getElementById("customHeightInput").value
+        );
 
-        // Create temporary canvas with new size
+        if (!width || width <= 0 || !height || height <= 0) {
+          return alert("Enter valid width and height!");
+        }
+
+        // Create a temporary canvas with new dimensions
         const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = customValue;
-        tempCanvas.height = (customValue / img.width) * img.height; // preserve aspect ratio
+        tempCanvas.width = width;
+        tempCanvas.height = height;
         const tCtx = tempCanvas.getContext("2d");
-        tCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+        tCtx.drawImage(img, 0, 0, width, height);
+
+        // Update image source
         img.src = tempCanvas.toDataURL();
 
         // Reset scale and offsets
         scale = 1;
         offsetX = 0;
         offsetY = 0;
+
         saveState();
         drawCanvas();
       };

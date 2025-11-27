@@ -393,6 +393,12 @@ a:hover {
     margin: 8px auto;
     display: block;
   }
+  canvas {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 #game-controls {
   position: fixed;

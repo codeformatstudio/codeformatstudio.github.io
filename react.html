@@ -2,437 +2,128 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>HTML → React Native JSX Converter PRO</title>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
-      rel="stylesheet"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyber-Neon HTML → JS Converter</title>
+    <link rel="icon" href="icons/icon.png" />
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
       body {
-        font-family: "Orbitron", Arial, sans-serif;
-        background: radial-gradient(circle at center, #0a0a12 0%, #020207 100%);
-        padding: 30px;
-        color: #8affff;
-      }
-      h1 {
-        text-align: center;
-        font-size: 32px;
-        color: #91faff;
-      }
-      h3 {
-        color: #00ffff;
-        margin-top: 30px;
-      }
-      .container {
+        margin: 0;
+        font-family: "Share Tech Mono", monospace;
+        background: #0d0d0d;
+        color: #00fff0;
         display: flex;
-        gap: 30px;
-        margin-bottom: 30px;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        min-height: 100vh;
       }
-      .column {
-        flex: 1;
+      h2,
+      h3 {
+        text-shadow: 0 0 5px #00fff0, 0 0 10px #00fff0, 0 0 20px #00fff0;
       }
-      textarea {
+      textarea,
+      pre {
         width: 100%;
-        height: 300px;
-        padding: 14px;
-        font-size: 15px;
+        max-width: 800px;
         border-radius: 8px;
-        border: 2px solid #0ff;
-        background: rgba(0, 20, 30, 0.85);
-        color: #9dffff;
+        background: #111;
+        border: 2px solid #00fff0;
+        color: #00fff0;
+        padding: 10px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 14px;
+        box-shadow: 0 0 10px #00fff0;
+        margin-bottom: 10px;
+        overflow-x: auto;
+      }
+      textarea:focus {
+        box-shadow: 0 0 20px #00fff0, 0 0 40px #00fff0;
+        border-color: #00fff0;
         outline: none;
-        font-family: Consolas, monospace;
-        margin-bottom: 16px;
-        resize: vertical;
       }
       button {
-        padding: 12px 22px;
-        background: rgba(0, 255, 255, 0.08);
-        color: #00faff;
-        border: 2px solid #00eaff;
-        border-radius: 6px;
+        background: #111;
+        color: #00fff0;
+        border: 2px solid #00fff0;
+        border-radius: 8px;
+        padding: 10px 20px;
         cursor: pointer;
         font-size: 16px;
-        margin-right: 10px;
-        transition: all 0.3s ease;
+        text-shadow: 0 0 5px #00fff0;
+        box-shadow: 0 0 10px #00fff0;
+        transition: 0.3s;
+        margin-bottom: 20px;
       }
       button:hover {
-        background: rgba(0, 255, 255, 0.15);
-        box-shadow: 0 0 15px #00ffff;
-      }
-      .output-container {
-        background: rgba(0, 0, 0, 0.65);
-        padding: 18px;
-        border-radius: 10px;
-        border: 1px solid #00ffff;
-        max-height: 400px;
-        overflow-y: auto;
-      }
-      pre {
-        white-space: pre-wrap !important;
-        color: #c8f6ff !important;
-        margin: 0;
-      }
-      .top-buttons {
-        margin-bottom: 15px;
-      }
-      select {
-        padding: 10px 14px;
-        background: rgba(0, 20, 30, 0.9);
-        color: #00ffff;
-        border: 2px solid #00eaff;
-        border-radius: 6px;
-        margin-bottom: 15px;
-        font-size: 14px;
-        cursor: pointer;
-      }
-      .info {
-        background: rgba(0, 100, 150, 0.2);
-        border-left: 3px solid #00ffff;
-        padding: 12px;
-        margin: 15px 0;
-        border-radius: 4px;
-        font-size: 14px;
-        color: #a0ffff;
+        box-shadow: 0 0 20px #00fff0, 0 0 40px #00fff0;
+        transform: scale(1.05);
       }
     </style>
   </head>
   <body>
-    <h1>HTML → React Native JSX Converter PRO</h1>
+    <h2>⚡ Cyber-Neon HTML → JS Converter ⚡</h2>
 
-    <div class="info">
-      ✨ Converts HTML/CSS to fully valid React Native JSX with styles, events,
-      images, and gradients
-    </div>
+    <textarea id="htmlInput" placeholder="Paste your HTML here..."></textarea>
+    <button onclick="convertHTMLtoJS()">Convert</button>
 
-    <div class="container">
-      <div class="column">
-        <h3>HTML Input</h3>
-        <textarea
-          id="htmlInput"
-          placeholder="Paste your HTML here..."
-        ></textarea>
-
-        <h3>CSS Input</h3>
-        <textarea id="cssInput" placeholder="Paste your CSS here..."></textarea>
-
-        <div class="top-buttons">
-          <button onclick="convertToReactNative()">🔄 Convert</button>
-          <button onclick="copyOutput()">📋 Copy JSX</button>
-          <button onclick="downloadJSX()">⬇️ Download JSX</button>
-        </div>
-      </div>
-
-      <div class="column">
-        <h3>React Native JSX Output:</h3>
-        <div class="output-container">
-          <pre><code id="jsxOutput" class="language-jsx">// Output will appear here</code></pre>
-        </div>
-      </div>
-    </div>
+    <h3>Generated JavaScript:</h3>
+    <pre id="jsOutput"></pre>
 
     <script>
-      let stylesMap = {};
-      let styleCounter = 0;
+      function convertHTMLtoJS() {
+        const html = document.getElementById("htmlInput").value;
+        const container = document.createElement("div");
+        container.innerHTML = html;
 
-      const tagMap = {
-        div: "View",
-        span: "Text",
-        p: "Text",
-        h1: "Text",
-        h2: "Text",
-        h3: "Text",
-        h4: "Text",
-        h5: "Text",
-        h6: "Text",
-        label: "Text",
-        strong: "Text",
-        em: "Text",
-        i: "Text",
-        b: "Text",
-        small: "Text",
-        code: "Text",
-        pre: "View",
-        article: "View",
-        section: "View",
-        header: "View",
-        footer: "View",
-        nav: "View",
-        main: "View",
-        aside: "View",
-        img: "Image",
-        image: "Image",
-        button: "TouchableOpacity",
-        input: "TextInput",
-        textarea: "TextInput",
-        form: "View",
-        fieldset: "View",
-        ul: "View",
-        ol: "View",
-        li: "View",
-        br: "View",
-        hr: "View",
-        a: "TouchableOpacity",
-        table: "View",
-        tbody: "View",
-        thead: "View",
-        tr: "View",
-        td: "Text",
-        th: "Text",
-        select: "View",
-        option: "Text",
-      };
+        let jsCode = "";
+        let counter = 0;
 
-      const eventMap = {
-        onclick: "onPress",
-        onchange: "onChange",
-        oninput: "onChangeText",
-        onsubmit: "onSubmit",
-        onfocus: "onFocus",
-        onblur: "onBlur",
-        onkeydown: "onKeyDown",
-        onkeyup: "onKeyUp",
-      };
+        function processNode(node, parentVar = "document.body", depth = 0) {
+          const indent = "  ".repeat(depth);
 
-      function extractAttributes(attrString) {
-        const attrs = {};
-        const regex = /(\w+(?:-\w+)*)(?:=["']([^"']*?)["'])?/g;
-        let match;
-        while ((match = regex.exec(attrString))) {
-          attrs[match[1].toLowerCase()] = match[2] || "";
-        }
-        return attrs;
-      }
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (text) {
+              jsCode += `${indent}${parentVar}.appendChild(document.createTextNode(${JSON.stringify(
+                text
+              )}));\n`;
+            }
+            return;
+          }
 
-      function parseCssToJs(css) {
-        const obj = {};
-        if (!css) return { styleObj: obj, linearGradient: null, bgImage: null };
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            counter++;
+            const varName = `el${counter}`;
+            jsCode += `${indent}const ${varName} = document.createElement('${node.tagName.toLowerCase()}');\n`;
 
-        let linearGradient = null,
-          bgImage = null;
-        const linearMatch = css.match(/linear-gradient\((.*?)\)/);
-        if (linearMatch) {
-          linearGradient = linearMatch[1].split(",").map((s) => s.trim());
-          css = css.replace(linearMatch[0], "");
-        }
-        const bgImageMatch = css.match(/background-image:\s*url\((.*?)\)/);
-        if (bgImageMatch) {
-          bgImage = bgImageMatch[1].replace(/['"]/g, "");
-          css = css.replace(bgImageMatch[0], "");
-        }
+            // Set attributes as properties if possible
+            for (let attr of node.attributes) {
+              if (attr.name === "id")
+                jsCode += `${indent}${varName}.id = ${JSON.stringify(
+                  attr.value
+                )};\n`;
+              else if (attr.name === "class")
+                jsCode += `${indent}${varName}.className = ${JSON.stringify(
+                  attr.value
+                )};\n`;
+              else
+                jsCode += `${indent}${varName}.setAttribute('${
+                  attr.name
+                }', ${JSON.stringify(attr.value)});\n`;
+            }
 
-        css.split(";").forEach((rule) => {
-          const [prop, val] = rule.split(":").map((s) => s.trim());
-          if (!prop || !val) return;
-          let jsProp = prop.replace(/-([a-z])/g, (_, p) => p.toUpperCase());
-          let jsVal = val;
-          if (jsVal.endsWith("px")) jsVal = Number(jsVal.replace("px", ""));
-          else if (jsVal.endsWith("%")) jsVal = `'${jsVal}'`;
-          else if (/^rgb/.test(jsVal)) jsVal = `'${jsVal}'`;
-          else if (!isNaN(jsVal)) jsVal = Number(jsVal);
-          obj[jsProp] = jsVal;
-        });
-        return { styleObj: obj, linearGradient, bgImage };
-      }
+            jsCode += `${indent}${parentVar}.appendChild(${varName});\n`;
 
-      function parseStyleBlocks(html) {
-        const cssRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-        let match,
-          classStyles = {};
-        while ((match = cssRegex.exec(html))) {
-          const cssContent = match[1];
-          html = html.replace(match[0], "");
-          const classRuleRegex = /\.([\w-]+)\s*{([\s\S]*?)}/g;
-          let classMatch;
-          while ((classMatch = classRuleRegex.exec(cssContent))) {
-            const className = classMatch[1].replace(/-/g, "_");
-            const styleContent = classMatch[2];
-            classStyles[className] = parseCssToJs(styleContent).styleObj;
+            node.childNodes.forEach((child) =>
+              processNode(child, varName, depth + 1)
+            );
           }
         }
-        return { html, classStyles };
-      }
 
-      function buildProps(tag, attrs) {
-        const props = [];
-        const rnTag = tagMap[tag.toLowerCase()] || tag;
-
-        if (attrs.placeholder) props.push(`placeholder="${attrs.placeholder}"`);
-        if (attrs.value) props.push(`defaultValue="${attrs.value}"`);
-        if (attrs.maxlength) props.push(`maxLength={${attrs.maxlength}}`);
-        if (attrs.type === "password") props.push(`secureTextEntry={true}`);
-        if (attrs.disabled || attrs.readonly) props.push(`editable={false}`);
-        if (attrs.href && rnTag === "TouchableOpacity")
-          props.push(`onPress={() => Linking.openURL('${attrs.href}')}`);
-
-        for (const [htmlEvent, rnEvent] of Object.entries(eventMap)) {
-          if (attrs[htmlEvent])
-            props.push(`${rnEvent}={() => { ${attrs[htmlEvent]} }}`);
-        }
-        if (rnTag === "TextInput" && attrs.type) {
-          const keyboardType =
-            {
-              email: "email-address",
-              number: "numeric",
-              tel: "phone-pad",
-              url: "url",
-            }[attrs.type] || "default";
-          props.push(`keyboardType="${keyboardType}"`);
-        }
-        if (rnTag === "Image" && attrs.src)
-          props.push(`source={{uri:'${attrs.src}'}}`);
-        return props;
-      }
-
-      function processElement(
-        tag,
-        attrs = {},
-        innerHtml = "",
-        classStyles = {}
-      ) {
-        const rnTag = tagMap[tag.toLowerCase()] || "View";
-        const { styleObj, linearGradient, bgImage } = parseCssToJs(
-          attrs.style || ""
-        );
-
-        const styleArr = [];
-        if (attrs.class) {
-          attrs.class.split(/\s+/).forEach((c) => {
-            const className = c.replace(/-/g, "_");
-            if (classStyles[className]) styleArr.push(`styles.${className}`);
-          });
-        }
-        if (Object.keys(styleObj).length) {
-          const inlineStyleName = "inlineStyle" + styleCounter++;
-          stylesMap[inlineStyleName] = styleObj;
-          styleArr.push(`styles.${inlineStyleName}`);
-        }
-        const styleProp = styleArr.length
-          ? ` style={[${styleArr.join(", ")}]}`
-          : "";
-
-        const props = buildProps(tag, attrs);
-        const propsStr = props.length ? " " + props.join(" ") : "";
-
-        let openTag = "",
-          closeTag = "";
-        if (linearGradient) {
-          openTag = `<LinearGradient colors={[${linearGradient
-            .map((c) => `"${c}"`)
-            .join(", ")}]} start={{x:0,y:0}} end={{x:1,y:1}}>`;
-          closeTag = "</LinearGradient>";
-        } else if (bgImage) {
-          openTag = `<ImageBackground source={{uri:"${bgImage}"}}${propsStr}${styleProp}>`;
-          closeTag = "</ImageBackground>";
-        } else {
-          if (
-            !innerHtml.trim() &&
-            ["TextInput", "Image", "View"].includes(rnTag)
-          ) {
-            return `<${rnTag}${propsStr}${styleProp} />`;
-          }
-          openTag = `<${rnTag}${propsStr}${styleProp}>`;
-          closeTag = `</${rnTag}>`;
-        }
-
-        let processedChildren = innerHtml.replace(
-          /<(\w+)([^>]*)>([\s\S]*?)<\/\1>/gs,
-          (m, t, a, c) => {
-            const childAttrs = extractAttributes(a);
-            return processElement(t, childAttrs, c, classStyles);
-          }
-        );
-
-        if (!["Text", "TextInput"].includes(rnTag)) {
-          processedChildren = processedChildren.replace(/([^<>]+)/g, (m) =>
-            m.trim() ? `<Text>${m.trim()}</Text>` : ""
-          );
-        }
-
-        return `${openTag}${processedChildren}${closeTag}`;
-      }
-
-      function convertToReactNative() {
-        stylesMap = {};
-        styleCounter = 0;
-        let html = document.getElementById("htmlInput").value;
-        const css = document.getElementById("cssInput").value;
-        
-        // Remove DOCTYPE declarations (HTML5, HTML4, XHTML, etc.)
-        html = html.replaceAll(/<!DOCTYPE[^>]*>/gi, "");
-        html = html.replaceAll(/<!doctype[^>]*>/gi, "");
-        html = html.replaceAll(/<\?xml[^?]*\?>/gi, "");
-        
-        if (css.trim()) html = `<style>${css}</style>\n${html}`;
-
-        const { html: htmlNoStyles, classStyles } = parseStyleBlocks(html);
-        let htmlProcessed = htmlNoStyles.replace(
-          /<(\w+)([^>]*)>([\s\S]*?)<\/\1>/gs,
-          (m, t, a, c) => {
-            const attrs = extractAttributes(a);
-            return processElement(t, attrs, c, classStyles);
-          }
-        );
-
-        htmlProcessed = htmlProcessed.replace(/>\s+([^<]+)\s+</g, (m, text) =>
-          text.trim() ? `><Text>${text.trim()}</Text><` : m
-        );
-
-        let styleSheet = "const styles = StyleSheet.create({\n";
-        for (const key in { ...classStyles, ...stylesMap }) {
-          const styleObj = { ...classStyles[key], ...stylesMap[key] };
-          const styleStr = JSON.stringify(styleObj, null, 2)
-            .replace(/"([^"]+)":/g, "$1:")
-            .split("\n")
-            .map((line, i) => (i === 0 ? line : "  " + line))
-            .join("\n");
-          styleSheet += `  ${key}: ${styleStr},\n`;
-        }
-        styleSheet += "});\n";
-
-        const jsx = `import React, { useState } from 'react';
-import { View, Text, Image, ImageBackground, TextInput, TouchableOpacity, ScrollView, Linking, StyleSheet, useWindowDimensions } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-
-export default function Component() {
-  const { width, height } = useWindowDimensions();
-  const [state, setState] = useState({});
-
-  return (
-    <ScrollView style={{ flex: 1 }}>
-${htmlProcessed
-  .split("\n")
-  .filter((line) => line.trim())
-  .map((line) => "      " + line)
-  .join("\n")}
-    </ScrollView>
-  );
-}
-
-${styleSheet}`.replaceAll(/"/g, '\\"');
-
-        const outputEl = document.getElementById("jsxOutput");
-        outputEl.textContent = jsx;
-        Prism.highlightElement(outputEl);
-      }
-
-      function copyOutput() {
-        const text = document.getElementById("jsxOutput").textContent;
-        navigator.clipboard
-          .writeText(text)
-          .then(() => alert("✅ Copied to clipboard!"))
-          .catch(() => alert("❌ Failed to copy"));
-      }
-
-      function downloadJSX() {
-        const text = document.getElementById("jsxOutput").textContent;
-        const blob = new Blob([text], { type: "text/plain" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Component.jsx";
-        link.click();
+        container.childNodes.forEach((node) => processNode(node));
+        document.getElementById("jsOutput").textContent = jsCode;
       }
     </script>
   </body>

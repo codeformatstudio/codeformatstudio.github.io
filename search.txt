@@ -1,0 +1,27 @@
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const createLinkBtn = document.getElementById('createLinkBtn');
+        const linkContainer = document.getElementById('linkContainer');
+
+        createLinkBtn.addEventListener('click', function() {
+            const searchTerm = searchInput.value;
+
+            if (searchTerm) {
+                // Encode the search term to handle special characters in the URL
+                const encodedSearchTerm = encodeURIComponent(searchTerm);
+                const searchUrl = `https://www.google.com/search?q=${encodedSearchTerm}`;
+
+                // Create a new anchor element
+                const newLink = document.createElement('a');
+                newLink.href = searchUrl;
+                newLink.textContent = `Search for "${searchTerm}"`;
+                newLink.target = "_blank"; // Open link in a new tab
+
+                // Clear previous links and append the new one
+                linkContainer.innerHTML = '';
+                linkContainer.appendChild(newLink);
+            } else {
+                linkContainer.innerHTML = 'Please enter a search term.';
+            }
+        });
+    });
