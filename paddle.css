@@ -1,4 +1,4 @@
-@import url(assets/Otribtion.css);
+/* Root variables */
 :root {
   --bg-color: #0d0d0d;
   --primary-color: #00ffff;
@@ -18,32 +18,18 @@
 html,
 body {
   margin: 0;
-  padding: 40px;
+  padding: 20px;
   height: 100%;
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-family);
   text-align: center;
-  overflow-y: hidden;
-  user-select: none;
-  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-}
-
-/* Headings */
-h1,
-h2 {
-  color: var(--primary-color);
-  text-shadow: 0 0 15px var(--primary-color);
-  margin-bottom: 30px;
-  font-weight: 700;
-}
-
-h2 {
-  font-size: 2.2rem;
 }
 
 /* Panels */
@@ -55,11 +41,11 @@ h2 {
   left: 50%;
   transform: translate(-50%, -50%);
   background: var(--panel-bg);
-  border-radius: 16px;
-  padding: 30px 50px;
+  border-radius: var(--border-radius);
+  padding: clamp(20px, 4vw, 40px) clamp(20px, 6vw, 60px);
   box-shadow: 0 0 25px var(--primary-color);
+  min-width: clamp(250px, 40%, 500px);
   text-align: center;
-  min-width: 280px;
   z-index: 20;
 }
 
@@ -69,16 +55,17 @@ h2 {
   color: var(--primary-color-light);
   text-shadow: 0 0 8px var(--primary-color);
   margin-bottom: 1.2rem;
+  font-size: clamp(1.2rem, 2.5vw, 2.2rem);
 }
 
-/* Buttons, links */
+/* Buttons */
 button,
 a,
 #btnWiFi,
 #btnLocal {
-  font-size: 18px;
+  font-size: clamp(14px, 2vw, 18px);
   margin: 10px 15px;
-  padding: 12px 30px;
+  padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 30px);
   border: var(--button-border);
   border-radius: var(--border-radius);
   background: var(--button-bg);
@@ -87,8 +74,7 @@ a,
   box-shadow: 0 0 12px var(--box-shadow-color);
   font-weight: 600;
   transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
-  min-width: 140px;
+  min-width: clamp(100px, 30%, 180px);
   display: inline-block;
   text-decoration: none;
   text-align: center;
@@ -103,71 +89,25 @@ a:hover,
   box-shadow: 0 0 25px var(--box-shadow-color);
 }
 
-/* Special styling for downloadBtn, BF, iframeBtn */
-#downloadBtn,
-#BF,
-#iframeBtn {
-  position: fixed;
-  bottom: 15px;
-  left: 0;
-  width: fit-content !important;
-  height: fit-content !important;
-  background: transparent;
-  color: var(--primary-color);
-  border: none;
-  box-shadow: none;
-  cursor: pointer;
-  padding: 6px 10px;
-  font-size: 22px;
-  transition: color 0.3s ease;
-  user-select: none;
-  z-index: 9999;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#downloadBtn {
-  bottom: 70px !important;
-  padding: 8px 12px;
-  font-size: 20px;
-}
-
-#iframeBtn {
-  bottom: 120px !important;
-  left: 0 !important;
-  padding: 8px 12px;
-  font-size: 20px;
-}
-
-#downloadBtn:hover,
-#BF:hover,
-#iframeBtn:hover {
-  color: var(--primary-color-light);
-  text-shadow: 0 0 10px var(--primary-color-light);
-}
-
 /* Canvas */
 #gameCanvas {
-  /* background: linear-gradient(135deg, #122b4d, var(--bg-color)); */
   background: transparent;
   box-shadow: 0 0 30px var(--primary-color);
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   display: block;
   margin-top: 10px;
   user-select: none;
-  max-width: 100%;
+  max-width: 95%;
   height: auto;
 }
 
-/* Round score display */
+/* Round score */
 #roundScoreDisplay {
   position: absolute;
   top: 15px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 28px;
+  font-size: clamp(18px, 3vw, 28px);
   font-weight: 700;
   color: var(--primary-color);
   text-shadow: 0 0 16px var(--primary-color);
@@ -183,158 +123,22 @@ a:hover,
   user-select: none;
 }
 
-/* Input styles - add if you use inputs */
-input {
-  background: transparent;
-  border: 2px solid var(--primary-color);
-  border-radius: var(--border-radius);
-  padding: 10px 20px;
-  font-size: 18px;
-  color: var(--text-color);
-  box-shadow: 0 0 10px var(--primary-color);
-  outline: none;
-  transition: 0.3s;
-  text-align: left;
-  margin-bottom: 20px;
-  width: 280px;
-}
-
-/* Misc */
+/* ESC div */
 #esc {
   display: none;
   background: black;
   color: white;
   width: fit-content;
   height: fit-content;
-  padding: 20px 30px;
+  padding: clamp(10px, 2vw, 20px) clamp(20px, 4vw, 30px);
   position: fixed;
-  top: -10px;
-  transition: 0.5s ease;
-  justify-self: center;
-  font-size: large;
+  top: 10px;
+  font-size: clamp(14px, 2.5vw, 18px);
   opacity: 0.8;
-  z-index: 9999999999;
+  z-index: 9999;
 }
 
-iframe {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  z-index: 9999 !important;
-}
-
-::selection {
-  background: var(--primary-color);
-  color: var(--bg-color);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  #startScreen,
-  #difficultyScreen,
-  #modeTypeScreen {
-    width: calc(100% - 40px);
-    padding: 20px;
-    box-shadow: none;
-    border-radius: 8px;
-  }
-  #startScreen h2,
-  #difficultyScreen h2,
-  #modeTypeScreen h2 {
-    font-size: 1.8rem;
-  }
-  button,
-  a,
-  #btnWiFi,
-  #btnLocal {
-    width: calc(100% - 30px);
-    padding: 12px;
-    font-size: 18px;
-    min-width: unset;
-  }
-  #gameCanvas {
-    width: calc(100% - 40px);
-    height: auto;
-  }
-}
-
-/* Light mode example */
-.light-mode {
-  --bg-color: #fff;
-  --text-color: #111;
-  --primary-color: #00cccc;
-  --primary-color-light: #33ffff;
-  --button-border: 2px solid #222;
-  --button-bg: #f9f9f9;
-  --button-hover-bg: #00cccc;
-  --button-hover-color: #000;
-  --box-shadow-color: #ccc;
-  --panel-bg: #f2f2f2;
-  color: var(--text-color);
-  background: var(--bg-color);
-}
-
-.light-mode input,
-.light-mode button {
-  border-color: #222;
-  color: #222;
-  background: #f9f9f9;
-  box-shadow: 0 0 10px #ccc;
-}
-
-.light-mode img {
-  background: white;
-  border-color: #ccc;
-  box-shadow: 0 0 20px #aaa;
-}
-
-.light-mode #logoContainer,
-.light-mode #codeBlockWrapper div {
-  background-color: #f2f2f2 !important;
-  color: #111 !important;
-}
-
-.light-mode #copyCodeBtn {
-  background: #222;
-  color: white;
-}
-
-/* Logo title */
-.logo-title {
-  margin-top: 5px;
-  margin-bottom: 20px;
-  color: inherit;
-}
-/* Buttons: base, hover, transition */
-#downloadBtn,
-#BF,
-#iframeBtn,
-button,
-#btnWiFi,
-#btnLocal,
-a {
-  font-size: 18px;
-  margin: 10px 15px;
-  padding: 12px 30px;
-  border: 2px solid var(--primary-color);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-color);
-  cursor: pointer;
-  box-shadow: 0 0 12px var(--primary-color);
-  font-weight: 600;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
-  min-width: 140px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
+/* Fixed buttons */
 #downloadBtn,
 #BF,
 #iframeBtn {
@@ -342,64 +146,33 @@ a {
   left: 0;
   width: fit-content !important;
   height: fit-content !important;
-  padding: 6px 10px;
-  font-size: 22px;
-  box-shadow: none;
-  border: none;
-  margin: 10px 15px;
+  padding: clamp(6px, 1.5vw, 12px);
+  font-size: clamp(16px, 2.5vw, 22px);
   background: transparent;
   color: var(--primary-color);
-  min-width: unset;
+  border: none;
+  box-shadow: none;
   z-index: 9999;
 }
 
-/* Positioning for special fixed buttons */
 #downloadBtn {
-  bottom: 70px !important;
+  bottom: 70px;
 }
 #BF {
-  bottom: 15px !important;
+  bottom: 15px;
 }
 #iframeBtn {
-  bottom: 120px !important;
+  bottom: 120px;
 }
 
-/* Hover effect for all buttons */
 #downloadBtn:hover,
 #BF:hover,
-#iframeBtn:hover,
-button:hover,
-#btnWiFi:hover,
-#btnLocal:hover,
-a:hover {
-  background-color: var(--primary-color);
-  color: #000;
-  box-shadow: 0 0 25px var(--primary-color);
+#iframeBtn:hover {
+  color: var(--primary-color-light);
+  text-shadow: 0 0 10px var(--primary-color-light);
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  #downloadBtn,
-  #BF,
-  #iframeBtn,
-  button,
-  #btnWiFi,
-  #btnLocal,
-  a {
-    width: calc(100% - 30px);
-    padding: 12px;
-    font-size: 18px;
-    min-width: unset;
-    margin: 8px auto;
-    display: block;
-  }
-  canvas {
-    width: 100%;
-    height: auto;
-    margin-left: 0;
-    margin-right: 0;
-  }
-}
+/* Game controls */
 #game-controls {
   position: fixed;
   top: 10px;
@@ -407,11 +180,12 @@ a:hover {
   z-index: 1000;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 #game-controls button {
-  font-size: 16px;
-  padding: 8px 16px;
+  font-size: clamp(12px, 2vw, 16px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 16px);
   border: var(--button-border);
   border-radius: var(--border-radius);
   background: var(--button-bg);
@@ -419,13 +193,95 @@ a:hover {
   cursor: pointer;
   box-shadow: 0 0 12px var(--box-shadow-color);
   font-weight: 600;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
-  min-width: 80px;
+  min-width: clamp(70px, 25%, 100px);
 }
 
 #game-controls button:hover {
   background-color: var(--button-hover-bg);
   color: var(--button-hover-color);
   box-shadow: 0 0 25px var(--box-shadow-color);
+}
+
+/* Responsive tweaks using media queries */
+@media (max-width: 1200px) {
+  #gameCanvas {
+    max-width: 90%;
+  }
+}
+@media (max-width: 992px) {
+  #gameCanvas {
+    max-width: 100%;
+  }
+}
+@media (max-width: 768px) {
+  #gameCanvas {
+    max-width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  #startScreen,
+  #difficultyScreen,
+  #modeTypeScreen {
+    padding: 15px 10px;
+    width: 100%;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+  button,
+  a,
+  #btnWiFi,
+  #btnLocal {
+    font-size: 14px;
+    padding: 8px;
+    min-width: 100px;
+  }
+}
+@media (max-width: 320px) {
+  #startScreen,
+  #difficultyScreen,
+  #modeTypeScreen {
+    width: 95%;
+    padding: 10px;
+  }
+  button,
+  a,
+  #btnWiFi,
+  #btnLocal {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+@media (max-width: 319px) {
+  #startScreen,
+  #difficultyScreen,
+  #modeTypeScreen {
+    width: 100%;
+    padding: 10px;
+  }
+  button,
+  a,
+  #btnWiFi,
+  #btnLocal {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+@media (max-width: 150px) {
+  #startScreen,
+  #difficultyScreen,
+  #modeTypeScreen {
+    width: 100%;
+    padding: 5px;
+  }
+  button,
+  a,
+  #btnWiFi,
+  #btnLocal {
+    font-size: 10px;
+    padding: 4px;
+  }
+  #gameCanvas {
+    min-width: 100%;
+  }
 }

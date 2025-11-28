@@ -900,6 +900,9 @@ VERY SMALL SCREENS (<=150px)
         resetCanvas();
         drawCanvas();
       };
+      // ------------------------------
+      // RESIZE (allows up to 300,000px)
+      // ------------------------------
       document.getElementById("applyResize").onclick = () => {
         const width = parseInt(
           document.getElementById("customWidthInput").value
@@ -908,27 +911,142 @@ VERY SMALL SCREENS (<=150px)
           document.getElementById("customHeightInput").value
         );
 
-        if (!width || width <= 0 || !height || height <= 0) {
+        if (!width || width <= 0 || !height || height <= 0)
           return alert("Enter valid width and height!");
-        }
 
-        // Create a temporary canvas with new dimensions
+        if (width > 300000 || height > 300000)
+          return alert("Maximum size is 300,000 px");
+
+        // Use an off-screen canvas for resizing
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = width;
         tempCanvas.height = height;
         const tCtx = tempCanvas.getContext("2d");
+
         tCtx.drawImage(img, 0, 0, width, height);
 
-        // Update image source
+        // Update image source for future edits
         img.src = tempCanvas.toDataURL();
 
-        // Reset scale and offsets
+        // Reset scale/offsets for visible canvas
         scale = 1;
         offsetX = 0;
         offsetY = 0;
 
         saveState();
         drawCanvas();
+      };
+
+      // ------------------------------
+      // SAVE AS (full image, ignores screen size)
+      // ------------------------------
+      document.getElementById("applySaveAs").onclick = async () => {
+        if (!img.src) return alert("Upload image first!");
+
+        const format = document.getElementById("saveFormat").value; // MIME type
+        const ext = format.split("/")[1];
+
+        // Create an off-screen canvas with full image size
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tCtx = tempCanvas.getContext("2d");
+
+        // Apply filters permanently
+        const cssFilter = Object.entries(currentFilterSettings)
+          .map(([k, v]) => `${k}(${v})`)
+          .join(" ");
+        tCtx.filter = cssFilter;
+        tCtx.drawImage(img, 0, 0);
+
+        const originalName =
+          fileInput.files[0]?.name.replace(/\.[^/.]+$/, "-edited") ||
+          "edited-image";
+
+        // Native formats (PNG, JPEG, WebP) using off-screen canvas
+        if (["image/png", "image/jpeg", "image/webp"].includes(format)) {
+          tempCanvas.toBlob(
+            (blob) => {
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = `${originalName}.${ext}`;
+              link.click();
+              URL.revokeObjectURL(link.href);
+            },
+            format,
+            1
+          );
+          return;
+        }
+
+        // BMP, TIFF, QOI, ICO, DDS, RGB, PPM, TGA
+        const imageData = tCtx.getImageData(
+          0,
+          0,
+          tempCanvas.width,
+          tempCanvas.height
+        );
+        let blob;
+
+        switch (format) {
+          case "image/bmp":
+            blob = new Blob([encodeBMP(imageData)], { type: "image/bmp" });
+            break;
+          case "image/tiff":
+            blob = new Blob([encodeTIFF(imageData)], { type: "image/tiff" });
+            break;
+          case "image/qoi":
+            blob = new Blob([encodeQOI(imageData)], { type: "image/qoi" });
+            break;
+          case "image/x-icon":
+            blob = new Blob([await encodeICO(imageData)], {
+              type: "image/x-icon",
+            });
+            break;
+          case "image/vnd-ms.dds":
+            blob = new Blob([encodeDDS(imageData)], { type: "image/dds" });
+            break;
+          case "image/rgb":
+            blob = new Blob([encodeRGB(imageData)], { type: "image/rgb" });
+            break;
+          case "image/x-portable-pixmap":
+            blob = new Blob([encodePPM(imageData)], {
+              type: "image/x-portable-pixmap",
+            });
+            break;
+          case "image/x-tga":
+            blob = new Blob([await encodeTGA(imageData)], {
+              type: "image/tga",
+            });
+            break;
+          case "application/pdf":
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.create();
+            const page = pdfDoc.addPage([img.width, img.height]);
+            const pngBytes = await fetch(
+              tempCanvas.toDataURL("image/png")
+            ).then((r) => r.arrayBuffer());
+            const pngImage = await pdfDoc.embedPng(pngBytes);
+            page.drawImage(pngImage, {
+              x: 0,
+              y: 0,
+              width: img.width,
+              height: img.height,
+            });
+            const pdfBytes = await pdfDoc.save();
+            blob = new Blob([pdfBytes], { type: "application/pdf" });
+            break;
+          default:
+            return alert("Unsupported format");
+        }
+
+        if (blob) {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${originalName}.${ext}`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+        }
       };
 
       function applyFiltersToCanvas() {

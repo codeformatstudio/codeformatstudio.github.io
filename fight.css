@@ -568,3 +568,93 @@ input[type="radio"] {
   background: white;
   color: black;
 }
+/* Media Queries for Responsive Design */
+@media (max-width: 1024px) {
+  #game {
+    width: 90%;
+    height: auto;
+  }
+  #health1,
+  #health2 {
+    width: 45%;
+    height: 25px;
+  }
+  #status {
+    width: 95%;
+    font-size: 16px;
+  }
+  #winnerLabel {
+    width: 80%;
+    font-size: 1.8em;
+  }
+}
+
+@media (max-width: 768px) {
+  #game {
+    width: 95%;
+    height: 300px;
+  }
+  .player {
+    width: 40px;
+    height: 80px;
+  }
+  .arm {
+    width: 12px;
+    height: 30px;
+  }
+  .sword {
+    width: 8px;
+    height: 45px;
+  }
+  #health1,
+  #health2 {
+    width: 40%;
+    height: 22px;
+  }
+  #status {
+    font-size: 14px;
+    padding: 8px 0 6px 0;
+  }
+  #winnerLabel {
+    font-size: 1.5em;
+  }
+  #helpBtn,
+  #settingsBtn {
+    padding: 6px 16px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  #game {
+    height: 220px;
+  }
+  .player {
+    width: 30px;
+    height: 60px;
+  }
+  .arm {
+    width: 10px;
+    height: 24px;
+  }
+  .sword {
+    width: 6px;
+    height: 35px;
+  }
+  #health1,
+  #health2 {
+    width: 35%;
+    height: 20px;
+  }
+  #status {
+    font-size: 12px;
+  }
+  #winnerLabel {
+    font-size: 1.2em;
+  }
+  #helpBtn,
+  #settingsBtn {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+}
