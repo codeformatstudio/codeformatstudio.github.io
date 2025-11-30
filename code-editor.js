@@ -1,3 +1,13 @@
+window.addEventListener("beforeunload", function (event) {
+    // Most browsers ignore the custom message, but you can set it
+    const message = "Are you sure you want to leave this page?";
+    
+    event.preventDefault(); // Some browsers require this
+    event.returnValue = message; // Legacy method for older browsers
+    
+    return message?true:false; // For some older browsers
+});
+
 // Helper Function \\
 function cyberPrompt(message, callback) {
   // Create overlay
