@@ -67,6 +67,8 @@
 
     <textarea id="htmlInput" placeholder="Paste your HTML here..."></textarea>
     <button onclick="convertHTMLtoJS()">Convert</button>
+    <button onclick="copyToClipboard()">Copy</button>
+    <button onclick="download()">Download</button>
 
     <h3>Generated JavaScript:</h3>
     <pre id="jsOutput"></pre>
@@ -125,6 +127,8 @@
         container.childNodes.forEach((node) => processNode(node));
         document.getElementById("jsOutput").textContent = jsCode;
       }
+      function copyToClipboard(){navigator.clipboard.writeText(jsCode)}
+      function download(){const blob = new Blob([jsCode], {type: 'text/javascript'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="Output.js";document.body.appendChild(a);a.click();URL.revokeObjectURL(blol)}
     </script>
   </body>
 </html>
