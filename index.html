@@ -593,7 +593,7 @@ VERY SMALL SCREENS (<=150px)
         window.addEventListener("load", () => {
           // Adjust the path based on your site
           navigator.serviceWorker
-            .register("/service-worker.js")
+            .register("service-worker.js")
             .then((registration) => {
               console.log(
                 "ServiceWorker registered with scope:",
