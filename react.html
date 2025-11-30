@@ -81,7 +81,6 @@
 
         let jsCode = "";
         let counter = 0;
-
         function processNode(node, parentVar = "document.body", depth = 0) {
           const indent = "  ".repeat(depth);
 
@@ -127,6 +126,7 @@
         container.childNodes.forEach((node) => processNode(node));
         document.getElementById("jsOutput").textContent = jsCode;
       }
+      const jsCode = document.getElementById("htmlInput").value;
       function copyToClipboard(){navigator.clipboard.writeText(jsCode)}
       function download(){const blob = new Blob([jsCode], {type: 'text/javascript'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="Output.js";document.body.appendChild(a);a.click();URL.revokeObjectURL(blol)}
     </script>
