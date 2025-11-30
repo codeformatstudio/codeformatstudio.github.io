@@ -620,6 +620,27 @@ document.getElementById('windows').addEventListener('click', () => {
     document.body.removeChild(a);
   });
 });
+      navigator.serviceWorker.register('service-worker.js')
+  .then(reg => {
+    console.log('Service worker registered:', reg);
+
+    // Force activation for dev
+    if (reg.waiting) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      newSW.addEventListener('statechange', () => {
+        console.log('New SW state:', newSW.state);
+        if (newSW.state === 'activated') {
+          console.log('Service worker is now active!');
+        }
+      });
+    });
+  })
+  .catch(err => console.error('Service worker failed:', err));
+
     </script>
   </body>
 </html>
