@@ -1,4 +1,4 @@
-const CACHE_NAME = "formatperfection-cache-v2";
+const CACHE_NAME = "codeformatstudio-cache-v2";
 const urlsToCache = [
   "/",
   "./speaker.html",
