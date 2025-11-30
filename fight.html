@@ -854,28 +854,6 @@
       const player2 = document.getElementById("player2");
       const health1Fill = document.getElementById("health1-fill");
       const health2Fill = document.getElementById("health2-fill");
-      // Instead of fixed values:
-      function getGameWidth() {
-        return gameArea.clientWidth;
-      }
-      function getGameHeight() {
-        return gameArea.clientHeight;
-      }
-
-      // Player size relative to game area
-      const playerWidthRatio = 0.06; // 6% of game width
-      const playerHeightRatio = 0.12; // 12% of game height
-      function getPlayerWidth() {
-        return getGameWidth() * playerWidthRatio;
-      }
-      function getPlayerHeight() {
-        return getGameHeight() * playerHeightRatio;
-      }
-
-      // Other constants relative to game width/height
-      const speedRatio = 0.005; // relative horizontal speed
-      const jumpPowerRatio = 0.03; // relative jump height
-      const gravityRatio = 0.002; // relative gravity
 
       // ========== Game Constants ==========
       const gameWidth = 950;
@@ -1682,20 +1660,10 @@
 
       // ========== Player Update ==========
       function updatePlayer(player, isAi = false) {
-        const prevX = player.x;
-        const prevY = player.y;
+        // store previous position for collision resolution and carry movement
+        player.prevX = player.x;
+        player.prevY = player.y;
 
-        const gameWidth = getGameWidth();
-        const gameHeight = getGameHeight();
-        const playerWidth = getPlayerWidth();
-        const playerHeight = getPlayerHeight();
-        const groundLevel = 0;
-
-        const speed = gameWidth * speedRatio;
-        const jumpPower = gameHeight * jumpPowerRatio;
-        const gravity = gameHeight * gravityRatio;
-
-        // Horizontal movement
         if (!gameOver && !isFrozen(player)) {
           if (isAi) {
             aiMovePlayer(settings, p1, p2, {
@@ -1731,93 +1699,87 @@
           }
         }
 
-        // Vertical movement
+        // Apply gravity/vertical movement
         player.vy -= gravity;
         player.y += player.vy;
         if (player.y < groundLevel) {
           player.y = groundLevel;
           player.vy = 0;
           player.onGround = true;
-        } else player.onGround = false;
+        } else {
+          player.onGround = false;
+        }
 
-        // Carry any player standing on this player
-        const dx = player.x - prevX;
+        // If someone is standing on this player, carry them horizontally by the same delta
+        const dx = player.x - player.prevX;
         if (dx !== 0) {
+          // find other player
           const other = player === p1 ? p2 : p1;
           if (other.standingOn === player) {
             other.x += dx;
+            // keep them exactly atop
             other.y = player.y + playerHeight;
             other.vy = 0;
             other.onGround = true;
           }
         }
 
-        // Clamp horizontally
-        player.x = Math.min(Math.max(player.x, 0), gameWidth - playerWidth);
-
-        // Update DOM
-        const elem = player === p1 ? player1 : player2;
-        elem.style.left = player.x + "px";
-        elem.style.bottom = player.y + "px";
-        elem.style.width = playerWidth + "px";
-        elem.style.height = playerHeight + "px";
+        // Clamp to game bounds horizontally (final)
+        if (player.x < 0) player.x = 0;
+        if (player.x > gameWidth - playerWidth)
+          player.x = gameWidth - playerWidth;
       }
 
       // ========== Projectiles Update ==========
       function updateProjectiles() {
-        const gameWidth = getGameWidth();
-        const gameHeight = getGameHeight();
-        const playerWidth = getPlayerWidth();
-        const playerHeight = getPlayerHeight();
         // Fireballs
         fireballs = fireballs.filter((fb) => {
           fb.x += fb.speed;
+          if (fb.x < -22 || fb.x > gameWidth + 22) return false;
           const target = fb.owner === p1 ? p2 : p1;
-          const tw = playerWidth,
-            th = playerHeight;
           if (
             fb.x > target.x &&
-            fb.x < target.x + tw &&
+            fb.x < target.x + playerWidth &&
             fb.y > target.y &&
-            fb.y < target.y + th
+            fb.y < target.y + playerHeight
           ) {
-            if (!target.shieldActive) target.health -= 50;
+            if (!target.shieldActive) {
+              target.health -= 50;
+              if (target.health < 0) target.health = 0;
+            }
             return false;
           }
-          return fb.x > -22 && fb.x < gameWidth + 22;
+          return true;
         });
-
         // Bullets
         bullets = bullets.filter((b) => {
           b.x += b.speed;
+          if (b.x < -10 || b.x > gameWidth + 16) return false;
           const target = b.owner === p1 ? p2 : p1;
-          const tw = playerWidth,
-            th = playerHeight;
           if (
             b.x > target.x &&
-            b.x < target.x + tw &&
+            b.x < target.x + playerWidth &&
             b.y > target.y &&
-            b.y < target.y + th
+            b.y < target.y + playerHeight
           ) {
-            if (!target.shieldActive) target.health -= 30;
+            if (!target.shieldActive) {
+              target.health -= 30;
+              if (target.health < 0) target.health = 0;
+            }
             return false;
           }
-          return b.x > -10 && b.x < gameWidth + 16;
+          return true;
         });
-
-        // Lasers
         // Lasers
         lasers = lasers.filter((l) => {
           if (l.hit) return false;
           const target = l.owner === p1 ? p2 : p1;
-
+          // Laser is a line, player is a box: check overlap
           const lx = l.x;
           const ly = l.y;
           const tx = target.x;
           const ty = target.y;
-          const beamW = (l.width || 340) * (getGameWidth() / 1920); // scale width relative to game width
-
-          // Check overlap
+          const beamW = l.width || 340;
           if (
             ((l.direction === 1 && lx < tx + playerWidth && lx + beamW > tx) ||
               (l.direction === -1 &&
@@ -1834,28 +1796,26 @@
             setTimeout(() => {
               const idx = lasers.indexOf(l);
               if (idx !== -1) lasers.splice(idx, 1);
-            }, 300);
+            }, 300); // increased so player can actually see beam
             return false;
           }
-
-          // Lifetime removal
-          if (lx < -beamW || lx > getGameWidth() + beamW) return false;
-          return true;
+          setTimeout(() => {
+            const idx = lasers.indexOf(l);
+            if (idx !== -1) lasers.splice(idx, 1);
+          }, 300); // increased lifetime
+          return !l.hit;
         });
-
         // Boomerangs
         boomerangs = boomerangs.filter((boom) => {
-          const speed = getGameWidth() * 0.007; // scale speed
           if (boom.goingOut) {
-            boom.x += speed * boom.direction;
+            boom.x += 14 * boom.direction;
             boom.age += 1;
             if (boom.age > 25) boom.goingOut = false;
           } else {
-            boom.x -= speed * boom.direction;
+            boom.x -= 14 * boom.direction;
             boom.age -= 1;
             if (boom.age < 0) boom.returned = true;
           }
-
           const target = boom.owner === p1 ? p2 : p1;
           if (
             boom.x > target.x &&
@@ -1870,14 +1830,10 @@
           }
           return !boom.returned;
         });
-
         // Freeze Rays
         freezeRays = freezeRays.filter((ray) => {
           if (ray.hit) return false;
-
-          const speed = getGameWidth() * 0.01; // scale speed
-          ray.x += speed * ray.direction;
-
+          ray.x += ray.speed;
           const target = ray.owner === p1 ? p2 : p1;
           if (
             ray.x > target.x &&
@@ -1896,16 +1852,17 @@
             }, 80);
             return false;
           }
-
-          // Remove if offscreen
-          if (ray.x < -30 || ray.x > getGameWidth() + 30) return false;
-          return true;
+          if (ray.x < -30 || ray.x > gameWidth + 30) return false;
+          setTimeout(() => {
+            const idx = freezeRays.indexOf(ray);
+            if (idx !== -1) freezeRays.splice(idx, 1);
+          }, 100);
+          return !ray.hit;
         });
-
         // Heals
         heals = heals.filter((h) => {
-          // lifetime scaling not needed, keep 500ms
-          return Date.now() - h.createdAt <= 500;
+          if (Date.now() - h.createdAt > 500) return false;
+          return true;
         });
       }
 
@@ -3000,20 +2957,6 @@
         // The boomerang itself triggers knockback in updateProjectiles
         _origThrowBoomerang(player, whichPlayer);
       };
-      window.addEventListener("load", () => {
-        // Adjust player positions proportionally
-        const newWidth = getGameWidth();
-        const newHeight = getGameHeight();
-
-        [p1, p2].forEach((player) => {
-          player.x = (player.x / gameWidth) * newWidth;
-          player.y = (player.y / gameHeight) * newHeight;
-        });
-
-        // Update DOM immediately
-        updatePlayer(p1);
-        updatePlayer(p2);
-      });
     </script>
   </body>
 </html>
