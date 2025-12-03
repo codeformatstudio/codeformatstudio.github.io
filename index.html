@@ -646,10 +646,23 @@ document.getElementById('windows').addEventListener('click', () => {
 function getOperatingSystem() {
   const ua = navigator.userAgent;
 
+  // Windows
   if (ua.includes("Win")) return "Windows";
-  if (ua.includes("Mac") && !ua.includes("iPhone") && !ua.includes("iPad")) return "macOS";
+
+  // macOS (not iOS/iPadOS)
+  if (ua.includes("Macintosh") && !ua.includes("Mobile")) return "macOS";
+
+  // iPhone / iPad / iPod
+  if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod"))
+    return "iOS";
+
+  // Android (must come before Linux)
   if (ua.includes("Android")) return "Android";
-  if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod")) return "iOS";
+
+  // ChromeOS
+  if (ua.includes("CrOS")) return "ChromeOS";
+
+  // Linux
   if (ua.includes("Linux")) return "Linux";
 
   return "Unknown";
