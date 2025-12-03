@@ -664,7 +664,7 @@ document.getElementById('windows').addEventListener('click', () => {
     const os = getOperatingSystem();
     const linux = document.getElementById('linux');
     const windows = document.getElementById('windows');
-    if (os === "Linux"){document.body.removeChild(windows);} else if (os === "Windows") {document.body.removeChild(linux)} else {document.body.removeChild(windows);document.body.removeChild(linux)}
+    if (os === "Linux"){windows.remove();} else if (os === "Windows") {linux.remove()} else {windows.remove();linux.remove();}
     </script>
   </body>
 </html>
