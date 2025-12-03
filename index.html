@@ -643,28 +643,32 @@ document.getElementById('windows').addEventListener('click', () => {
 
     </script>
     <script>
-          function getOperatingSystem() {
-        const userAgent = navigator.userAgent;
+function getOperatingSystem() {
+  const ua = navigator.userAgent;
 
-        if (userAgent.includes("Win")) {
-            return "Windows";
-        } else if (userAgent.includes("Mac")) {
-            return "macOS";
-        } else if (userAgent.includes("Linux")) {
-            return "Linux";
-        } else if (userAgent.includes("Android")) {
-            return "Android";
-        } else if (userAgent.includes("iOS") || userAgent.includes("iPhone") || userAgent.includes("iPad") || userAgent.includes("iPod")) {
-            return "iOS";
-        } else {
-            return "Unknown";
-        }
-    }
+  if (ua.includes("Win")) return "Windows";
+  if (ua.includes("Mac") && !ua.includes("iPhone") && !ua.includes("iPad")) return "macOS";
+  if (ua.includes("Android")) return "Android";
+  if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod")) return "iOS";
+  if (ua.includes("Linux")) return "Linux";
 
-    const os = getOperatingSystem();
-    const linux = document.getElementById('linux');
-    const windows = document.getElementById('windows');
-    if (os === "Linux"){windows.remove();} else if (os === "Windows") {linux.remove()} else {windows.remove();linux.remove();}
+  return "Unknown";
+}
+
+const os = getOperatingSystem();
+const linux = document.getElementById("linux");
+const windows = document.getElementById("windows");
+
+// Safe removal
+if (os === "Linux") {
+    windows?.remove();
+} else if (os === "Windows") {
+    linux?.remove();
+} else {
+    windows?.remove();
+    linux?.remove();
+}
+
     </script>
   </body>
 </html>
