@@ -681,6 +681,40 @@ if (os === "Linux") {
     windows?.remove();
     linux?.remove();
 }
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function tryInstallPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => (deferredPrompt = null));
+}
+
+function getOperatingSystem() {
+  const ua = navigator.userAgent;
+
+  if (ua.includes("Win")) return "Windows";
+  if (ua.includes("Macintosh") && !ua.includes("Mobile")) return "macOS";
+  if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod")) return "iOS";
+  if (ua.includes("Android")) return "Android";
+  if (ua.includes("CrOS")) return "ChromeOS";
+  if (ua.includes("Linux")) return "Linux";
+
+  return "Unknown";
+}
+
+window.addEventListener("load", () => {
+  const os = getOperatingSystem();
+
+  // If OS not supported → trigger PWA install UI
+  if (os !== "Windows" && os !== "Linux") {
+    tryInstallPWA();
+  }
+});
 
     </script>
   </body>
