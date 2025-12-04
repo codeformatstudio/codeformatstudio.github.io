@@ -2,268 +2,302 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title> QR Code Generator</title>
+<title>Advanced Responsive QR Code Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="icon" href="icons/icon.png" />
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+:root {
+    --accent: #00ffff;
+    --bg-dark: #000010;
+    --panel-bg: rgba(0, 10, 20, 0.92);
+}
+
+* { box-sizing: border-box; }
+
 body {
-    background: radial-gradient(circle at center, #000010, #000000 70%);
-    color: #00ffff;
+    margin: 0;
+    background: radial-gradient(circle at center, #000020, #000000 70%);
+    color: var(--accent);
     font-family: 'Orbitron', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
+    padding: clamp(8px, 2vw, 24px);
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1rem, 4vw, 2.6rem);
     text-align: center;
-    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff55;
-    margin-bottom: 20px;
-    word-break: break-word;
+    text-shadow: 0 0 10px var(--accent);
+    margin-bottom: 15px;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    gap: 16px;
+}
+
+.card {
+    background: var(--panel-bg);
+    border: 2px solid var(--accent);
+    border-radius: 16px;
+    padding: clamp(10px, 2vw, 20px);
+    box-shadow: 0 0 20px #00ffff44;
 }
 
 .inputRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
     align-items: center;
-    flex-direction: column;
-    justify-content: center;
 }
 
-input[type="text"], input[type="number"], input[type="color"] {
+label {
+    font-size: 0.9rem;
+}
+
+input, select {
     padding: 10px;
-    font-size: 1rem;
-    border: 2px solid #00ffff;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    border: 2px solid var(--accent);
     border-radius: 10px;
     background: rgba(0, 20, 30, 0.9);
-    color: #00ffff;
-    text-shadow: 0 0 5px #00ffff;
+    color: var(--accent);
     outline: none;
-    transition: all 0.2s ease;
-    min-width: 100px;
-    flex: 1 1 150px; /* flexible width */
+}
+
+input[type="text"] {
+    width: 100%;
 }
 
 input[type="color"] {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     padding: 0;
     border-radius: 50%;
     cursor: pointer;
-    flex: 0 0 auto; /* don’t grow */
-    flex-shrink: 0;
 }
 
 .colorPreview {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
-    border: 2px solid #00ffff;
-    box-shadow: 0 0 10px #00ffff55;
+    border: 2px solid var(--accent);
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: #000010;
-    background: #00ffff;
-    border: 2px solid #00ffff;
-    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    background: var(--accent);
+    color: #000;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
     cursor: pointer;
-    margin: 5px;
-    text-shadow: 0 0 5px #000010;
-    box-shadow: 0 0 15px #00ffff88;
-    transition: all 0.2s ease;
-    flex: 1 1 120px; /* flexible button width */
-    max-width: 200px;
+    box-shadow: 0 0 12px #00ffff88;
+    transition: 0.2s;
 }
 
 button:hover {
     background: #000010;
-    color: #00ffff;
-    box-shadow: 0 0 25px #00ffff;
+    color: var(--accent);
+    box-shadow: 0 0 22px var(--accent);
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
 }
 
 #qrcode {
-    margin-top: 20px;
-    padding: 20px;
-    background: rgba(0, 10, 20, 0.9);
-    border: 2px solid #00ffff;
-    border-radius: 12px;
-    box-shadow: 0 0 20px #00ffff55;
-    width: 90%;
-    max-width: 350px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    min-height: 220px;
 }
 
-@media (max-width: 768px) {
-    h1 {
-        font-size: 2rem;
-    }
-    .inputRow {
-        flex-direction: column;
-    }
-    input[type="text"], input[type="number"] {
-        flex: 1 1 100%;
-    }
-    button {
-        flex: 1 1 100%;
-    }
+#history {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 8px;
 }
 
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.5rem;
-    }
-    input[type="text"], input[type="number"] {
-        font-size: 0.9rem;
-        padding: 8px;
-    }
-    button {
-        font-size: 0.9rem;
-        padding: 8px;
-    }
-    #qrcode {
-        max-width: 90%;
-        padding: 15px;
-    }
-}
-
-@media (max-width: 320px) {
-    h1 {
-        font-size: 1.2rem;
-    }
-    input[type="text"], input[type="number"], input[type="color"] {
-        font-size: 0.8rem;
-        padding: 6px;
-    }
-    button {
-        font-size: 0.8rem;
-        padding: 6px;
-    }
-}
-#urlInput {
+#history img {
     width: 100%;
-    max-width: 400px;
-    height: 40px;          /* fixed single-line height */
-    padding: 8px 10px;
-    font-size: 1rem;
-    line-height: normal;    /* prevent extra vertical stretch */
-    box-sizing: border-box;
-    display: block;
-    flex: none !important;  /* THIS stops flex from stretching height */
-    min-height: 0;          /* ensures flex-shrink works properly */
+    border-radius: 8px;
+    border: 2px solid var(--accent);
+    cursor: pointer;
 }
 
+.themeToggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+
+@media (max-width: 350px) {
+    .card { padding: 8px; }
+    input, button { padding: 6px; }
+}
 
 </style>
 </head>
-
 <body>
-<h1> QR Code Generator</h1>
 
-<input type="text" id="urlInput" placeholder="Enter URL to generate QR Code" style="height: initial">
+<button class="themeToggle" id="themeBtn">Toggle Theme</button>
 
-<div class="inputRow"><label for="widthInput">Width (px)</label>
-    <input type="number" id="widthInput" placeholder="Width (px)" value="200" min="50">
-    <label for="widthInput">Height (px)</label>
-    <input type="number" id="heightInput" placeholder="Height (px)" value="200" min="50">
-</div>
+<h1>Advanced QR Code Generator</h1>
 
-<div class="inputRow">
-    <div style="display:flex;align-items:center;gap:10px;">
-        <input type="color" id="fgInput" value="#000000">
-        <div class="colorPreview" id="fgPreview" style="background-color:#000000;"></div>
-        <span>Foreground</span>
+<div class="container">
+
+    <div class="card">
+        <div class="inputRow">
+            <label>QR Content</label>
+            <input type="text" id="urlInput" placeholder="Enter text or URL">
+        </div>
     </div>
-    
-    <div style="display:flex;align-items:center;gap:10px;">
-        <input type="color" id="bgInput" value="#ffffff">
-        <div class="colorPreview" id="bgPreview" style="background-color:#ffffff;"></div>
-        <span>Background</span>
+
+    <div class="card">
+        <div class="inputRow">
+            <div>
+                <label>Width (px)</label>
+                <input type="number" id="widthInput" value="220" min="80">
+            </div>
+            <div>
+                <label>Height (px)</label>
+                <input type="number" id="heightInput" value="220" min="80">
+            </div>
+            <div>
+                <label>Correction</label>
+                <select id="levelInput">
+                    <option value="L">Low (L)</option>
+                    <option value="M">Medium (M)</option>
+                    <option value="Q">High (Q)</option>
+                    <option value="H">Max (H)</option>
+                </select>
+            </div>
+        </div>
     </div>
-</div>
 
-<div>
-    <button id="generateBtn">Generate QR Code</button>
-    <button id="downloadBtn">Download QR Code</button>
-</div>
+    <div class="card">
+        <div class="inputRow">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <input type="color" id="fgInput" value="#000000">
+                <div class="colorPreview" id="fgPreview"></div>
+                <span>Foreground</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <input type="color" id="bgInput" value="#ffffff">
+                <div class="colorPreview" id="bgPreview"></div>
+                <span>Background</span>
+            </div>
+        </div>
+    </div>
 
-<div id="qrcode"></div>
+    <div class="card actions">
+        <button id="generateBtn">Generate</button>
+        <button id="downloadBtn">Download</button>
+        <button id="copyBtn">Copy Image</button>
+        <button id="clearBtn">Clear</button>
+    </div>
+
+    <div class="card" id="qrcode"></div>
+
+    <div class="card">
+        <h3 style="margin-top:0">History</h3>
+        <div id="history"></div>
+    </div>
+
+</div>
 
 <script>
 let qr;
+let darkMode = true;
 
 const qrContainer = document.getElementById('qrcode');
+const historyBox = document.getElementById('history');
+
 const urlInput = document.getElementById('urlInput');
 const widthInput = document.getElementById('widthInput');
 const heightInput = document.getElementById('heightInput');
 const fgInput = document.getElementById('fgInput');
 const bgInput = document.getElementById('bgInput');
+const levelInput = document.getElementById('levelInput');
 const fgPreview = document.getElementById('fgPreview');
 const bgPreview = document.getElementById('bgPreview');
-const generateBtn = document.getElementById('generateBtn');
-const downloadBtn = document.getElementById('downloadBtn');
 
-// Live color preview
-fgInput.addEventListener('input', () => {
-    fgPreview.style.backgroundColor = fgInput.value;
-});
-bgInput.addEventListener('input', () => {
-    bgPreview.style.backgroundColor = bgInput.value;
-});
+fgPreview.style.background = fgInput.value;
+bgPreview.style.background = bgInput.value;
 
-generateBtn.addEventListener('click', () => {
-    const url = urlInput.value.trim();
-    if (!url) {
-        urlInput.focus();
-        urlInput.style.boxShadow = "0 0 20px red";
-        return alert("Please enter a URL!");
-    }
+fgInput.addEventListener('input', () => fgPreview.style.background = fgInput.value);
+bgInput.addEventListener('input', () => bgPreview.style.background = bgInput.value);
 
-    const width = parseInt(widthInput.value) || 200;
-    const height = parseInt(heightInput.value) || 200;
+document.getElementById('generateBtn').onclick = () => {
+    const text = urlInput.value.trim();
+    if (!text) return alert('Enter content first');
 
-    // Validation: ensure colors are valid hex
-    if (!/^#[0-9A-Fa-f]{6}$/.test(fgInput.value)) {
-        fgInput.focus();
-        fgInput.style.boxShadow = "0 0 20px red";
-        return alert("Foreground color is invalid!");
-    }
-    if (!/^#[0-9A-Fa-f]{6}$/.test(bgInput.value)) {
-        bgInput.focus();
-        bgInput.style.boxShadow = "0 0 20px red";
-        return alert("Background color is invalid!");
-    }
-
-    qrContainer.innerHTML = "";
+    qrContainer.innerHTML = '';
 
     qr = new QRCode(qrContainer, {
-        text: url,
-        width,
-        height,
+        text,
+        width: +widthInput.value,
+        height: +heightInput.value,
         colorDark: fgInput.value,
         colorLight: bgInput.value,
+        correctLevel: QRCode.CorrectLevel[levelInput.value]
     });
-});
 
-downloadBtn.addEventListener('click', () => {
+    setTimeout(() => {
+        const img = qrContainer.querySelector('img');
+        if (img) addToHistory(img.src);
+    }, 200);
+};
+
+document.getElementById('downloadBtn').onclick = () => {
     const img = qrContainer.querySelector('img');
-    if (!img) return alert("Please generate a QR code first!");
+    if (!img) return alert('Generate QR first');
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = 'qr-code.png';
+    a.click();
+};
 
-    const link = document.createElement('a');
-    link.href = img.src;
-    link.download = 'qr-code.png';
-    link.click();
-});
+document.getElementById('copyBtn').onclick = async () => {
+    const img = qrContainer.querySelector('img');
+    if (!img) return alert('Generate QR first');
+    const blob = await fetch(img.src).then(r => r.blob());
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    alert('QR copied to clipboard');
+};
+
+document.getElementById('clearBtn').onclick = () => {
+    qrContainer.innerHTML = '';
+};
+
+function addToHistory(src) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.onclick = () => { qrContainer.innerHTML = `<img src="${src}">`; };
+    historyBox.prepend(img);
+    if (historyBox.children.length > 8) historyBox.lastChild.remove();
+}
+
+// Theme toggle
+
+document.getElementById('themeBtn').onclick = () => {
+    darkMode = !darkMode;
+    document.documentElement.style.setProperty('--accent', darkMode ? '#00ffff' : '#0066ff');
+    document.body.style.background = darkMode ?
+        'radial-gradient(circle at center, #000020, #000000 70%)' :
+        'linear-gradient(135deg, #e0f2ff, #ffffff)';
+    document.body.style.color = darkMode ? '#00ffff' : '#003366';
+};
 </script>
+
 </body>
 </html>
