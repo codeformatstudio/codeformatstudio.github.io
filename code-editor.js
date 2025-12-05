@@ -8,15 +8,10 @@ window.addEventListener("beforeunload", function (event) {
     return message?true:false; // For some older browsers
 });
 
-// Helper Function \\
 function cyberPrompt(message, callback) {
-  // Create overlay
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
-  overlay.style.top = "0";
-  overlay.style.left = "0";
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
+  overlay.style.inset = "0";
   overlay.style.background = "rgba(0,0,10,0.95)";
   overlay.style.display = "flex";
   overlay.style.flexDirection = "column";
@@ -24,77 +19,42 @@ function cyberPrompt(message, callback) {
   overlay.style.alignItems = "center";
   overlay.style.zIndex = "10000";
   overlay.style.color = "#00ffff";
-  overlay.style.fontFamily =
-    '"Orbitron", "Segoe UI", Tahoma, Roboto, sans-serif';
-  overlay.style.textAlign = "center";
+  overlay.style.fontFamily = '"Orbitron", sans-serif';
 
-  // Message
   const msg = document.createElement("div");
   msg.textContent = message;
   msg.style.marginBottom = "20px";
   msg.style.fontSize = "20px";
-  msg.style.textShadow = "0 0 10px #00ffff";
   overlay.appendChild(msg);
 
-  // Input
   const input = document.createElement("input");
-  input.type = "text";
   input.style.padding = "10px";
-  input.style.border = "2px solid #00ffff";
-  input.style.borderRadius = "10px";
-  input.style.background = "rgba(0,20,30,0.9)";
-  input.style.color = "#00ffff";
-  input.style.fontSize = "16px";
   input.style.width = "300px";
-  input.style.marginBottom = "20px";
-  input.style.textAlign = "center";
   overlay.appendChild(input);
 
-  // Buttons
-  const btnContainer = document.createElement("div");
-  btnContainer.style.display = "flex";
-  btnContainer.style.gap = "10px";
+  const btnBox = document.createElement("div");
+  btnBox.style.marginTop = "20px";
 
   const okBtn = document.createElement("button");
   okBtn.textContent = "OK";
-  okBtn.style.padding = "8px 16px";
-  okBtn.style.background = "#000010";
-  okBtn.style.color = "#00ffff";
-  okBtn.style.border = "2px solid #00ffff";
-  okBtn.style.borderRadius = "8px";
-  okBtn.style.cursor = "pointer";
-  okBtn.style.boxShadow = "0 0 10px #00ffff55";
-  okBtn.onclick = () => {
-    callback(input.value);
-    document.body.removeChild(overlay);
-  };
 
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "Cancel";
-  cancelBtn.style.padding = "8px 16px";
-  cancelBtn.style.background = "#000010";
-  cancelBtn.style.color = "#00ffff";
-  cancelBtn.style.border = "2px solid #00ffff";
-  cancelBtn.style.borderRadius = "8px";
-  cancelBtn.style.cursor = "pointer";
-  cancelBtn.style.boxShadow = "0 0 10px #00ffff55";
-  cancelBtn.onclick = () => {
-    callback(null);
+
+  function close(result) {
+    callback(result);
     document.body.removeChild(overlay);
-  };
+  }
 
-  btnContainer.appendChild(okBtn);
-  btnContainer.appendChild(cancelBtn);
-  overlay.appendChild(btnContainer);
+  okBtn.onclick = () => close(input.value);
+  cancelBtn.onclick = () => close(null);
 
+  btnBox.appendChild(okBtn);
+  btnBox.appendChild(cancelBtn);
+  overlay.appendChild(btnBox);
   document.body.appendChild(overlay);
+
   input.focus();
-  okBtn.addEventListener("click", function (){
-    document.body.removeChild(overlay);
-  })
-  cancelBtn.addEventListener("click", function () {
-    document.body.removeChild(overlay);
-  })
 }
 
 // === DOM ELEMENTS === \\
@@ -408,10 +368,6 @@ function downloadProject(defaultName = "project") {
 // ---------------------------
 // attach download button
 // ---------------------------
-downloadBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  downloadProject("project");
-});
 
 // === Auto Update on Input Change ===
 htmlEditor.on("change", updatePreview);
@@ -499,21 +455,72 @@ pySelect.addEventListener("load", (e) => {
   }
 });
 
-downloadBtn.addEventListener("click", () => {
-  cyberPrompt("Enter your project name:", (value) => {
-    if (!value) value = "project"; // default name
-
-    // --- Generate full HTML output ---
-    const fullOutput = generateFullOutput();
-
-    // --- Create download link ---
-    const a = document.createElement("a");
-    const blob = new Blob([fullOutput], { type: "text/html" });
-    const downloadURL = URL.createObjectURL(blob);
-    a.href = downloadURL;
-    a.download = value + ".html"; // use entered name
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
+downloadBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  downloadProjectAsFolder();
 });
+async function downloadProjectAsFolder() {
+  cyberPrompt("Enter your project name:", async (projectName) => {
+    if (!projectName || !projectName.trim()) projectName = "project";
+
+    // Ask the user where to save
+    const root = await window.showDirectoryPicker();
+
+    // Create main project directory
+    const projectFolder = await root.getDirectoryHandle(projectName, { create: true });
+
+    // ---------------------------
+    // ✅ WEB FILES (Always Created)
+    // ---------------------------
+    await writeFile(projectFolder, "index.html", htmlEditor.getValue());
+    await writeFile(projectFolder, "style.css", cssEditor.getValue());
+    await writeFile(projectFolder, "script.js", jsEditor.getValue());
+
+    // ---------------------------
+    // ✅ LANGUAGE-SPECIFIC FOLDER
+    // ---------------------------
+    const lang = pySelect.value;   // ← THIS IS YOUR REAL DROPDOWN VALUE
+    let folderName = null;
+    let fileName = null;
+
+    if (lang === "brython") {
+      folderName = "python";
+      fileName = "main.py";
+    } 
+    else if (lang === "python") {
+      folderName = "python";
+      fileName = "main.py";
+    } 
+    else if (lang === "ruby") {
+      folderName = "ruby";
+      fileName = "main.rb";
+    } 
+    else if (lang === "r") {
+      folderName = "r";
+      fileName = "main.r";
+    } 
+    else if (lang === "lua") {
+      folderName = "lua";
+      fileName = "main.lua";
+    } 
+    else if (lang === "scheme") {
+      folderName = "scheme";
+      fileName = "main.scm";
+    }
+
+    // ✅ Only create the language folder if one is selected
+    if (folderName && fileName) {
+      const langFolder = await projectFolder.getDirectoryHandle(folderName, { create: true });
+      await writeFile(langFolder, fileName, pyEditor.getValue());
+    }
+
+    console.log("✅ Project created successfully with correct structure!");
+  });
+}
+
+async function writeFile(dirHandle, name, content) {
+  const fileHandle = await dirHandle.getFileHandle(name, { create: true });
+  const writable = await fileHandle.createWritable();
+  await writable.write(content);
+  await writable.close();
+}
