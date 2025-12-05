@@ -23,6 +23,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/lua/lua.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/r/r.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/scheme/scheme.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
 
@@ -42,28 +46,36 @@
         font-family: "Orbitron", "Segoe UI", Tahoma, Roboto, sans-serif;
         box-sizing: border-box;
       }
-      body {
-        background: radial-gradient(circle at center, #000010, #000000 70%);
-        color: #00ffff;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      h1 {
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
-        margin-bottom: 20px;
-      }
+body {
+  background: radial-gradient(circle at center, #000010, #000000 70%);
+  color: #00ffff;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ✅ TRUE horizontal centering */
+}
+
+h1 {
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff;
+  margin-bottom: 20px;
+  text-align: center;   /* ✅ TRUE text centering */
+}
+
 
       /* === LAYOUT === */
-      .container {
-        display: flex;
-        justify-content: space-around;
-        width: 95%;
-        margin-bottom: 20px;
-      }
+.container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 20px;
+}
+
       .two-inputs {
         display: flex;
         flex-direction: column;
@@ -125,7 +137,6 @@
 
       /* Section Titles */
       h2 {
-        text-align: center;
         color: #00ffff;
         text-shadow: 0 0 10px #00ffff;
       }
@@ -180,6 +191,100 @@
         color: #000010;
         box-shadow: 0 0 15px #00ffffcc;
       }
+      /* === REAL DOCKING SYSTEM (PUSHES CONTENT) === */
+
+body {
+  transition: padding 0.3s ease;
+}
+
+/* RIGHT DOCK */
+body.dock-right {
+  padding-right: 45vw;   /* ✅ pushes content LEFT */
+}
+
+/* LEFT DOCK */
+body.dock-left {
+  padding-left: 45vw;    /* ✅ pushes content RIGHT */
+}
+
+/* BOTTOM DOCK */
+body.dock-bottom {
+  padding-bottom: 45vh;  /* ✅ pushes content UP */
+}
+
+/* Preview Positioning */
+#previewScreen {
+  position: fixed;
+  z-index: 9999;
+}
+
+/* RIGHT */
+body.dock-right #previewScreen {
+  right: 10px;
+  top: 5%;
+  width: 42vw;
+  height: 90%;
+}
+
+/* LEFT */
+body.dock-left #previewScreen {
+  left: 10px;
+  top: 5%;
+  width: 42vw;
+  height: 90%;
+}
+
+/* BOTTOM */
+body.dock-bottom #previewScreen {
+  left: 2.5%;
+  bottom: 10px;
+  width: 95%;
+  height: 40vh;
+}
+/* BOTTOM DOCK */
+body.dock-bottom {
+  padding-bottom: 45vh;  /* pushes editor content UP */
+}
+
+body.dock-bottom #previewScreen {
+  left: 2.5%;
+  bottom: 10px;
+  width: 95%;
+  height: 40vh;  /* preview takes bottom 40% of screen */
+}
+
+#openPreviewBtn {
+  justify-self: center;
+  background: #000010;
+  color: #00ffff;
+  border: 1px solid #00ffff;
+  border-radius: 6px;
+  width: fit-content;
+  height: fit-content;
+  padding: 10px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 8px #00ffff88;
+  transition: all 0.2s ease;
+  z-index: 9999;
+  margin-right: 10px;
+}
+
+#openPreviewBtn:hover {
+  background: #00ffff;
+  color: #000010;
+  box-shadow: 0 0 15px #00ffffcc;
+}
+#openPreviewBtn {
+  display: block;
+  margin: 20px auto;   /* ✅ Perfect horizontal center */
+}
+#downloadBtn {
+  display: block;
+  margin: 20px auto;   /* ✅ Perfect horizontal center */
+}
+
     </style>
   </head>
   <body>
@@ -216,6 +321,10 @@
       <div class="two-inputs">
         <select id="pySelect">
           <option value="brython">Python</option>
+            <option value="lua">Lua</option>
+            <option value="ruby">Ruby</option>
+            <option value="scheme">Scheme</option>
+            <option value="r">R</option>
         </select>
         <textarea
           id="pyInput"
@@ -283,6 +392,8 @@
       <div id="previewContent" style="width: 100%; height: 100%"></div>
     </div>
     <button id="downloadBtn">Download</button>
+    <button id="openPreviewBtn">Open Preview</button>
+
     <script src="code-editor.js"></script>
   </body>
 </html>
