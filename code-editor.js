@@ -162,46 +162,85 @@ const pyEditor = CodeMirror.fromTextArea(pyInput, {
 });
 pyEditor.getWrapperElement().style.fontFamily = '"Consolas", "Monaco", "Courier New", monospace';
 
-// === Docking Logic ===
+let previewWindow = null;
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const mode = previewInput.value.toLowerCase();
-  previewScreen.style.display = "block";
 
-  // Reset all positioning first
+  const mode = previewInput.value.toLowerCase().trim();
+
+  // RESET EVERYTHING
+  document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+
+  previewStyle.display = "block";
   previewStyle.top = "";
   previewStyle.bottom = "";
   previewStyle.left = "";
   previewStyle.right = "";
   previewStyle.width = "";
   previewStyle.height = "";
+});
+const openPreviewBtn = document.getElementById("openPreviewBtn");
 
-  if (mode === "dock to bottom") {
-    previewStyle.bottom = "0";
-    previewStyle.left = "0";
-    previewStyle.width = "100%";
-    previewStyle.height = "250px";
-  } else if (mode === "dock to right") {
-    previewStyle.right = "0";
-    previewStyle.top = "0";
-    previewStyle.width = "50%";
-    previewStyle.height = "100%";
+// ✅ MAIN PREVIEW APPLY FUNCTION
+function applyPreviewMode(mode) {
+  mode = mode.toLowerCase().trim();
+
+  localStorage.setItem("preferredDockMode", mode);
+
+  // RESET
+  document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+
+  previewStyle.display = "block";
+
+  if (mode === "separate window") {
+    previewStyle.display = 'none';
+    if (!previewWindow || previewWindow.closed) {
+      previewWindow = window.open("", "_blank", "width=1000,height=700");
+    }
+    previewWindow.document.open();
+    previewWindow.document.write(generateFullOutput());
+    previewWindow.document.close();
+    return;
+  }
+
+  if (mode === "dock to right") {
+    document.body.classList.add("dock-right");
   } else if (mode === "dock to left") {
-    previewStyle.left = "0";
-    previewStyle.top = "0";
-    previewStyle.width = "50%";
-    previewStyle.height = "100%";
-  } else if (mode === "separate window") {
-    previewStyle.top = "0";
-    previewStyle.left = "0";
-    previewStyle.width = "100%";
-    previewStyle.height = "100%";
+    document.body.classList.add("dock-left");
+  } else if (mode === "dock to bottom") {
+    document.body.classList.add("dock-bottom");
   }
 
   updatePreview();
+  resizeEditors();
+}
+
+function resizeEditors() {
+  setTimeout(() => {
+    htmlEditor.refresh();
+    cssEditor.refresh();
+    jsEditor.refresh();
+    pyEditor.refresh();
+  }, 50);
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const mode = previewInput.value;
+  applyPreviewMode(mode);
 });
 
-// === Update Preview Function ===
+openPreviewBtn.addEventListener("click", () => {
+  const savedMode = localStorage.getItem("preferredDockMode");
+
+  if (!savedMode) {
+    alert("No saved preview mode yet!");
+    return;
+  }
+
+  applyPreviewMode(savedMode);
+});
 function updatePreview() {
   previewContent.innerHTML = ""; // clear previous iframe
 
@@ -216,46 +255,69 @@ function updatePreview() {
   doc.write(generateOutput());
   doc.close();
 
-  if (pySelect.value === "brython") {
-    iframe.onload = () => {
-      iframe.contentWindow.brython && iframe.contentWindow.brython();
-    };
+  const lang = pySelect.value;
+  iframe.onload = () => {
+    switch (lang) {
+      case "brython":
+        iframe.contentWindow.brython && iframe.contentWindow.brython();
+        break;
+      case "lua":
+        fengari.load(jsEditor.getValue())(); // or pyEditor.getValue()
+        break;
+      case "ruby":
+        Opal.eval(pyEditor.getValue());
+        break;
+      case "scheme":
+        new BiwaScheme.Interpreter().evaluate(pyEditor.getValue());
+        break;
+      case "r":
+        const r = new R();
+        r.eval(pyEditor.getValue()).then(console.log);
+        break;
+    }
+  };
+  if (previewWindow && !previewWindow.closed) {
+    previewWindow.document.open();
+    previewWindow.document.write(generateFullOutput());
+    previewWindow.document.close();
   }
 }
-
-// === Code Compilation and Assembly ===
 function generateOutput() {
-  let htmlContent = htmlEditor.getValue();
-  let cssContent = `<style>${cssEditor.getValue()}</style>`;
-  let jsContent = "";
-
-  // --- HTML or Markdown ---
-  if (htmlSelect.value === "markdown") {
-    htmlContent = marked.parse(htmlEditor.getValue() || "");
-  }
-
-  // --- JS / TS Compilation ---
-  if (jsSelect.value === "typescript") {
-    try {
-      jsContent = ts.transpile(jsEditor.getValue(), {
-        module: ts.ModuleKind.ESNext,
-        target: ts.ScriptTarget.ES2020,
-      });
-    } catch (err) {
-      jsContent = `console.error("TypeScript Error:", ${JSON.stringify(
-        err.message
-      )});`;
-    }
-  } else if (jsSelect.value === "javascript") {
-    jsContent = jsEditor.getValue();
-  }
-
-  // --- Python (Brython) ---
+  const htmlContent = htmlEditor.getValue();
+  const cssContent = `<style>${cssEditor.getValue()}</style>`;
+  let jsContent = jsEditor.getValue();
   let pyScript = "";
-  if (pySelect.value === "brython") {
-    pyScript = `<script type="text/python">${pyEditor.getValue()}</script>`;
+
+  const lang = pySelect.value;
+  const code = pyEditor.getValue().replace(/`/g,'\\`'); // escape backticks
+
+  if (lang === "brython") {
+    pyScript = `<script type="text/python">${code}</script>`;
+  } else if (lang === "lua") {
+    pyScript = `<script type="text/lua">
+      fengari.load(\`${code}\`)();
+    </script>`;
+  } else if (lang === "ruby") {
+    pyScript = `<script type="text/ruby">
+      Opal.eval(\`${code}\`);
+    </script>`;
+  } else if (lang === "scheme") {
+    pyScript = `<script type="text/scheme">
+      new BiwaScheme.Interpreter().evaluate(\`${code}\`);
+    </script>`;
+  } else if (lang === "r") {
+    pyScript = `<script type="text/r">
+      const r = new R();
+      r.eval(\`${code}\`).then(console.log);
+    </script>`;
   }
 
+  return `
+    ${htmlContent}
+    ${cssContent}
+    <script>${jsContent}</script>
+    ${pyScript}
+  `;
   // === Final HTML Output ===
   const fullOutput = `
      ${htmlContent}
@@ -269,77 +331,88 @@ function generateOutput() {
 
   return fullOutput;
 }
+// ---------------------------
+// generateFullOutput (pure)
+// ---------------------------
 function generateFullOutput() {
-  let htmlContent = htmlEditor.getValue();
-  let cssContent = `<style>${cssEditor.getValue()}</style>`;
-  let jsContent = "";
-
-  // --- HTML or Markdown ---
-  if (htmlSelect.value === "markdown") {
-    htmlContent = marked.parse(htmlEditor.getValue() || "");
-  }
-
-  // --- JS / TS Compilation ---
-  if (jsSelect.value === "typescript") {
-    try {
-      jsContent = ts.transpile(jsEditor.getValue(), {
-        module: ts.ModuleKind.ESNext,
-        target: ts.ScriptTarget.ESNext,
-      });
-    } catch (err) {
-      jsContent = `console.error("TypeScript Error:", ${JSON.stringify(
-        err.message
-      )});`;
-    }
-  } else if (jsSelect.value === "javascript") {
-    jsContent = jsEditor.getValue();
-  }
-
-  // --- Python (Brython) ---
+  const htmlContent = htmlEditor.getValue();
+  const cssContent = `<style>${cssEditor.getValue()}</style>`;
+  let jsContent = jsEditor.getValue();
   let pyScript = "";
-  if (pySelect.value === "brython") {
-    pyScript = `<script type="text/python">${pyEditor.getValue()}</script>`;
+
+  const lang = pySelect.value;
+  const code = pyEditor.getValue().replace(/`/g,'\\`'); // escape backticks
+
+  if (lang === "brython") {
+    pyScript = `<script type="text/python">${code}</script>`;
+  } else if (lang === "lua") {
+    pyScript = `<script type="text/lua">
+      fengari.load(\`${code}\`)();
+    </script>`;
+  } else if (lang === "ruby") {
+    pyScript = `<script type="text/ruby">
+      Opal.eval(\`${code}\`);
+    </script>`;
+  } else if (lang === "scheme") {
+    pyScript = `<script type="text/scheme">
+      new BiwaScheme.Interpreter().evaluate(\`${code}\`);
+    </script>`;
+  } else if (lang === "r") {
+    pyScript = `<script type="text/r">
+      const r = new R();
+      r.eval(\`${code}\`).then(console.log);
+    </script>`;
   }
 
+  return `
+    ${htmlContent}
+    ${cssContent}
+    <script>${jsContent}</script>
+    ${pyScript}
+  `;
   // === Final HTML Output ===
   const fullOutput = `
-     <!DOCTYPE html>
-     <html>
-     <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     </head>
-     <body>
      ${htmlContent}
      ${cssContent}
-     <script src="https://cdn.jsdelivr.net/npm/brython@3.14.0/brython.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/marked@17.0.0/lib/marked.umd.js"></script>
      <script type="text/javascript">
-     document.addEventListener("DOMContentLoaded", () => { if(typeof brython !== 'undefined') brython(); });
+     window.onload = () => { if(typeof brython !== 'undefined') brython(); };
      ${jsContent}
      </script>
      ${pyScript}
-     </body>
-     </html>
    `;
-  let name;
-  cyberPrompt("Enter your project name:", (value) => {
-    if (value === null) {
-      value = "project";
-      name = value;
-    }
-  });
-  const a = document.createElement("a");
-  generateOutput();
-  const blob = new Blob([fullOutput], { type: "text/html" });
-  const downloadURL = URL.createObjectURL(blob);
-  a.href = downloadURL;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
+
   return fullOutput;
 }
+
+// ---------------------------
+// download helper (uses cyberPrompt)
+// ---------------------------
+function downloadProject(defaultName = "project") {
+  cyberPrompt("Enter your project name:", (value) => {
+    let name = defaultName;
+    if (value && value.trim()) name = value.trim();
+
+    const fullOutput = generateFullOutput();
+    const blob = new Blob([fullOutput], { type: "text/html" });
+    const downloadURL = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = downloadURL;
+    a.download = name.endsWith(".html") ? name : name + ".html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(downloadURL);
+  });
+}
+
+// ---------------------------
+// attach download button
+// ---------------------------
+downloadBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  downloadProject("project");
+});
+
 // === Auto Update on Input Change ===
 htmlEditor.on("change", updatePreview);
 cssEditor.on("change", updatePreview);
@@ -363,9 +436,69 @@ jsSelect.addEventListener("change", (e) => {
   }
 });
 
-closePreviewBtn.addEventListener("click", function () {
+closePreviewBtn.addEventListener("click", () => {
   previewStyle.display = "none";
+  document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+  localStorage.removeItem("preferredDockMode");
+  resizeEditors();
 });
+
+window.addEventListener("resize", () => {
+  resizeEditors();
+
+  const savedMode = localStorage.getItem("preferredDockMode");
+  if (savedMode && previewScreen.style.display !== "none") {
+    applyPreviewMode(savedMode);
+  }
+});
+
+pySelect.addEventListener("change", (e) => {
+  const lang = e.target.value;
+  switch (lang) {
+    case "python":
+    case "brython":
+      pyEditor.setOption("mode", "python");
+      break;
+    case "ruby":
+      pyEditor.setOption("mode", "ruby");
+      break;
+    case "scheme":
+      pyEditor.setOption("mode", "scheme");
+      break;
+    case "r":
+      pyEditor.setOption("mode", "r");
+      break;
+    case "lua":
+      pyEditor.setOption("mode", "lua");
+      break;
+    default:
+      pyEditor.setOption("mode", "null"); // plain text
+  }
+});
+pySelect.addEventListener("load", (e) => {
+  const lang = e.target.value;
+  switch (lang) {
+    case "python":
+    case "brython":
+      pyEditor.setOption("mode", "python");
+      break;
+    case "ruby":
+      pyEditor.setOption("mode", "ruby");
+      break;
+    case "scheme":
+      pyEditor.setOption("mode", "scheme");
+      break;
+    case "r":
+      pyEditor.setOption("mode", "r");
+      break;
+    case "lua":
+      pyEditor.setOption("mode", "lua");
+      break;
+    default:
+      pyEditor.setOption("mode", "null"); // plain text
+  }
+});
+
 downloadBtn.addEventListener("click", () => {
   cyberPrompt("Enter your project name:", (value) => {
     if (!value) value = "project"; // default name
