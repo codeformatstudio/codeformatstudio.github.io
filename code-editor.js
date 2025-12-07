@@ -1,3 +1,21 @@
+function generateLanguageScriptForPreview(lang, code) {
+  const escapedCode = code.replace(/`/g, '\\`');
+  switch(lang) {
+    case "brython":
+      return `<script type="text/python">${escapedCode}</script>`;
+    case "ruby":
+      return `<script type="text/ruby">${escapedCode}</script>`;
+    case "scheme":
+      return `<script type="text/x-scheme">${escapedCode}</script>`;
+    case "r":
+      return `<script type="text/r">${escapedCode}</script>`;
+    case "lua":
+      return `<script type="application/lua">${escapedCode}</script>`;
+    default:
+      return "";
+  }
+}
+
 const RUNTIME_URLS = {
   brython: [
     "https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js",
@@ -251,10 +269,10 @@ function updatePreview() {
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
   const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
-  const code = pyEditor.getValue(); // <-- get code directly from pyEditor
+  const code = pyEditor.getValue();
 
   const runtimeScripts = injectRuntime(lang);
-  const pyScript = generateLanguageScript(lang, code);
+  const pyScript = generateLanguageScriptForPreview(lang, code);
 
   doc.write(`
     ${htmlContent}
@@ -265,7 +283,7 @@ function updatePreview() {
   `);
   doc.close();
 
-  // If you also support separate window preview:
+  // Separate window preview
   if (previewWindow && !previewWindow.closed) {
     previewWindow.document.open();
     previewWindow.document.write(`
@@ -278,11 +296,12 @@ function updatePreview() {
     previewWindow.document.close();
   }
 
-  // Brython needs an explicit call
+  // Brython needs explicit initialization
   if (lang === "brython") {
     iframe.contentWindow.brython();
   }
 }
+
 function generateOutput() {
   const htmlContent = htmlEditor.getValue();
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
