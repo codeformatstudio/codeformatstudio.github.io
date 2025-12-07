@@ -2,7 +2,7 @@ function generateLanguageScriptForPreview(lang, code) {
   const escapedCode = code.replace(/`/g, '\\`');
 
   switch(lang) {
-    case "brython":
+    case "python":
       return `<script type="text/python">${escapedCode}</script>`;
 
     case "ruby":
