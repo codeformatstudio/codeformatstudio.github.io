@@ -1,16 +1,40 @@
 function generateLanguageScriptForPreview(lang, code) {
   const escapedCode = code.replace(/`/g, '\\`');
+
   switch(lang) {
     case "brython":
       return `<script type="text/python">${escapedCode}</script>`;
+
     case "ruby":
-      return `<script type="text/ruby">${escapedCode}</script>`;
-    case "scheme":
-      return `<script type="text/x-scheme">${escapedCode}</script>`;
-    case "r":
-      return `<script type="text/r">${escapedCode}</script>`;
+      return `<script>
+        document.addEventListener('DOMContentLoaded', () => {
+          Opal.eval(\`${escapedCode}\`);
+        });
+      </script>`;
+
     case "lua":
-      return `<script type="application/lua">${escapedCode}</script>`;
+      return `<script>
+        document.addEventListener('DOMContentLoaded', () => {
+          fengari.load(\`${escapedCode}\`)();
+        });
+      </script>`;
+
+    case "scheme":
+      return `<script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const interpreter = new BiwaScheme.Interpreter();
+          interpreter.evaluate(\`${escapedCode}\`);
+        });
+      </script>`;
+
+    case "r":
+      return `<script type="module">
+        import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
+        const webR = new WebR();
+        await webR.init();
+        await webR.evalR(\`${escapedCode}\`);
+      </script>`;
+
     default:
       return "";
   }
