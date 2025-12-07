@@ -246,41 +246,43 @@ function updatePreview() {
 
   const doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.open();
-  doc.write(generateOutput());
+
+  const htmlContent = htmlEditor.getValue();
+  const cssContent = `<style>${cssEditor.getValue()}</style>`;
+  const jsContent = jsEditor.getValue();
+  const lang = pySelect.value;
+  const code = pyEditor.getValue(); // <-- get code directly from pyEditor
+
+  const runtimeScripts = injectRuntime(lang);
+  const pyScript = generateLanguageScript(lang, code);
+
+  doc.write(`
+    ${htmlContent}
+    ${cssContent}
+    ${runtimeScripts}
+    <script>${jsContent}</script>
+    ${pyScript}
+  `);
   doc.close();
 
-  const lang = pySelect.value;
-// For iframe source loading (secondary languages)
-iframe.onload = () => {
-
-  switch (lang) {
-
-    case "brython":
-      iframe.contentWindow.brython();
-      break;
-
-    case "lua":
-      // Fengari automatically loads <script type="application/lua">
-      break;
-
-    case "ruby":
-      // Opal auto-loads <script type="text/ruby">
-      break;
-
-    case "scheme":
-      // BiwaScheme auto-loads type="text/x-scheme"
-      break;
-
-    case "r":
-      // WebR still needs initialization
-      (async () => {
-        const { WebR } = iframe.contentWindow;
-        const webr = new WebR();
-        await webr.init();
-      })();
-      break;
+  // If you also support separate window preview:
+  if (previewWindow && !previewWindow.closed) {
+    previewWindow.document.open();
+    previewWindow.document.write(`
+      ${htmlContent}
+      ${cssContent}
+      ${runtimeScripts}
+      <script>${jsContent}</script>
+      ${pyScript}
+    `);
+    previewWindow.document.close();
   }
-};
+
+  // Brython needs an explicit call
+  if (lang === "brython") {
+    iframe.contentWindow.brython();
+  }
+}
 
   if (previewWindow && !previewWindow.closed) {
     previewWindow.document.open();
