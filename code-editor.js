@@ -283,13 +283,6 @@ function updatePreview() {
     iframe.contentWindow.brython();
   }
 }
-
-  if (previewWindow && !previewWindow.closed) {
-    previewWindow.document.open();
-    previewWindow.document.write(generateFullOutput());
-    previewWindow.document.close();
-  }
-}
 function generateOutput() {
   const htmlContent = htmlEditor.getValue();
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
