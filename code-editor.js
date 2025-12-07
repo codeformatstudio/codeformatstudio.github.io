@@ -1,3 +1,37 @@
+const RUNTIME_URLS = {
+  brython: [
+    "https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js",
+    "https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.min.js"
+  ],
+
+  lua: [
+    "https://unpkg.com/fengari-web/dist/fengari-web.js"
+  ],
+
+  ruby: [
+    "https://cdn.opalrb.com/opal/current/opal.js"
+  ],
+
+  scheme: [
+    "https://cdn.jsdelivr.net/npm/biwascheme@0.8.3/release/biwascheme.js"
+  ],
+
+  r: [
+    "https://webr.r-wasm.org/latest/webr.mjs"
+  ]
+};
+function injectRuntime(lang) {
+  const urls = RUNTIME_URLS[lang] || [];
+  return urls
+    .map(url => {
+      if (url.endsWith(".mjs")) {
+        return `<script type="module" src="${url}"></script>`;
+      }
+      return `<script src="${url}"></script>`;
+    })
+    .join("\n");
+}
+
 window.addEventListener("beforeunload", function (event) {
     // Most browsers ignore the custom message, but you can set it
     const message = "Are you sure you want to leave this page?";
@@ -245,103 +279,101 @@ function updatePreview() {
 function generateOutput() {
   const htmlContent = htmlEditor.getValue();
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
-  let jsContent = jsEditor.getValue();
-  let pyScript = "";
-
+  const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
-  const code = pyEditor.getValue().replace(/`/g,'\\`'); // escape backticks
 
-  if (lang === "brython") {
-    pyScript = `<script type="text/python">${code}</script>`;
-  } else if (lang === "lua") {
-    pyScript = `<script type="text/lua">
-      fengari.load(\`${code}\`)();
-    </script>`;
-  } else if (lang === "ruby") {
-    pyScript = `<script type="text/ruby">
-      Opal.eval(\`${code}\`);
-    </script>`;
-  } else if (lang === "scheme") {
-    pyScript = `<script type="text/scheme">
-      new BiwaScheme.Interpreter().evaluate(\`${code}\`);
-    </script>`;
-  } else if (lang === "r") {
-    pyScript = `<script type="text/r">
-      const r = new R();
-      r.eval(\`${code}\`).then(console.log);
-    </script>`;
-  }
+  const code = pyEditor.getValue().replace(/`/g, "\\`");
+
+  // Insert language-specific runtime URLs
+  const runtimeScripts = injectRuntime(lang);
+
+  // Insert language-specific interpreter usage
+  const pyScript = generateLanguageScript(lang, code);
 
   return `
     ${htmlContent}
     ${cssContent}
+
+    ${runtimeScripts}
+
     <script>${jsContent}</script>
     ${pyScript}
   `;
-  // === Final HTML Output ===
-  const fullOutput = `
-     ${htmlContent}
-     ${cssContent}
-     <script type="text/javascript">
-     window.onload = () => { if(typeof brython !== 'undefined') brython(); };
-     ${jsContent}
-     </script>
-     ${pyScript}
-   `;
-
-  return fullOutput;
 }
+
 // ---------------------------
 // generateFullOutput (pure)
 // ---------------------------
 function generateFullOutput() {
   const htmlContent = htmlEditor.getValue();
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
-  let jsContent = jsEditor.getValue();
-  let pyScript = "";
-
+  const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
-  const code = pyEditor.getValue().replace(/`/g,'\\`'); // escape backticks
 
-  if (lang === "brython") {
-    pyScript = `<script type="text/python">${code}</script>`;
-  } else if (lang === "lua") {
-    pyScript = `<script type="text/lua">
-      fengari.load(\`${code}\`)();
-    </script>`;
-  } else if (lang === "ruby") {
-    pyScript = `<script type="text/ruby">
-      Opal.eval(\`${code}\`);
-    </script>`;
-  } else if (lang === "scheme") {
-    pyScript = `<script type="text/scheme">
-      new BiwaScheme.Interpreter().evaluate(\`${code}\`);
-    </script>`;
-  } else if (lang === "r") {
-    pyScript = `<script type="text/r">
-      const r = new R();
-      r.eval(\`${code}\`).then(console.log);
-    </script>`;
-  }
+  const code = pyEditor.getValue().replace(/`/g, "\\`");
+
+  const runtimeScripts = injectRuntime(lang);
+  const pyScript = generateLanguageScript(lang, code);
 
   return `
     ${htmlContent}
     ${cssContent}
+
+    ${runtimeScripts}
+
     <script>${jsContent}</script>
     ${pyScript}
   `;
-  // === Final HTML Output ===
-  const fullOutput = `
-     ${htmlContent}
-     ${cssContent}
-     <script type="text/javascript">
-     window.onload = () => { if(typeof brython !== 'undefined') brython(); };
-     ${jsContent}
-     </script>
-     ${pyScript}
-   `;
+}
+function generateLanguageScript(lang, code) {
+  switch (lang) {
 
-  return fullOutput;
+    case "brython":
+      return `
+        <script>
+          window.addEventListener("load", () => brython());
+        </script>
+        <script type="text/python">
+          ${code}
+        </script>
+      `;
+
+    case "lua":
+      return `
+        <script>
+          fengari.load(\`${code}\`)();
+        </script>
+      `;
+
+    case "ruby":
+      return `
+        <script>
+          Opal.eval(\`${code}\`);
+        </script>
+      `;
+
+    case "scheme":
+      return `
+        <script>
+          const biwa = new BiwaScheme.Interpreter();
+          biwa.evaluate(\`${code}\`);
+        </script>
+      `;
+
+    case "r":
+      return `
+        <script type="module">
+          import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
+          const webr = new WebR();
+          await webr.init();
+          const result = await webr.run(\`${code}\`);
+          console.log(result);
+        </script>
+      `;
+
+    default:
+      return ""; // No secondary language
+  }
 }
 
 // ---------------------------
