@@ -250,31 +250,38 @@ function updatePreview() {
   doc.close();
 
   const lang = pySelect.value;
-  iframe.onload = () => {
-    switch (lang) {
-      case "brython":
-        iframe.contentWindow.brython && iframe.contentWindow.brython();
-        break;
-case "lua":
-    try {
-        iframe.contentWindow.fengari.load(pyEditor.getValue())();
-    } catch (e) {
-        console.error("Fengari error:", e);
-    }
-    break;
+// For iframe source loading (secondary languages)
+iframe.onload = () => {
 
-      case "ruby":
-        Opal.eval(pyEditor.getValue());
-        break;
-      case "scheme":
-        new BiwaScheme.Interpreter().evaluate(pyEditor.getValue());
-        break;
-      case "r":
-        const r = new R();
-        r.eval(pyEditor.getValue()).then(console.log);
-        break;
-    }
-  };
+  switch (lang) {
+
+    case "brython":
+      iframe.contentWindow.brython();
+      break;
+
+    case "lua":
+      // Fengari automatically loads <script type="application/lua">
+      break;
+
+    case "ruby":
+      // Opal auto-loads <script type="text/ruby">
+      break;
+
+    case "scheme":
+      // BiwaScheme auto-loads type="text/x-scheme"
+      break;
+
+    case "r":
+      // WebR still needs initialization
+      (async () => {
+        const { WebR } = iframe.contentWindow;
+        const webr = new WebR();
+        await webr.init();
+      })();
+      break;
+  }
+};
+
   if (previewWindow && !previewWindow.closed) {
     previewWindow.document.open();
     previewWindow.document.write(generateFullOutput());
@@ -332,54 +339,36 @@ function generateFullOutput() {
 }
 function generateLanguageScript(lang, code) {
   switch (lang) {
-
     case "brython":
       return `
-        <script>
-          window.addEventListener("load", () => brython());
-        </script>
-        <script type="text/python">
-          ${code}
-        </script>
+        <script type="text/python" src="python/main.py"></script>
       `;
 
     case "lua":
       return `
-        <script>
-          fengari.load(\`${code}\`)();
-        </script>
+        <script type="application/lua" src="lua/main.lua"></script>
       `;
 
     case "ruby":
       return `
-        <script>
-          Opal.eval(\`${code}\`);
-        </script>
+        <script type="text/ruby" src="ruby/main.rb"></script>
       `;
 
     case "scheme":
       return `
-        <script>
-          const biwa = new BiwaScheme.Interpreter();
-          biwa.evaluate(\`${code}\`);
-        </script>
+        <script type="text/x-scheme" src="scheme/main.scm"></script>
       `;
 
     case "r":
       return `
-        <script type="module">
-          import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
-          const webr = new WebR();
-          await webr.init();
-          const result = await webr.run(\`${code}\`);
-          console.log(result);
-        </script>
+        <script type="text/r" src="r/main.r"></script>
       `;
 
     default:
-      return ""; // No secondary language
+      return "";
   }
 }
+
 
 // ---------------------------
 // download helper (uses cyberPrompt)
