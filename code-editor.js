@@ -3,36 +3,42 @@ function generateLanguageScriptForPreview(lang, code) {
 
   switch(lang) {
     case "python":
-      return `<script type="text/python">${escapedCode}</script>`;
+      return `<script type="text/python">
+        window.onload = () => {
+          ${escapedCode}
+        };
+      </script>`;
 
     case "ruby":
       return `<script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => {
           Opal.eval(\`${escapedCode}\`);
-        });
+        };
       </script>`;
 
     case "lua":
       return `<script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => {
           fengari.load(\`${escapedCode}\`)();
-        });
+        };
       </script>`;
 
     case "scheme":
       return `<script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => {
           const interpreter = new BiwaScheme.Interpreter();
           interpreter.evaluate(\`${escapedCode}\`);
-        });
+        };
       </script>`;
 
     case "r":
       return `<script type="module">
-        import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
-        const webR = new WebR();
-        await webR.init();
-        await webR.evalR(\`${escapedCode}\`);
+        window.onload = async () => {
+          const { WebR } = await import("https://webr.r-wasm.org/latest/webr.mjs");
+          const webR = new WebR();
+          await webR.init();
+          await webR.evalR(\`${escapedCode}\`);
+        };
       </script>`;
 
     default:
@@ -380,6 +386,7 @@ function generateLanguageScript(lang, code) {
     case "brython":
       return `
         <script type="text/python" src="python/main.py"></script>
+        <script>window.onload = ()=>{brython();}
       `;
 
     case "lua":
