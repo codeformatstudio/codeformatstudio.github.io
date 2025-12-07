@@ -255,9 +255,14 @@ function updatePreview() {
       case "brython":
         iframe.contentWindow.brython && iframe.contentWindow.brython();
         break;
-      case "lua":
-        fengari.load(jsEditor.getValue())(); // or pyEditor.getValue()
-        break;
+case "lua":
+    try {
+        iframe.contentWindow.fengari.load(pyEditor.getValue())();
+    } catch (e) {
+        console.error("Fengari error:", e);
+    }
+    break;
+
       case "ruby":
         Opal.eval(pyEditor.getValue());
         break;
