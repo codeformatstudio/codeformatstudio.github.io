@@ -10,32 +10,40 @@ function generateLanguageScriptForPreview(lang, code) {
     case "ruby":
       return `<script id="ruby-script">
         (function() {
-          const code = \`${escapedCode}\`;
-          window.__rubyCode = code;
+          if (window.Opal) {
+            Opal.eval(\`${escapedCode}\`);
+          }
         })();
       </script>`;
 
     case "lua":
       return `<script id="lua-script">
         (function() {
-          const code = \`${escapedCode}\`;
-          window.__luaCode = code;
+          if (window.fengari) {
+            fengari.load(\`${escapedCode}\`)();
+          }
         })();
       </script>`;
 
     case "scheme":
       return `<script id="scheme-script">
         (function() {
-          const code = \`${escapedCode}\`;
-          window.__schemeCode = code;
+          if (window.BiwaScheme) {
+            const interpreter = new BiwaScheme.Interpreter();
+            interpreter.evaluate(\`${escapedCode}\`);
+          }
         })();
       </script>`;
 
     case "r":
       return `<script id="r-script" type="module">
-        (function() {
-          const code = \`${escapedCode}\`;
-          window.__rCode = code;
+        (async function() {
+          if (window.WebR) {
+            const { WebR } = window;
+            const webR = new WebR();
+            await webR.init();
+            await webR.evalR(\`${escapedCode}\`);
+          }
         })();
       </script>`;
 
@@ -281,40 +289,6 @@ openPreviewBtn.addEventListener("click", () => {
 
   applyPreviewMode(savedMode);
 });
-function initializeLanguage(targetWindow, lang, delay = 100) {
-  if (lang === "brython") {
-    setTimeout(() => targetWindow.brython(), delay);
-  } else if (lang === "ruby") {
-    setTimeout(() => {
-      if (targetWindow.__rubyCode && targetWindow.Opal) {
-        targetWindow.Opal.eval(targetWindow.__rubyCode);
-      }
-    }, delay);
-  } else if (lang === "lua") {
-    setTimeout(() => {
-      if (targetWindow.__luaCode && targetWindow.fengari) {
-        targetWindow.fengari.load(targetWindow.__luaCode)();
-      }
-    }, delay);
-  } else if (lang === "scheme") {
-    setTimeout(() => {
-      if (targetWindow.__schemeCode && targetWindow.BiwaScheme) {
-        const interpreter = new targetWindow.BiwaScheme.Interpreter();
-        interpreter.evaluate(targetWindow.__schemeCode);
-      }
-    }, delay);
-  } else if (lang === "r") {
-    setTimeout(async () => {
-      if (targetWindow.__rCode && targetWindow.WebR) {
-        const { WebR } = targetWindow;
-        const webR = new WebR();
-        await webR.init();
-        await webR.evalR(targetWindow.__rCode);
-      }
-    }, delay);
-  }
-}
-
 function updatePreview() {
    previewContent.innerHTML = ""; // clear previous iframe
 
@@ -356,11 +330,15 @@ function updatePreview() {
        ${pyScript}
      `);
      previewWindow.document.close();
-     initializeLanguage(previewWindow, lang);
    }
 
-   // Initialize for iframe
-   initializeLanguage(iframe.contentWindow, lang);
+   // Brython needs explicit initialization
+   if (lang === "brython") {
+     setTimeout(() => iframe.contentWindow.brython(), 100);
+     if (previewWindow && !previewWindow.closed) {
+       setTimeout(() => previewWindow.brython(), 100);
+     }
+   }
 }
 
 function generateOutput() {
@@ -396,11 +374,10 @@ function generateFullOutput() {
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
   const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
-
-  const code = pyEditor.getValue().replace(/`/g, "\\`");
+  const code = pyEditor.getValue();
 
   const runtimeScripts = injectRuntime(lang);
-  const pyScript = generateLanguageScript(lang, code);
+  const pyScript = generateLanguageScriptForPreview(lang, code);
 
   return `
     ${htmlContent}
