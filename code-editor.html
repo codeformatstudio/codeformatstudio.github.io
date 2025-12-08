@@ -35,7 +35,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
 <!-- Language support  -->
     <script src="https://cdn.opalrb.com/opal/current/opal.js"></script>
-    <script src="https://webr.r-wasm.org/latest/webr.mjs"></script>
+    <script type="module">
+      import * as WebR from "https://webr.r-wasm.org/latest/webr.mjs";
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.3/release/biwascheme.js"></script>
     <script src="https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js"></script>
     <link
