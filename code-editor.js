@@ -1,3 +1,4 @@
+const htmlSelect = document.getElementById("htmlSelect");
 function generateLanguageScriptForPreview(lang, code) {
   const escapedCode = code.replace(/`/g, '\\`');
 
@@ -290,55 +291,62 @@ openPreviewBtn.addEventListener("click", () => {
   applyPreviewMode(savedMode);
 });
 function updatePreview() {
-   previewContent.innerHTML = ""; // clear previous iframe
+  previewContent.innerHTML = ""; // clear previous iframe
 
-   const iframe = document.createElement("iframe");
-   iframe.style.width = "100%";
-   iframe.style.height = "100%";
-   iframe.style.border = "none";
-   previewContent.appendChild(iframe);
+  const iframe = document.createElement("iframe");
+  iframe.style.width = "100%";
+  iframe.style.height = "100%";
+  iframe.style.border = "none";
+  previewContent.appendChild(iframe);
 
-   const doc = iframe.contentDocument || iframe.contentWindow.document;
-   doc.open();
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
 
-   const htmlContent = htmlEditor.getValue();
-   const cssContent = `<style>${cssEditor.getValue()}</style>`;
-   const jsContent = jsEditor.getValue();
-   const lang = pySelect.value;
-   const code = pyEditor.getValue();
+  let rawHTML = htmlEditor.getValue();
 
-   const runtimeScripts = injectRuntime(lang);
-   const pyScript = generateLanguageScriptForPreview(lang, code);
+  // 🔥 If HTML section is set to Markdown → convert it
+  if (htmlSelect.value === "markdown") {
+    rawHTML = marked.parse(rawHTML);
+  }
 
-   doc.write(`
-     ${htmlContent}
-     ${cssContent}
-     ${runtimeScripts}
-     <script>${jsContent}</script>
-     ${pyScript}
-   `);
-   doc.close();
+  const htmlContent = "<!DOCTYPE html>\n" + rawHTML;
+  const cssContent = `<style>${cssEditor.getValue()}</style>`;
+  const jsContent = jsEditor.getValue();
+  const lang = pySelect.value;
+  const code = pyEditor.getValue();
 
-   // Separate window preview
-   if (previewWindow && !previewWindow.closed) {
-     previewWindow.document.open();
-     previewWindow.document.write(`
-       ${htmlContent}
-       ${cssContent}
-       ${runtimeScripts}
-       <script>${jsContent}</script>
-       ${pyScript}
-     `);
-     previewWindow.document.close();
-   }
+  const runtimeScripts = injectRuntime(lang);
+  const pyScript = generateLanguageScriptForPreview(lang, code);
 
-   // Brython needs explicit initialization
-   if (lang === "brython") {
-     setTimeout(() => iframe.contentWindow.brython(), 100);
-     if (previewWindow && !previewWindow.closed) {
-       setTimeout(() => previewWindow.brython(), 100);
-     }
-   }
+  doc.write(`
+    ${htmlContent}
+    ${cssContent}
+    ${runtimeScripts}
+    <script>${jsContent}</script>
+    ${pyScript}
+  `);
+  doc.close();
+
+  // Separate window preview
+  if (previewWindow && !previewWindow.closed) {
+    previewWindow.document.open();
+    previewWindow.document.write(`
+      ${htmlContent}
+      ${cssContent}
+      ${runtimeScripts}
+      <script>${jsContent}</script>
+      ${pyScript}
+    `);
+    previewWindow.document.close();
+  }
+
+  // Brython initialization
+  if (lang === "brython") {
+    setTimeout(() => iframe.contentWindow.brython(), 100);
+    if (previewWindow && !previewWindow.closed) {
+      setTimeout(() => previewWindow.brython(), 100);
+    }
+  }
 }
 
 function generateOutput() {
@@ -370,7 +378,14 @@ function generateOutput() {
 // generateFullOutput (pure)
 // ---------------------------
 function generateFullOutput() {
-  const htmlContent = htmlEditor.getValue();
+  let rawHTML = htmlEditor.getValue();
+
+  // 🔥 Convert Markdown if selected
+  if (htmlSelect.value === "markdown") {
+    rawHTML = marked.parse(rawHTML);
+  }
+
+  const htmlContent = "<!DOCTYPE html>\n" + rawHTML;
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
   const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
@@ -382,13 +397,12 @@ function generateFullOutput() {
   return `
     ${htmlContent}
     ${cssContent}
-
     ${runtimeScripts}
-
     <script>${jsContent}</script>
     ${pyScript}
   `;
 }
+
 function generateLanguageScript(lang, code) {
   switch (lang) {
     case "brython":
