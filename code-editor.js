@@ -1,3 +1,48 @@
+function cyberConfirm(message, callback) {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.background = "rgba(0,0,10,0.95)";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "10000";
+  overlay.style.color = "#00ffff";
+  overlay.style.fontFamily = '"Orbitron", sans-serif';
+
+  const msg = document.createElement("div");
+  msg.textContent = message;
+  msg.style.marginBottom = "20px";
+  msg.style.fontSize = "20px";
+  overlay.appendChild(msg);
+
+  const btnBox = document.createElement("div");
+
+  const okBtn = document.createElement("button");
+  okBtn.textContent = "OK";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.style.marginLeft = "20px";
+
+  okBtn.onclick = () => {
+    document.body.removeChild(overlay);
+    callback(true);
+  };
+
+  cancelBtn.onclick = () => {
+    document.body.removeChild(overlay);
+    callback(false);
+  };
+
+  btnBox.appendChild(okBtn);
+  btnBox.appendChild(cancelBtn);
+  overlay.appendChild(btnBox);
+
+  document.body.appendChild(overlay);
+}
+
 function generateLanguageScriptForPreview(lang, code) {
   const escapedCode = code.replace(/`/g, '\\`');
 
@@ -350,6 +395,9 @@ function updatePreview() {
 
 function generateOutput() {
   const htmlContent = htmlEditor.getValue();
+    if (htmlSelect.value === "markdown") {
+    htmlContent = marked.parse(htmlContent);
+  }
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
   const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
@@ -551,64 +599,103 @@ downloadBtn.addEventListener("click", (e) => {
   e.preventDefault();
   downloadProjectAsFolder();
 });
+function downloadMultipleFilesFallback(projectName) {
+  const files = {
+    "index.html": htmlEditor.getValue(),
+    "style.css": cssEditor.getValue(),
+    "script.js": jsEditor.getValue()
+  };
+
+  const lang = pySelect.value;
+  let ext = null;
+
+  if (lang === "python" || lang === "brython") ext = "py";
+  else if (lang === "ruby") ext = "rb";
+  else if (lang === "lua") ext = "lua";
+  else if (lang === "scheme") ext = "scm";
+  else if (lang === "r") ext = "r";
+
+  if (ext) {
+    files[`main.${ext}`] = pyEditor.getValue();
+  }
+
+  for (const [filename, content] of Object.entries(files)) {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = projectName + "_" + filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+}
+
 async function downloadProjectAsFolder() {
   cyberPrompt("Enter your project name:", async (projectName) => {
     if (!projectName || !projectName.trim()) projectName = "project";
 
-    // Ask the user where to save
-    const root = await window.showDirectoryPicker();
+    // ------------------------------
+    // 🔥 Detect non-Chromium browsers
+    // ------------------------------
+    const ua = navigator.userAgent.toLowerCase();
+    const isChromium = ua.includes("chrome") || ua.includes("edg") || ua.includes("chromium");
 
-    // Create main project directory
+    if (!isChromium) {
+      cyberConfirm(
+        "Your browser doesn't support downloading folders.\nDownload as a single file or multiple files?",
+        (choice) => {
+          if (choice) {
+            // user chose "Single File"
+            const full = generateFullOutput();
+            const blob = new Blob([full], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = projectName + ".html";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          } else {
+            // user chose "Multiple Files"
+            downloadMultipleFilesFallback(projectName);
+          }
+        }
+      );
+      return; // stop normal folder download
+    }
+
+    // ------------------------------
+    // Chromium → normal folder download
+    // ------------------------------
+    const root = await window.showDirectoryPicker();
     const projectFolder = await root.getDirectoryHandle(projectName, { create: true });
 
-    // ---------------------------
-    // ✅ WEB FILES (Always Created)
-    // ---------------------------
     await writeFile(projectFolder, "index.html", htmlEditor.getValue());
     await writeFile(projectFolder, "style.css", cssEditor.getValue());
     await writeFile(projectFolder, "script.js", jsEditor.getValue());
 
-    // ---------------------------
-    // ✅ LANGUAGE-SPECIFIC FOLDER
-    // ---------------------------
-    const lang = pySelect.value;   // ← THIS IS YOUR REAL DROPDOWN VALUE
+    const lang = pySelect.value;
     let folderName = null;
     let fileName = null;
 
-    if (lang === "brython") {
-      folderName = "python";
-      fileName = "main.py";
-    } 
-    else if (lang === "python") {
-      folderName = "python";
-      fileName = "main.py";
-    } 
-    else if (lang === "ruby") {
-      folderName = "ruby";
-      fileName = "main.rb";
-    } 
-    else if (lang === "r") {
-      folderName = "r";
-      fileName = "main.r";
-    } 
-    else if (lang === "lua") {
-      folderName = "lua";
-      fileName = "main.lua";
-    } 
-    else if (lang === "scheme") {
-      folderName = "scheme";
-      fileName = "main.scm";
-    }
+    if (lang === "python" || lang === "brython") { folderName = "python"; fileName = "main.py"; }
+    else if (lang === "ruby")  { folderName = "ruby"; fileName = "main.rb"; }
+    else if (lang === "r")     { folderName = "r"; fileName = "main.r"; }
+    else if (lang === "lua")   { folderName = "lua"; fileName = "main.lua"; }
+    else if (lang === "scheme"){ folderName = "scheme"; fileName = "main.scm"; }
 
-    // ✅ Only create the language folder if one is selected
     if (folderName && fileName) {
       const langFolder = await projectFolder.getDirectoryHandle(folderName, { create: true });
       await writeFile(langFolder, fileName, pyEditor.getValue());
     }
 
-    console.log("✅ Project created successfully with correct structure!");
+    console.log("✅ Project folder created successfully!");
   });
 }
+
 
 async function writeFile(dirHandle, name, content) {
   const fileHandle = await dirHandle.getFileHandle(name, { create: true });
