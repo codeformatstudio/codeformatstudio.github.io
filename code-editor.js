@@ -1,4 +1,3 @@
-const htmlSelect = document.getElementById("htmlSelect");
 function generateLanguageScriptForPreview(lang, code) {
   const escapedCode = code.replace(/`/g, '\\`');
 
