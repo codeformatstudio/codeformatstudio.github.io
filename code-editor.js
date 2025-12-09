@@ -601,7 +601,7 @@ downloadBtn.addEventListener("click", (e) => {
 });
 function downloadMultipleFilesFallback(projectName) {
   const files = {
-    "index.html": htmlEditor.getValue(),
+    "index.html": htmlSelect.value === "markdown" ? marked.parse(htmlEditor.getValue) : htmlEditor.getValue(),
     "style.css": cssEditor.getValue(),
     "script.js": jsEditor.getValue()
   };
