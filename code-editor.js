@@ -523,7 +523,22 @@ htmlSelect.addEventListener("change", (e) => {
     htmlEditor.setOption("mode", "xml");
   }
 });
+htmlSelect.addEventListener("load", (e) => {
+  if (e.target.value === "markdown") {
+    htmlEditor.setOption("mode", "markdown");
+  } else {
+    htmlEditor.setOption("mode", "xml");
+  }
+});
 
+
+jsSelect.addEventListener("change", (e) => {
+  if (e.target.value === "typescript") {
+    jsEditor.setOption("mode", "javascript"); // TypeScript uses JS highlighting
+  } else {
+    jsEditor.setOption("mode", "javascript");
+  }
+});
 jsSelect.addEventListener("change", (e) => {
   if (e.target.value === "typescript") {
     jsEditor.setOption("mode", "javascript"); // TypeScript uses JS highlighting
