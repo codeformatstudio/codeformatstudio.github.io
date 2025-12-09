@@ -520,14 +520,14 @@ htmlSelect.addEventListener("change", (e) => {
   if (e.target.value === "markdown") {
     htmlEditor.setOption("mode", "markdown");
   } else {
-    htmlEditor.setOption("mode", "xml");
+    htmlEditor.setOption("mode", "htmlmixed");
   }
 });
 htmlSelect.addEventListener("load", (e) => {
   if (e.target.value === "markdown") {
     htmlEditor.setOption("mode", "markdown");
   } else {
-    htmlEditor.setOption("mode", "xml");
+    htmlEditor.setOption("mode", "htmlmixed");
   }
 });
 
