@@ -305,7 +305,7 @@ function applyPreviewMode(mode) {
     document.body.classList.add("dock-bottom");
   }
 
-  updatePreview();
+  schedulePreviewUpdate();
   resizeEditors();
 }
 
@@ -510,10 +510,10 @@ function downloadProject(defaultName = "project") {
 // ---------------------------
 
 // === Auto Update on Input Change ===
-htmlEditor.on("change", updatePreview);
-cssEditor.on("change", updatePreview);
-jsEditor.on("change", updatePreview);
-pyEditor.on("change", updatePreview);
+htmlEditor.on("change", schedulePreviewUpdate);
+cssEditor.on("change", schedulePreviewUpdate);
+jsEditor.on("change", schedulePreviewUpdate);
+pyEditor.on("change", schedulePreviewUpdate);
 
 // === Dynamic Syntax Highlighting ===
 htmlSelect.addEventListener("change", (e) => {
@@ -717,4 +717,10 @@ async function writeFile(dirHandle, name, content) {
   const writable = await fileHandle.createWritable();
   await writable.write(content);
   await writable.close();
+}
+let previewTimer = null;
+
+function schedulePreviewUpdate() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(schedulePreviewUpdate, 250); // 250ms debounce
 }
