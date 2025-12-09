@@ -163,7 +163,7 @@ const downloadBtn = document.getElementById("downloadBtn");
 const previewContent = document.getElementById("previewContent");
 const previewStyle = previewScreen.style;
 const htmlEditor = CodeMirror.fromTextArea(htmlInput, {
-  mode: "xml",
+  mode: "htmlmixed",
   theme: "dracula",
   lineNumbers: true,
   autoCloseBrackets: true,
