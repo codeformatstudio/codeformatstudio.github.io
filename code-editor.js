@@ -20,10 +20,10 @@ function cyberConfirm(message, callback) {
   const btnBox = document.createElement("div");
 
   const okBtn = document.createElement("button");
-  okBtn.textContent = "OK";
+  okBtn.textContent = "Single";
 
   const cancelBtn = document.createElement("button");
-  cancelBtn.textContent = "Cancel";
+  cancelBtn.textContent = "Multiple";
   cancelBtn.style.marginLeft = "20px";
 
   okBtn.onclick = () => {
