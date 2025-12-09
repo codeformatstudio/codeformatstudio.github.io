@@ -719,8 +719,9 @@ async function writeFile(dirHandle, name, content) {
   await writable.close();
 }
 let previewTimer = null;
-
 function schedulePreviewUpdate() {
+  if (previewScreen.style.display === "none") return; // prevent wasted work
   clearTimeout(previewTimer);
-  previewTimer = setTimeout(schedulePreviewUpdate, 250); // 250ms debounce
+  previewTimer = setTimeout(updatePreview, 250);
 }
+
