@@ -289,7 +289,7 @@ function applyPreviewMode(mode) {
   if (mode === "separate window") {
     previewStyle.display = 'none';
     if (!previewWindow || previewWindow.closed) {
-      previewWindow = window.open("", "_blank", "width=1000,height=700");
+      previewWindow = window.open("", `_blank", "width=${screen.width},height=${screen.height}`);
     }
     previewWindow.document.open();
     previewWindow.document.write(generateFullOutput());
