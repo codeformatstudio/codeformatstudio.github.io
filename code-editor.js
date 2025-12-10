@@ -1,3 +1,20 @@
+let newTabWindow = null;
+function updateNewTabPreview() {
+  if (!newTabWindow || newTabWindow.closed) return;
+
+  const content = generateFullOutput();
+  newTabWindow.document.open();
+  newTabWindow.document.write(content);
+  newTabWindow.document.close();
+
+  // Brython or other runtimes initialization
+  const lang = pySelect.value;
+  if (lang === "brython") {
+    setTimeout(() => newTabWindow.brython(), 100);
+  }
+}
+
+
 function cyberConfirm(message, callback) {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
@@ -406,6 +423,8 @@ function updatePreview() {
       setTimeout(() => previewWindow.brython(), 100);
     }
   }
+  updateNewTabPreview();
+
 }
 
 function generateOutput() {
