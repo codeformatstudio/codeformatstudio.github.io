@@ -1,18 +1,23 @@
 let newTabWindow = null;
 function updateNewTabPreview() {
-  if (!newTabWindow || newTabWindow.closed) return;
+    if (!newTabWindow || newTabWindow.closed) return;
 
-  const content = generateFullOutput();
-  newTabWindow.document.open();
-  newTabWindow.document.write(content);
-  newTabWindow.document.close();
+    const content = generateFullOutput();
+    newTabWindow.document.open();
+    newTabWindow.document.write(content);
+    newTabWindow.document.close();
 
-  // Brython or other runtimes initialization
-  const lang = pySelect.value;
-  if (lang === "brython") {
-    setTimeout(() => newTabWindow.brython(), 100);
-  }
+    // Brython & other runtime initializers
+    const lang = pySelect.value;
+    if (lang === "brython") {
+        setTimeout(() => {
+            if (newTabWindow && !newTabWindow.closed) {
+                newTabWindow.brython();
+            }
+        }, 100);
+    }
 }
+
 
 
 function cyberConfirm(message, callback) {
@@ -300,28 +305,67 @@ function applyPreviewMode(mode) {
   previewStyle.display = "block";
 
   // 🔥 NEW TAB MODE
-  if (mode === "separate new tab") {
-    const newTab = window.open("", "_blank");
-    if (newTab) {
-      newTab.document.open();
-      newTab.document.write(generateFullOutput());
-      newTab.document.close();
+// --- SEPARATE NEW TAB MODE (FULLY FIXED) ---
+if (mode === "separate new tab") {
+
+    // MUST open immediately — popup safe
+    if (!newTabWindow || newTabWindow.closed) {
+        newTabWindow = window.open("", "_blank");
+        if (!newTabWindow) {
+            alert("Popup was blocked! Enable popups for this site.");
+            return;
+        }
     }
+
+    // Write preview contents
+    newTabWindow.document.open();
+    newTabWindow.document.write(generateFullOutput());
+    newTabWindow.document.close();
+
     previewStyle.display = "none";
+
     return;
-  }
+}
 
   // Separate Window Mode
-  if (mode === "separate window") {
-    previewStyle.display = 'none';
+  // Inside applyPreviewMode(mode):
+
+// --- SEPARATE WINDOW MODE (FIXED) ---
+if (mode === "separate window") {
+
+    // *** OPEN IMMEDIATELY (popup-safe) ***
     if (!previewWindow || previewWindow.closed) {
-      previewWindow = window.open("", "_blank", "width=1000,height=700");
+        previewWindow = window.open(
+            "",
+            "_blank",
+            "noopener,noreferrer,width=" + screen.availWidth + ",height=" + screen.availHeight
+        );
     }
+
+    if (!previewWindow) {
+        alert("Popup was blocked! Please allow popups for this site.");
+        return;
+    }
+
+    // Write content immediately after creation
     previewWindow.document.open();
     previewWindow.document.write(generateFullOutput());
     previewWindow.document.close();
+
+    // Make preview div disappear in main UI
+    previewStyle.display = "none";
+
+    // Force full-window sizing inside popup
+    previewWindow.document.body.style.margin = "0";
+    previewWindow.document.documentElement.style.height = "100%";
+    previewWindow.document.body.style.height = "100%";
+
+    // Ensure window fills entire screen
+    previewWindow.resizeTo(screen.availWidth, screen.availHeight);
+    previewWindow.moveTo(0, 0);
+
     return;
-  }
+}
 
   // Docking modes
   if (mode === "dock to right") {
