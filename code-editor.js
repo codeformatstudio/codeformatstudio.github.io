@@ -734,7 +734,7 @@ function schedulePreviewUpdate() {
     const now = Date.now();
 
     // If user has stopped typing for 1000ms → update preview
-    if (now - lastInputTime >= 1000) {
+    if (now - lastInputTime >= 500) {
       clearInterval(checkInterval);
       isUpdating = false;
       updatePreview();
