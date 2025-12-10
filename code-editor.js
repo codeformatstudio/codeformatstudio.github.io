@@ -2,21 +2,20 @@ let newTabWindow = null;
 function updateNewTabPreview() {
     if (!newTabWindow || newTabWindow.closed) return;
 
-    const content = generateFullOutput();
-    newTabWindow.document.open();
-    newTabWindow.document.write(content);
-    newTabWindow.document.close();
+    // ❗ Prevent writing into the main window
+    if (newTabWindow === window) return;
+    newTabWindow = window.open("", "_blank");
 
-    // Brython & other runtime initializers
-    const lang = pySelect.value;
-    if (lang === "brython") {
-        setTimeout(() => {
-            if (newTabWindow && !newTabWindow.closed) {
-                newTabWindow.brython();
-            }
-        }, 100);
+    if (!newTabWindow || newTabWindow.closed) {
+        alert("Popup blocked. Enable popups.");
+        return;
+    }
+
+    if (pySelect.value === "brython") {
+        setTimeout(() => newTabWindow?.brython?.(), 100);
     }
 }
+
 
 
 
@@ -278,23 +277,6 @@ const pyEditor = CodeMirror.fromTextArea(pyInput, {
 pyEditor.getWrapperElement().style.fontFamily = '"Consolas", "Monaco", "Courier New", monospace';
 
 let previewWindow = null;
-
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  const mode = previewInput.value.toLowerCase().trim();
-
-  // RESET EVERYTHING
-  document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
-
-  previewStyle.display = "block";
-  previewStyle.top = "";
-  previewStyle.bottom = "";
-  previewStyle.left = "";
-  previewStyle.right = "";
-  previewStyle.width = "";
-  previewStyle.height = "";
-});
 const openPreviewBtn = document.getElementById("openPreviewBtn");
 
 // ✅ MAIN PREVIEW APPLY FUNCTION
@@ -401,7 +383,7 @@ form.addEventListener("submit", (event) => {
 });
 
 openPreviewBtn.addEventListener("click", () => {
-  const savedMode = localStorage.getItem("preferredDockMode");
+  const savedMode = localStorage.getItem("preferredPreviewMode");
 
   if (!savedMode) {
     alert("No saved preview mode yet!");
@@ -632,14 +614,14 @@ jsSelect.addEventListener("change", (e) => {
 closePreviewBtn.addEventListener("click", () => {
   previewStyle.display = "none";
   document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
-  localStorage.removeItem("preferredDockMode");
+  localStorage.removeItem("preferredPreviewMode");
   resizeEditors();
 });
 
 window.addEventListener("resize", () => {
   resizeEditors();
 
-  const savedMode = localStorage.getItem("preferredDockMode");
+  const savedMode = localStorage.getItem("preferredPreviewMode");
   if (savedMode && previewScreen.style.display !== "none") {
     applyPreviewMode(savedMode);
   }
