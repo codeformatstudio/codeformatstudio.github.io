@@ -718,9 +718,27 @@ async function writeFile(dirHandle, name, content) {
   await writable.write(content);
   await writable.close();
 }
-let previewTimer = null;
+let lastInputTime = 0;
+let isUpdating = false;
+
 function schedulePreviewUpdate() {
-  clearTimeout(previewTimer);
-  previewTimer = setTimeout(updatePreview, 250);
+  lastInputTime = Date.now();
+
+  // If an update is already scheduled or running, do nothing
+  if (isUpdating) return;
+
+  isUpdating = true;
+
+  // Poll every 150ms to see if user has stopped typing
+  const checkInterval = setInterval(() => {
+    const now = Date.now();
+
+    // If user has stopped typing for 1000ms → update preview
+    if (now - lastInputTime >= 1000) {
+      clearInterval(checkInterval);
+      isUpdating = false;
+      updatePreview();
+    }
+  }, 150);
 }
 
