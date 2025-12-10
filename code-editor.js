@@ -529,6 +529,10 @@ htmlEditor.on("change", schedulePreviewUpdate);
 cssEditor.on("change", schedulePreviewUpdate);
 jsEditor.on("change", schedulePreviewUpdate);
 pyEditor.on("change", schedulePreviewUpdate);
+htmlSelect.addEventListener("change", schedulePreviewUpdate);
+cssSelect.addEventListener("change", schedulePreviewUpdate);
+jsSelect.addEventListener("change", schedulePreviewUpdate);
+pySelect.addEventListener("change", schedulePreviewUpdate);
 
 // === Dynamic Syntax Highlighting ===
 htmlSelect.addEventListener("change", (e) => {
