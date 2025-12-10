@@ -287,7 +287,7 @@ function applyPreviewMode(mode) {
   previewStyle.display = "block";
 
   // 🔥 NEW TAB MODE
-  if (mode === "new tab") {
+  if (mode === "separate new tab") {
     const newTab = window.open("", "_blank");
     if (newTab) {
       newTab.document.open();
