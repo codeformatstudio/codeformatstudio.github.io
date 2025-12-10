@@ -296,7 +296,7 @@ function applyPreviewMode(mode) {
     previewWindow.document.close();
     return;
   }
-  if (mode === "new window") {
+  if (mode === "separate window") {
   previewStyle.display = "none"; // hide the dock preview
 
   const features = `
