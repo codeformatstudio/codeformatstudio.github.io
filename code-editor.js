@@ -277,10 +277,6 @@ const openPreviewBtn = document.getElementById("openPreviewBtn");
 
 // ✅ MAIN PREVIEW APPLY FUNCTION
 function applyPreviewMode(mode) {
-  mode = mode.toLowerCase().trim();
-
-  // Save mode immediately so Open Preview always works
-  localStorage.setItem("preferredDockMode", mode);
 
   // RESET
   document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
@@ -321,6 +317,10 @@ function applyPreviewMode(mode) {
 
   schedulePreviewUpdate();
   resizeEditors();
+  mode = mode.toLowerCase().trim();
+
+    // save it permanently
+  localStorage.setItem("preferredPreviewMode", mode);
 }
 
 
