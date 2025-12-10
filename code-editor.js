@@ -524,7 +524,7 @@ htmlSelect.addEventListener("change", (e) => {
   }
 });
 htmlSelect.addEventListener("load", (e) => {
-  if (e.target.value === "markdown") {
+  if (htmlSelect.value === "markdown") {
     htmlEditor.setOption("mode", "markdown");
   } else {
     htmlEditor.setOption("mode", "htmlmixed");
@@ -741,4 +741,15 @@ function schedulePreviewUpdate() {
     }
   }, 150);
 }
+window.onload = function () {
+
+  if (htmlSelect.value === "markdown") {
+    htmlEditor.setOption("mode", "markdown");
+  } else {
+    htmlEditor.setOption("mode", "htmlmixed");
+  }
+}
+
+
+
 
