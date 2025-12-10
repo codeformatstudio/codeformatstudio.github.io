@@ -279,13 +279,26 @@ const openPreviewBtn = document.getElementById("openPreviewBtn");
 function applyPreviewMode(mode) {
   mode = mode.toLowerCase().trim();
 
+  // Save mode immediately so Open Preview always works
   localStorage.setItem("preferredDockMode", mode);
 
   // RESET
   document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
-
   previewStyle.display = "block";
 
+  // 🔥 NEW TAB MODE
+  if (mode === "new tab") {
+    const newTab = window.open("", "_blank");
+    if (newTab) {
+      newTab.document.open();
+      newTab.document.write(generateFullOutput());
+      newTab.document.close();
+    }
+    previewStyle.display = "none";
+    return;
+  }
+
+  // Separate Window Mode
   if (mode === "separate window") {
     previewStyle.display = 'none';
     if (!previewWindow || previewWindow.closed) {
@@ -297,6 +310,7 @@ function applyPreviewMode(mode) {
     return;
   }
 
+  // Docking modes
   if (mode === "dock to right") {
     document.body.classList.add("dock-right");
   } else if (mode === "dock to left") {
@@ -308,6 +322,7 @@ function applyPreviewMode(mode) {
   schedulePreviewUpdate();
   resizeEditors();
 }
+
 
 function resizeEditors() {
   setTimeout(() => {
