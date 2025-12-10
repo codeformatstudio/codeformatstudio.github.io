@@ -1,21 +1,3 @@
-let newTabWindow = null;
-function updateNewTabPreview() {
-    if (!newTabWindow || newTabWindow.closed) return;
-    if (newTabWindow === window) return;
-
-    // Just update — never create a new tab here
-    newTabWindow.document.open();
-    newTabWindow.document.write(generateFullOutput());
-    newTabWindow.document.close();
-
-    if (pySelect.value === "brython") {
-        setTimeout(() => newTabWindow?.brython?.(), 100);
-    }
-}
-
-
-
-
 function cyberConfirm(message, callback) {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
@@ -156,7 +138,7 @@ window.addEventListener("beforeunload", function (event) {
     event.preventDefault(); // Some browsers require this
     event.returnValue = message; // Legacy method for older browsers
     
-    return message; // For some older browsers
+    return message?true:false; // For some older browsers
 });
 
 function cyberPrompt(message, callback) {
@@ -274,79 +256,47 @@ const pyEditor = CodeMirror.fromTextArea(pyInput, {
 pyEditor.getWrapperElement().style.fontFamily = '"Consolas", "Monaco", "Courier New", monospace';
 
 let previewWindow = null;
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const mode = previewInput.value.toLowerCase().trim();
+
+  // RESET EVERYTHING
+  document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+
+  previewStyle.display = "block";
+  previewStyle.top = "";
+  previewStyle.bottom = "";
+  previewStyle.left = "";
+  previewStyle.right = "";
+  previewStyle.width = "";
+  previewStyle.height = "";
+});
 const openPreviewBtn = document.getElementById("openPreviewBtn");
 
 // ✅ MAIN PREVIEW APPLY FUNCTION
 function applyPreviewMode(mode) {
+  mode = mode.toLowerCase().trim();
+
+  localStorage.setItem("preferredDockMode", mode);
 
   // RESET
   document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+
   previewStyle.display = "block";
 
-  // 🔥 NEW TAB MODE
-// --- SEPARATE NEW TAB MODE (FULLY FIXED) ---
-if (mode === "separate new tab") {
-
-    // MUST open immediately — popup safe
-    if (!newTabWindow || newTabWindow.closed) {
-        newTabWindow = window.open("", "_blank");
-        if (!newTabWindow) {
-            alert("Popup was blocked! Enable popups for this site.");
-            return;
-        }
-    }
-
-    // Write preview contents
-    newTabWindow.document.open();
-    newTabWindow.document.write(generateFullOutput());
-    newTabWindow.document.close();
-
-    previewStyle.display = "none";
-
-    return;
-}
-
-  // Separate Window Mode
-  // Inside applyPreviewMode(mode):
-
-// --- SEPARATE WINDOW MODE (FIXED) ---
-if (mode === "separate window") {
-
-    // *** OPEN IMMEDIATELY (popup-safe) ***
+  if (mode === "separate window") {
+    previewStyle.display = 'none';
     if (!previewWindow || previewWindow.closed) {
-        previewWindow = window.open(
-            "",
-            "_blank",
-            "noopener,noreferrer,width=" + screen.availWidth + ",height=" + screen.availHeight
-        );
+      previewWindow = window.open("", "_blank", "width=1000,height=700");
     }
-
-    if (!previewWindow) {
-        alert("Popup was blocked! Please allow popups for this site.");
-        return;
-    }
-
-    // Write content immediately after creation
     previewWindow.document.open();
     previewWindow.document.write(generateFullOutput());
     previewWindow.document.close();
-
-    // Make preview div disappear in main UI
-    previewStyle.display = "none";
-
-    // Force full-window sizing inside popup
-    previewWindow.document.body.style.margin = "0";
-    previewWindow.document.documentElement.style.height = "100%";
-    previewWindow.document.body.style.height = "100%";
-
-    // Ensure window fills entire screen
-    previewWindow.resizeTo(screen.availWidth, screen.availHeight);
-    previewWindow.moveTo(0, 0);
-
     return;
-}
+  }
 
-  // Docking modes
   if (mode === "dock to right") {
     document.body.classList.add("dock-right");
   } else if (mode === "dock to left") {
@@ -357,12 +307,7 @@ if (mode === "separate window") {
 
   schedulePreviewUpdate();
   resizeEditors();
-  mode = mode.toLowerCase().trim();
-
-    // save it permanently
-  localStorage.setItem("preferredPreviewMode", mode);
 }
-
 
 function resizeEditors() {
   setTimeout(() => {
@@ -380,7 +325,7 @@ form.addEventListener("submit", (event) => {
 });
 
 openPreviewBtn.addEventListener("click", () => {
-  const savedMode = localStorage.getItem("preferredPreviewMode");
+  const savedMode = localStorage.getItem("preferredDockMode");
 
   if (!savedMode) {
     alert("No saved preview mode yet!");
@@ -446,12 +391,10 @@ function updatePreview() {
       setTimeout(() => previewWindow.brython(), 100);
     }
   }
-  updateNewTabPreview();
-
 }
 
 function generateOutput() {
-  let htmlContent = htmlEditor.getValue();
+  const htmlContent = htmlEditor.getValue();
     if (htmlSelect.value === "markdown") {
     htmlContent = marked.parse(htmlContent);
   }
@@ -512,7 +455,7 @@ function generateLanguageScript(lang, code) {
     case "brython":
       return `
         <script type="text/python" src="python/main.py"></script>
-        <script>window.onload = ()=>{brython();} </script>
+        <script>window.onload = ()=>{brython();}
       `;
 
     case "lua":
@@ -571,10 +514,6 @@ htmlEditor.on("change", schedulePreviewUpdate);
 cssEditor.on("change", schedulePreviewUpdate);
 jsEditor.on("change", schedulePreviewUpdate);
 pyEditor.on("change", schedulePreviewUpdate);
-htmlSelect.addEventListener("change", schedulePreviewUpdate);
-cssSelect.addEventListener("change", schedulePreviewUpdate);
-jsSelect.addEventListener("change", schedulePreviewUpdate);
-pySelect.addEventListener("change", schedulePreviewUpdate);
 
 // === Dynamic Syntax Highlighting ===
 htmlSelect.addEventListener("change", (e) => {
@@ -585,7 +524,7 @@ htmlSelect.addEventListener("change", (e) => {
   }
 });
 htmlSelect.addEventListener("load", (e) => {
-  if (htmlSelect.value === "markdown") {
+  if (e.target.value === "markdown") {
     htmlEditor.setOption("mode", "markdown");
   } else {
     htmlEditor.setOption("mode", "htmlmixed");
@@ -600,18 +539,25 @@ jsSelect.addEventListener("change", (e) => {
     jsEditor.setOption("mode", "javascript");
   }
 });
+jsSelect.addEventListener("change", (e) => {
+  if (e.target.value === "typescript") {
+    jsEditor.setOption("mode", "javascript"); // TypeScript uses JS highlighting
+  } else {
+    jsEditor.setOption("mode", "javascript");
+  }
+});
 
 closePreviewBtn.addEventListener("click", () => {
   previewStyle.display = "none";
   document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
-  localStorage.removeItem("preferredPreviewMode");
+  localStorage.removeItem("preferredDockMode");
   resizeEditors();
 });
 
 window.addEventListener("resize", () => {
   resizeEditors();
 
-  const savedMode = localStorage.getItem("preferredPreviewMode");
+  const savedMode = localStorage.getItem("preferredDockMode");
   if (savedMode && previewScreen.style.display !== "none") {
     applyPreviewMode(savedMode);
   }
@@ -670,9 +616,7 @@ downloadBtn.addEventListener("click", (e) => {
 });
 function downloadMultipleFilesFallback(projectName) {
   const files = {
-    "index.html": htmlSelect.value === "markdown"
-  ? marked.parse(htmlEditor.getValue())       // <-- fixed, added ()
-  : htmlEditor.getValue(),
+    "index.html": htmlSelect.value === "markdown" ? marked.parse(htmlEditor.getValue) : htmlEditor.getValue(),
     "style.css": cssEditor.getValue(),
     "script.js": jsEditor.getValue()
   };
@@ -774,38 +718,8 @@ async function writeFile(dirHandle, name, content) {
   await writable.write(content);
   await writable.close();
 }
-let lastInputTime = 0;
-let isUpdating = false;
-
+let previewTimer = null;
 function schedulePreviewUpdate() {
-  lastInputTime = Date.now();
-
-  // If an update is already scheduled or running, do nothing
-  if (isUpdating) return;
-
-  isUpdating = true;
-
-  // Poll every 150ms to see if user has stopped typing
-  const checkInterval = setInterval(() => {
-    const now = Date.now();
-
-    // If user has stopped typing for 1000ms → update preview
-    if (now - lastInputTime >= 500) {
-      clearInterval(checkInterval);
-      isUpdating = false;
-      updatePreview();
-    }
-  }, 150);
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 250);
 }
-window.onload = function () {
-
-  if (htmlSelect.value === "markdown") {
-    htmlEditor.setOption("mode", "markdown");
-  } else {
-    htmlEditor.setOption("mode", "htmlmixed");
-  }
-}
-
-
-
-
