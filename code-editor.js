@@ -1,15 +1,12 @@
 let newTabWindow = null;
 function updateNewTabPreview() {
     if (!newTabWindow || newTabWindow.closed) return;
-
-    // ❗ Prevent writing into the main window
     if (newTabWindow === window) return;
-    newTabWindow = window.open("", "_blank");
 
-    if (!newTabWindow || newTabWindow.closed) {
-        alert("Popup blocked. Enable popups.");
-        return;
-    }
+    // Just update — never create a new tab here
+    newTabWindow.document.open();
+    newTabWindow.document.write(generateFullOutput());
+    newTabWindow.document.close();
 
     if (pySelect.value === "brython") {
         setTimeout(() => newTabWindow?.brython?.(), 100);
@@ -159,7 +156,7 @@ window.addEventListener("beforeunload", function (event) {
     event.preventDefault(); // Some browsers require this
     event.returnValue = message; // Legacy method for older browsers
     
-    return message?true:false; // For some older browsers
+    return message; // For some older browsers
 });
 
 function cyberPrompt(message, callback) {
@@ -454,7 +451,7 @@ function updatePreview() {
 }
 
 function generateOutput() {
-  const htmlContent = htmlEditor.getValue();
+  let htmlContent = htmlEditor.getValue();
     if (htmlSelect.value === "markdown") {
     htmlContent = marked.parse(htmlContent);
   }
@@ -515,7 +512,7 @@ function generateLanguageScript(lang, code) {
     case "brython":
       return `
         <script type="text/python" src="python/main.py"></script>
-        <script>window.onload = ()=>{brython();}
+        <script>window.onload = ()=>{brython();} </script>
       `;
 
     case "lua":
@@ -603,13 +600,6 @@ jsSelect.addEventListener("change", (e) => {
     jsEditor.setOption("mode", "javascript");
   }
 });
-jsSelect.addEventListener("change", (e) => {
-  if (e.target.value === "typescript") {
-    jsEditor.setOption("mode", "javascript"); // TypeScript uses JS highlighting
-  } else {
-    jsEditor.setOption("mode", "javascript");
-  }
-});
 
 closePreviewBtn.addEventListener("click", () => {
   previewStyle.display = "none";
@@ -680,7 +670,9 @@ downloadBtn.addEventListener("click", (e) => {
 });
 function downloadMultipleFilesFallback(projectName) {
   const files = {
-    "index.html": htmlSelect.value === "markdown" ? marked.parse(htmlEditor.getValue) : htmlEditor.getValue(),
+    "index.html": htmlSelect.value === "markdown"
+  ? marked.parse(htmlEditor.getValue())       // <-- fixed, added ()
+  : htmlEditor.getValue(),
     "style.css": cssEditor.getValue(),
     "script.js": jsEditor.getValue()
   };
