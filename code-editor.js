@@ -286,7 +286,7 @@ function applyPreviewMode(mode) {
 
   previewStyle.display = "block";
 
-  if (mode === "separate window") {
+  if (mode === "new tab") {
     previewStyle.display = 'none';
     if (!previewWindow || previewWindow.closed) {
       previewWindow = window.open("", `_blank", "width=${screen.width},height=${screen.height}`);
@@ -296,6 +296,32 @@ function applyPreviewMode(mode) {
     previewWindow.document.close();
     return;
   }
+  if (mode === "new window") {
+  previewStyle.display = "none"; // hide the dock preview
+
+  const features = `
+    width=${screen.width},
+    height=${screen.height},
+    left=0,
+    top=0,
+    resizable=yes,
+    scrollbars=yes,
+    toolbar=no,
+    menubar=no
+  `.replace(/\s/g, ''); // remove spaces
+
+  // Reuse window if it's already open
+  if (!previewWindow || previewWindow.closed) {
+    previewWindow = window.open("", "previewWindow", features);
+  }
+
+  previewWindow.document.open();
+  previewWindow.document.write(generateFullOutput());
+  previewWindow.document.close();
+
+  return;
+}
+
 
   if (mode === "dock to right") {
     document.body.classList.add("dock-right");
@@ -371,7 +397,7 @@ function updatePreview() {
   `);
   doc.close();
 
-  // Separate window preview
+  // new tab preview
   if (previewWindow && !previewWindow.closed) {
     previewWindow.document.open();
     previewWindow.document.write(`
