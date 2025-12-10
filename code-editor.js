@@ -720,7 +720,6 @@ async function writeFile(dirHandle, name, content) {
 }
 let previewTimer = null;
 function schedulePreviewUpdate() {
-  if (previewScreen.style.display === "none") return; // prevent wasted work
   clearTimeout(previewTimer);
   previewTimer = setTimeout(updatePreview, 250);
 }
