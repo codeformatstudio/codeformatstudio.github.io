@@ -163,6 +163,7 @@
         top: 0;
         left: 0;
         cursor: crosshair;
+        touch-action: none;
       }
       .drawCanvas.text-tool {
         cursor: text;
@@ -378,33 +379,133 @@
       }
 
       /* Responsive */
-      @media (max-width: 800px) {
+      @media (max-width: 1024px) {
         #app {
-          grid-template-columns: 130px 1fr 180px;
+          grid-template-columns: 180px 1fr 200px;
         }
         .tool-btn {
-          padding: 6px 8px;
+          padding: 8px 10px;
           font-size: 14px;
         }
       }
+
+      @media (max-width: 768px) {
+        #app {
+          grid-template-columns: 80px 1fr;
+        }
+        #propertiesPanel {
+          display: none;
+        }
+        #pagesPanel {
+          width: 80px;
+        }
+        .tool-btn {
+          padding: 6px 6px;
+          font-size: 12px;
+        }
+        #toolbar {
+          padding: 6px;
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+        #pageContainer {
+          padding: 10px;
+          gap: 15px;
+        }
+      }
+
       @media (max-width: 600px) {
         #app {
-          grid-template-columns: 80px 1fr 120px;
+          grid-template-columns: 1fr;
         }
         #pagesPanel,
         #propertiesPanel {
           display: none;
         }
-        #app {
-          grid-template-columns: 1fr;
-        }
-        .tool-btn {
-          padding: 5px 6px;
-          font-size: 12px;
-        }
         #toolbar {
           padding: 4px;
-          gap: 3px;
+          gap: 2px;
+          flex-wrap: wrap;
+        }
+        .tool-btn {
+          padding: 4px 6px;
+          font-size: 11px;
+        }
+        .toolbar-separator {
+          display: none;
+        }
+        #zoomLabel {
+          font-size: 10px;
+        }
+        #zoomIn,
+        #zoomOut {
+          padding: 4px 6px;
+          font-size: 10px;
+        }
+        #pageContainer {
+          padding: 8px;
+          gap: 12px;
+        }
+        .pdfCanvas {
+          max-width: 100%;
+          height: auto;
+        }
+        .text-input-area {
+          max-width: 200px;
+          font-size: 14px !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #toolbar {
+          padding: 3px;
+          gap: 1px;
+        }
+        .tool-btn {
+          padding: 3px 4px;
+          font-size: 10px;
+          min-width: 32px;
+          min-height: 32px;
+        }
+        #zoomIn,
+        #zoomOut {
+          padding: 3px 4px;
+          font-size: 9px;
+        }
+        #pageContainer {
+          padding: 4px;
+          gap: 8px;
+        }
+        #subToolbar {
+          padding: 3px;
+          min-height: 35px;
+          font-size: 11px;
+        }
+        #subToolbar label {
+          font-size: 10px;
+          display: block;
+        }
+        #subToolbar input,
+        #subToolbar select {
+          max-width: 80px;
+          font-size: 11px;
+          padding: 3px;
+        }
+      }
+
+      @media (max-width: 320px) {
+        .tool-btn {
+          padding: 2px 3px;
+          font-size: 9px;
+          min-width: 28px;
+          min-height: 28px;
+        }
+        #toolbar {
+          padding: 2px;
+          gap: 0;
+        }
+        #zoomLabel {
+          display: none;
         }
       }
     </style>
@@ -711,8 +812,13 @@
         }
       }
 
+      let lastTap = 0;
+      let tapCount = 0;
+      const doubleTapDelay = 300;
+
       function attachCanvasEvents() {
         pages.forEach((pg, pageIndex) => {
+          // Mouse events
           pg.drawCanvas.addEventListener("mousedown", (e) =>
             handleMouseDown(e, pageIndex)
           );
@@ -722,7 +828,70 @@
           pg.drawCanvas.addEventListener("mouseup", (e) =>
             handleMouseUp(e, pageIndex)
           );
+
+          // Touch events for mobile
+          pg.drawCanvas.addEventListener("touchstart", (e) =>
+            handleTouchStart(e, pageIndex)
+          );
+          pg.drawCanvas.addEventListener("touchmove", (e) =>
+            handleTouchMove(e, pageIndex)
+          );
+          pg.drawCanvas.addEventListener("touchend", (e) =>
+            handleTouchEnd(e, pageIndex)
+          );
         });
+      }
+
+      function handleTouchStart(e, pageIndex) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousedown", {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+        });
+        pages[pageIndex].drawCanvas.dispatchEvent(mouseEvent);
+
+        // Double-tap detection for mobile
+        const currentTime = Date.now();
+        const tapLength = currentTime - lastTap;
+
+        if (tapLength < doubleTapDelay && tapLength > 0) {
+          // Double tap detected
+          if (tool !== "select") {
+            isDrawing = true;
+            const pos = getMousePos({ clientX: touch.clientX, clientY: touch.clientY }, pages[pageIndex].drawCanvas);
+            tempPath = [pos];
+          }
+        } else {
+          // Single tap
+          if (tool !== "select") {
+            isDrawing = false;
+          }
+        }
+        lastTap = currentTime;
+      }
+
+      function handleTouchMove(e, pageIndex) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousemove", {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+        });
+        pages[pageIndex].drawCanvas.dispatchEvent(mouseEvent);
+      }
+
+      function handleTouchEnd(e, pageIndex) {
+        e.preventDefault();
+        if (isDrawing) {
+          const touch = e.changedTouches[0];
+          const mouseEvent = new MouseEvent("mouseup", {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+          });
+          pages[pageIndex].drawCanvas.dispatchEvent(mouseEvent);
+        }
       }
 
       function getMousePos(e, canvas) {
