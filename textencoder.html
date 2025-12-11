@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Neon Encoder/Decoder</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+    body {
+        background: #0d0d0d;
+        color: #00fffa;
+        font-family: 'Orbitron', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        flex-direction: column;
+    }
+
+    h1 {
+        color: #ff00ff;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #00ffff;
+        margin-bottom: 20px;
+    }
+
+    .container {
+        display: flex;
+        gap: 20px;
+        flex-direction: column;
+        width: 90%;
+        max-width: 800px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 150px;
+        background: #111;
+        color: #00fffa;
+        border: 2px solid #00fffa;
+        border-radius: 10px;
+        padding: 10px;
+        font-family: 'Orbitron', monospace;
+        font-size: 16px;
+        resize: vertical;
+        box-shadow: 0 0 10px #00fffa;
+    }
+
+    select, button {
+        background: #111;
+        color: #00fffa;
+        border: 2px solid #00fffa;
+        border-radius: 5px;
+        padding: 10px;
+        font-family: 'Orbitron', monospace;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.2s;
+    }
+
+    select:hover, button:hover {
+        box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+        border-color: #ff00ff;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+</head>
+<body>
+    <h1>Cyber Neon Encoder/Decoder</h1>
+    <div class="container">
+        <textarea id="input" placeholder="Enter your text here..."></textarea>
+        <div class="buttons">
+            <select id="from">
+                <option value="text">Text</option>
+                <option value="binary">Binary</option>
+                <option value="ascii">ASCII</option>
+                <option value="unicode">Unicode</option>
+                <option value="base64">Base64</option>
+            </select>
+            <select id="to">
+                <option value="text">Text</option>
+                <option value="binary">Binary</option>
+                <option value="ascii">ASCII</option>
+                <option value="unicode">Unicode</option>
+                <option value="base64">Base64</option>
+            </select>
+            <button onclick="convert()">Convert</button>
+            <button onclick="copyOutput()">Copy Output</button>
+        </div>
+        <textarea id="output" placeholder="Output will appear here..." readonly></textarea>
+    </div>
+
+<script>
+function textToBinary(text) { return text.split('').map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '); }
+function binaryToText(binary) { return binary.split(' ').map(b=>String.fromCharCode(parseInt(b,2))).join(''); }
+function textToASCII(text) { return text.split('').map(c=>c.charCodeAt(0)).join(' '); }
+function asciiToText(ascii) { return ascii.split(' ').map(n=>String.fromCharCode(Number(n))).join(''); }
+function textToUnicode(text) { return text.split('').map(c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0')).join(''); }
+function unicodeToText(unicode) { return unicode.split('\\u').filter(Boolean).map(h=>String.fromCharCode(parseInt(h,16))).join(''); }
+function textToBase64(text) { return btoa(unescape(encodeURIComponent(text))); }
+function base64ToText(base64) { return decodeURIComponent(escape(atob(base64))); }
+function convert() {
+    const input = document.getElementById('input').value.trim();
+    const from = document.getElementById('from').value;
+    const to = document.getElementById('to').value;
+    if (!input) { document.getElementById('output').value = ''; return; }
+
+    let intermediateText = '';
+    switch(from){
+        case 'text': intermediateText = input; break;
+        case 'binary': intermediateText = binaryToText(input); break;
+        case 'ascii': intermediateText = asciiToText(input); break;
+        case 'unicode': intermediateText = unicodeToText(input); break;
+        case 'base64': intermediateText = base64ToText(input); break;
+    }
+
+    let result = '';
+    switch(to){
+        case 'text': result = intermediateText; break;
+        case 'binary': result = textToBinary(intermediateText); break;
+        case 'ascii': result = textToASCII(intermediateText); break;
+        case 'unicode': result = textToUnicode(intermediateText); break;
+        case 'base64': result = textToBase64(intermediateText); break;
+    }
+
+    document.getElementById('output').value = result;
+}
+
+// Copy button function
+function copyOutput() {
+    const output = document.getElementById('output');
+    output.select();
+    output.setSelectionRange(0, 99999); // For mobile devices
+    navigator.clipboard.writeText(output.value).then(() => {
+        alert('Output copied to clipboard!');
+    }).catch(() => {
+        alert('Failed to copy!');
+    });
+}
+</script>
+</body>
+</html>
