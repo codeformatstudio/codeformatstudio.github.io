@@ -265,7 +265,9 @@ html, body {
 .file-suggestions a:hover {
     text-shadow: 0 0 6px #ff006e;
 }
-
+.terminal-wrapper {
+    overflow: auto; /* allow terminal scrolling */
+}
 /* -------------------------------------------------
    TRACE PROGRESS BAR
 ------------------------------------------------- */
@@ -516,7 +518,7 @@ function appendOutput(text, isError = false) {
     div.textContent = text;
     if (isError) div.style.color = '#FF006E';
     terminalOutput.appendChild(div);
-    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    terminalOutput.scrollTo({ top: terminalOutput.scrollHeight, behavior: 'smooth' });
 }
 
 function showFileSuggestions() {
