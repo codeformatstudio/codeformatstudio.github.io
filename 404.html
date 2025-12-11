@@ -572,9 +572,67 @@ function parseCommand(input) {
 
     if (!input) return;
 
-    if (input === 'help') {
-        appendOutput('Available commands: help, reboot, logs, clear, override security, files');
+if (input === 'help') {
+    const commands = {
+        'help': 'List all available commands',
+        'reboot': 'Reboot the terminal',
+        'logs': 'Show system logs',
+        'clear': 'Clear the terminal screen',
+        'override security': 'Initiate security override',
+        'files': 'Show file suggestions',
+        'shutdown': 'Shut down the system',
+        'whoami': 'Show current user',
+        'hostname': 'Show terminal hostname',
+        'date': 'Show current date',
+        'time': 'Show current time',
+        'echo': 'Echo text back',
+        'calc': 'Evaluate math expression',
+        'encrypt': 'Encrypt text',
+        'decrypt': 'Decrypt text',
+        'joke': 'Tell a joke',
+        'quote': 'Show a motivational quote',
+        'version': 'Show terminal version',
+        'settings': 'Show current settings',
+        'theme': 'Change terminal theme',
+        'color': 'Change terminal text color',
+        'music': 'Play or stop music',
+        'surprise': 'Show a surprise',
+        'virus scan': 'Scan for viruses',
+        'firewall status': 'Show firewall status',
+        'password hint': 'Show password hint',
+        'api test': 'Test API connection',
+        'credits': 'Show credits',
+        'contact': 'Show contact info',
+        'social': 'Show social links',
+        'joke me': 'Tell a programmer joke',
+        'motivate': 'Motivational tip',
+        'tip': 'Quick terminal tip',
+        'news': 'Show news',
+        'weather': 'Show weather',
+        'alarm': 'Set an alarm (alarm HH:MM)',
+        'calendar': 'Show calendar events',
+        'clear logs': 'Clear logs',
+        'list files': 'List available files',
+        'network status': 'Show network status',
+        'system info': 'Show system information',
+        'uptime': 'Show system uptime',
+        'memory': 'Show RAM usage',
+        'cpu': 'Show CPU load',
+        'disk': 'Show disk usage',
+        'clear cache': 'Clear cache',
+        'ping': 'Ping a host (ping host)',
+        'traceroute': 'Trace route to host (traceroute host)',
+        'download': 'Download a file (download file)',
+        'upload': 'Upload a file (upload file)',
+        'redirect': 'Redirect to a URL (redirect url)'
+    };
+
+    appendOutput('Available commands:');
+    for (const cmd in commands) {
+        appendOutput(`- ${cmd}: ${commands[cmd]}`);
     }
+}
+
     else if (input === 'reboot') {
         appendOutput('Rebooting system...');
         location.reload();
