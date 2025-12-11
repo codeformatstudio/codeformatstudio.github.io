@@ -543,6 +543,9 @@ function triggerRedAlert() {
 
     audioSiren.currentTime = 0;
     audioSiren.play();
+    setTimeout(() => {
+        window.location.href = '/'; // or your homepage URL
+    }, 5000);
 }
 
 function traceProgressBar(callback) {
