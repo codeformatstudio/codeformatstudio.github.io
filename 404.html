@@ -522,7 +522,7 @@ function showFileSuggestions() {
     fileSuggestions.innerHTML = '<strong>Files you may be looking for: will be found on the homepage</strong><br>';
     fakeFilesystem.forEach(file => {
         const a = document.createElement('a');
-        a.href = '/' + file;
+        a.href = '/';
         a.textContent = "[RETURN TO HOMEPAGE]";
         fileSuggestions.appendChild(a);
         fileSuggestions.appendChild(document.createElement('br'));
