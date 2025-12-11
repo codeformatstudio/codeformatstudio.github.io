@@ -706,6 +706,7 @@ else if (input.startsWith('upload ')) {
 else if (input === 'shutdown') {
     appendOutput('Shutting down...');
     setTimeout(() => appendOutput('Goodbye!'), 1000);
+    window.location.href = '/'
 }
 else if (input === 'whoami') appendOutput('cfs');
 else if (input === 'hostname') appendOutput('CFS-Terminal');
