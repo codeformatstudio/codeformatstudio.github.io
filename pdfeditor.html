@@ -199,9 +199,101 @@
         cursor: pointer;
         border: 2px solid transparent;
         border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+      .thumbnail:hover {
+        border-color: #0ff;
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
       }
       .thumbnail.selected {
         border-color: #0ff;
+        box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
+      }
+
+      /* Page Preview Modal */
+      #pagePreviewModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 999;
+        justify-content: center;
+        align-items: center;
+      }
+      #pagePreviewModal.active {
+        display: flex;
+      }
+      .page-preview-content {
+        background: #111;
+        border: 2px solid #0ff;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+      }
+      .page-preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #0ff;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #0ff;
+      }
+      .page-preview-header h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+      .page-preview-close {
+        background: none;
+        border: none;
+        color: #0ff;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .page-preview-close:hover {
+        transform: scale(1.2);
+        color: #fff;
+      }
+      .page-preview-canvas {
+        max-width: 100%;
+        max-height: 60vh;
+        border: 1px solid #0ff;
+        border-radius: 4px;
+        background: #222;
+      }
+      .page-preview-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      .page-preview-btn {
+        padding: 10px 20px;
+        background: #222;
+        color: #0ff;
+        border: 2px solid #0ff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+      .page-preview-btn:hover {
+        background: #0ff;
+        color: #111;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+      }
+      .page-preview-info {
+        color: #0ff;
+        text-align: center;
+        font-size: 14px;
+        opacity: 0.8;
       }
 
       /* Properties Panel */
@@ -567,6 +659,25 @@
       </aside>
     </div>
 
+    <!-- Page Preview Modal -->
+    <div id="pagePreviewModal">
+      <div class="page-preview-content">
+        <div class="page-preview-header">
+          <h2 id="pagePreviewTitle">Page 1</h2>
+          <button class="page-preview-close" id="closePreview">✕</button>
+        </div>
+        <canvas id="pagePreviewCanvas" class="page-preview-canvas"></canvas>
+        <div class="page-preview-info">
+          <div id="pagePreviewInfo">Page 1 of 1</div>
+        </div>
+        <div class="page-preview-footer">
+          <button class="page-preview-btn" id="prevPageBtn">← Previous</button>
+          <button class="page-preview-btn" id="goToPageBtn">Go to Page</button>
+          <button class="page-preview-btn" id="nextPageBtn">Next →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Signature Modal -->
     <div id="signatureModal">
       <div class="signature-modal-content">
@@ -736,14 +847,10 @@
           }).promise;
 
           thumb.onclick = () => {
-            wrapper.scrollIntoView({ behavior: "smooth" });
-            document
-              .querySelectorAll(".thumbnail")
-              .forEach((t) => t.classList.remove("selected"));
-            thumb.classList.add("selected");
+            showPagePreview(i - 1);
           };
 
-          pages.push({ pdfCanvas, drawCanvas, wrapper, scale: scaleFit });
+          pages.push({ pdfCanvas, drawCanvas, wrapper, scale: scaleFit, page });
         }
         drawObjects();
         attachCanvasEvents();
@@ -1801,7 +1908,7 @@
         }
         originalHandleMouseUp.call(this, e, pageIndex);
       };
-
+      
       // Override drawSignature to use stored data
       function drawSignature(o, ctx) {
         if (o.storedSignatureData) {
@@ -1819,6 +1926,89 @@
           ctx.stroke();
         }
       }
+
+      // ===================== PAGE PREVIEW =====================
+      let currentPreviewPage = 0;
+
+      function showPagePreview(pageIndex) {
+        currentPreviewPage = pageIndex;
+        renderPagePreview();
+        document.getElementById("pagePreviewModal").classList.add("active");
+      }
+
+      async function renderPagePreview() {
+        const previewCanvas = document.getElementById("pagePreviewCanvas");
+        const pageNum = currentPreviewPage + 1;
+
+        if (!pdfDoc || pageNum > pdfDoc.numPages) return;
+
+        try {
+          const page = await pdfDoc.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 2 });
+
+          previewCanvas.width = viewport.width;
+          previewCanvas.height = viewport.height;
+
+          await page.render({
+            canvasContext: previewCanvas.getContext("2d"),
+            viewport: viewport,
+          }).promise;
+
+          // Update title and info
+          document.getElementById("pagePreviewTitle").textContent = `Page ${pageNum}`;
+          document.getElementById("pagePreviewInfo").textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
+
+          // Update button states
+          document.getElementById("prevPageBtn").disabled = pageNum === 1;
+          document.getElementById("nextPageBtn").disabled = pageNum === pdfDoc.numPages;
+        } catch (e) {
+          console.error("Preview render error:", e);
+        }
+      }
+
+      function scrollToPage() {
+        const wrapper = pages[currentPreviewPage].wrapper;
+        wrapper.scrollIntoView({ behavior: "smooth" });
+        
+        // Update thumbnail selection
+        document
+          .querySelectorAll(".thumbnail")
+          .forEach((t) => t.classList.remove("selected"));
+        document.querySelectorAll(".thumbnail")[currentPreviewPage]?.classList.add("selected");
+
+        // Close modal
+        document.getElementById("pagePreviewModal").classList.remove("active");
+      }
+
+      // Preview modal controls
+      document.getElementById("closePreview").addEventListener("click", () => {
+        document.getElementById("pagePreviewModal").classList.remove("active");
+      });
+
+      document.getElementById("prevPageBtn").addEventListener("click", () => {
+        if (currentPreviewPage > 0) {
+          currentPreviewPage--;
+          renderPagePreview();
+        }
+      });
+
+      document.getElementById("nextPageBtn").addEventListener("click", () => {
+        if (currentPreviewPage < pdfDoc.numPages - 1) {
+          currentPreviewPage++;
+          renderPagePreview();
+        }
+      });
+
+      document.getElementById("goToPageBtn").addEventListener("click", () => {
+        scrollToPage();
+      });
+
+      // Close modal on backdrop click
+      document.getElementById("pagePreviewModal").addEventListener("click", (e) => {
+        if (e.target.id === "pagePreviewModal") {
+          document.getElementById("pagePreviewModal").classList.remove("active");
+        }
+      });
 
       // Initialize
       loadSignatureFromStorage();
