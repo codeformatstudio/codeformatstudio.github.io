@@ -172,15 +172,19 @@
       /* Text Input */
       .text-input-area {
         position: absolute;
-        background: #222;
-        border: 2px solid #0ff;
+        background: transparent;
+        border: none;
+        outline: 2px solid #0ff;
+        outline-offset: 2px;
         color: #0ff;
-        padding: 4px;
-        border-radius: 3px;
+        padding: 4px 8px;
+        border-radius: 0;
         font-family: Arial, sans-serif;
         resize: none;
+        overflow: hidden;
         z-index: 100;
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        min-height: 1.5em;
+        line-height: 1.5;
       }
 
       /* Thumbnails */
@@ -1253,12 +1257,30 @@
         textarea.style.left = x + "px";
         textarea.style.top = y + "px";
         textarea.style.fontSize = fontSize + "px";
-        textarea.style.width = "300px";
-        textarea.style.height = fontSize * 2 + "px";
+        textarea.style.fontFamily = document.getElementById("fontFamily")?.value || "Arial";
+        textarea.style.maxWidth = "80vw";
         textarea.placeholder = "Type text here...";
 
         wrapper.appendChild(textarea);
         textarea.focus();
+
+        // Auto-scale textarea with content
+        function autoResize() {
+          textarea.style.height = "auto";
+          const newHeight = Math.max(textarea.scrollHeight, fontSize * 1.5);
+          textarea.style.height = newHeight + "px";
+          
+          // Auto-width based on content
+          textarea.style.width = "auto";
+          const newWidth = Math.min(Math.max(textarea.scrollWidth + 16, 100), window.innerWidth * 0.8);
+          textarea.style.width = newWidth + "px";
+        }
+
+        textarea.addEventListener("input", autoResize);
+        textarea.addEventListener("keydown", autoResize);
+        
+        // Initial resize
+        setTimeout(autoResize, 10);
 
         function saveText() {
           const text = textarea.value.trim();
