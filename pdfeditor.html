@@ -207,17 +207,123 @@
       /* Responsive */
       @media (max-width: 800px) {
         #app {
-          grid-template-columns: 150px 1fr 200px;
+          grid-template-columns: 130px 1fr 180px;
+        }
+        .tool-btn {
+          padding: 6px 8px;
+          font-size: 14px;
         }
       }
-      @media (max-width: 500px) {
+      @media (max-width: 600px) {
         #app {
-          grid-template-columns: 120px 1fr 180px;
+          grid-template-columns: 80px 1fr 120px;
+        }
+        #pagesPanel,
+        #propertiesPanel {
+          display: none;
+        }
+        #app {
+          grid-template-columns: 1fr;
+        }
+        .tool-btn {
+          padding: 5px 6px;
+          font-size: 12px;
+        }
+        #toolbar {
+          padding: 4px;
+          gap: 3px;
+        }
+        #zoomLabel {
+          font-size: 12px;
         }
       }
       @media (max-width: 350px) {
+        .tool-btn {
+          padding: 4px 5px;
+          font-size: 11px;
+        }
+        #toolbar {
+          padding: 3px;
+          gap: 2px;
+        }
+        .toolbar-separator {
+          margin: 0 3px;
+          height: 20px;
+        }
+      }
+      @media (max-width: 250px) {
+        .tool-btn {
+          padding: 3px 4px;
+          font-size: 10px;
+        }
+        #toolbar {
+          padding: 2px;
+          gap: 1px;
+        }
+        #subToolbar {
+          padding: 3px;
+          min-height: 35px;
+          font-size: 11px;
+        }
+        #subToolbar label {
+          font-size: 10px;
+          display: block;
+        }
+        #subToolbar input,
+        #subToolbar select {
+          max-width: 60px;
+          font-size: 10px;
+        }
+      }
+      @media (max-width: 150px) {
         #app {
-          grid-template-columns: 100px 1fr 150px;
+          grid-template-columns: 1fr;
+        }
+        #toolbar {
+          overflow-x: auto;
+          padding: 1px;
+          gap: 0;
+        }
+        .tool-btn {
+          padding: 2px 3px;
+          font-size: 9px;
+          min-width: 30px;
+        }
+        .toolbar-separator {
+          display: none;
+        }
+        #zoomLabel {
+          display: none;
+        }
+        #zoomIn,
+        #zoomOut {
+          padding: 2px 3px;
+          font-size: 8px;
+        }
+        #subToolbar {
+          padding: 2px;
+          min-height: 25px;
+          max-height: 40px;
+          overflow-y: auto;
+          font-size: 9px;
+        }
+        #subToolbar label {
+          font-size: 8px;
+          margin: 1px 0;
+        }
+        #subToolbar input,
+        #subToolbar select {
+          padding: 1px 2px;
+          font-size: 8px;
+          max-width: 50px;
+        }
+        #pageContainer {
+          padding: 5px;
+          gap: 10px;
+        }
+        .pdfCanvas {
+          max-width: 100%;
+          height: auto;
         }
       }
     </style>
