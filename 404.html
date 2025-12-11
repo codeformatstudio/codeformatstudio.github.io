@@ -507,12 +507,7 @@ let commandHistory = [];
 let historyIndex = 0;
 
 let fakeFilesystem = [
-    'index.html',
-    'about.html',
-    'contact.html',
-    'README.md',
-    'LICENSE.txt',
-    'tutorial.html'
+    '/'
 ];
 
 function appendOutput(text, isError = false) {
@@ -524,11 +519,11 @@ function appendOutput(text, isError = false) {
 }
 
 function showFileSuggestions() {
-    fileSuggestions.innerHTML = '<strong>Files you may be looking for:</strong><br>';
+    fileSuggestions.innerHTML = '<strong>Files you may be looking for: will be found on the homepage</strong><br>';
     fakeFilesystem.forEach(file => {
         const a = document.createElement('a');
         a.href = '/' + file;
-        a.textContent = file;
+        a.textContent = "[RETURN TO HOMEPAGE]";
         fileSuggestions.appendChild(a);
         fileSuggestions.appendChild(document.createElement('br'));
     });
