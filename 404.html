@@ -627,7 +627,8 @@ if (input === 'help') {
         'download': 'Download a file (download file)',
         'upload': 'Upload a file (upload file)',
         'redirect': 'Redirect to a URL (redirect url)',
-        'list' : 'List all of the files inside the website'
+        'list' : 'List all of the files inside the website',
+        'open' : 'Open a file'
     };
 
     appendOutput('Available commands:');
@@ -648,6 +649,9 @@ else if (input === 'list files') {
     appendOutput('- config.sys');
     appendOutput('- logs.log');
     appendOutput('- notes.md');
+}
+    else if (input === 'open' + file) {
+        window.location.href = file
 }
 else if (input === 'network status') {
     appendOutput('Network Status: Connected');
