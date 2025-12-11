@@ -125,22 +125,24 @@ a:hover {
 </div>
 
 <script>
-    // Configuration
-    const GH_USERNAME = 'codeformatstudio'; // Replace with your GitHub username
-    const GH_REPO = 'codeformatstudio.github.io'; // Replace with your repository name
-    const API_URL = `api.github.com{GH_USERNAME}/${GH_REPO}/contents`;
+    const GH_USERNAME = 'codeformatstudio';
+    const GH_REPO = 'codeformatstudio.github.io';
+
+    const API_URL =
+        `https://api.github.com/repos/${GH_USERNAME}/${GH_REPO}/contents`;
 
     async function fetchFiles() {
         try {
             const response = await fetch(API_URL);
-            if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+
             const files = await response.json();
             displayFiles(files);
+
         } catch (error) {
             console.error("Could not fetch files:", error);
-            document.getElementById('file-list-container').innerHTML = '<p>_Could not retrieve file list due to a system error._</p>';
+            document.getElementById('file-list-container').innerHTML =
+                '<p>_Could not retrieve file list due to a system error._</p>';
         }
     }
 
@@ -148,27 +150,30 @@ a:hover {
         const listContainer = document.getElementById('file-list-container');
         const ul = document.createElement('ul');
 
-        // Filter for files (not directories or submodules) and specific file types if desired
-        files.filter(file => file.type === 'file' && !file.name.startsWith('_') && file.name.endsWith('.html') || file.name.endsWith('.md') || file.name.endsWith('.txt')).forEach(file => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = `/${file.path}`;
-            a.textContent = file.name;
-            li.appendChild(a);
-            ul.appendChild(li);
-        });
+        files
+          .filter(file =>
+              file.type === 'file' &&
+              !file.name.startsWith('_') &&
+              (file.name.endsWith('.html') ||
+               file.name.endsWith('.md') ||
+               file.name.endsWith('.txt'))
+          )
+          .forEach(file => {
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.href = `/${file.path}`;
+              a.textContent = file.name;
+              li.appendChild(a);
+              ul.appendChild(li);
+          });
 
-        if (ul.children.length > 0) {
-            listContainer.innerHTML = ''; // Clear the initial message
-            listContainer.appendChild(ul);
-        } else {
-            listContainer.innerHTML = '<p>_No prominent files to list._</p>';
-        }
+        listContainer.innerHTML = '';
+        listContainer.appendChild(ul);
     }
 
-    // Fetch files when the page loads
     fetchFiles();
 </script>
+
 
 </body>
 </html>
