@@ -650,8 +650,8 @@ else if (input === 'list files') {
     appendOutput('- logs.log');
     appendOutput('- notes.md');
 }
-    else if (input === 'open' + input.replace("open", "") {
-        let file = input.replace("open", "");
+    else if (input === 'open' + input.replace("open ", "") {
+        let file = input.replace("open ", "");
         appendOutput("Openning " + file + "...");
         setTimeout(function () {
             window.location.href = "/" + file;
