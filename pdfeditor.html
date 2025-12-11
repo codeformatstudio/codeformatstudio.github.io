@@ -1219,41 +1219,43 @@
         try {
           const { PDFDocument } = PDFLib;
           const newPdf = await PDFDocument.create();
+          const DPI = 300; // Ultra-high DPI (300 DPI = print quality)
+          const PX_TO_POINTS = 72 / DPI; // Convert pixels to PDF points
 
           for (let i = 0; i < pages.length; i++) {
-            const pageSize = [
-              pages[i].pdfCanvas.width,
-              pages[i].pdfCanvas.height,
-            ];
-            const newPage = newPdf.addPage(pageSize);
+            const pdfCanvas = pages[i].pdfCanvas;
+            const drawCanvas = pages[i].drawCanvas;
 
-            // Get canvas image data and embed it
-            if (pages[i] && pages[i].drawCanvas && pages[i].pdfCanvas) {
-              const drawCanvas = pages[i].drawCanvas;
-              const pdfCanvas = pages[i].pdfCanvas;
+            if (pdfCanvas.width > 0 && pdfCanvas.height > 0) {
+              // Use rendered size - maintains what you see on screen
+              const pageWidth = pdfCanvas.width * PX_TO_POINTS;
+              const pageHeight = pdfCanvas.height * PX_TO_POINTS;
 
-              if (pdfCanvas.width > 0 && pdfCanvas.height > 0) {
-                // Create combined canvas with both PDF and drawings
-                const combinedCanvas = document.createElement("canvas");
-                combinedCanvas.width = pdfCanvas.width;
-                combinedCanvas.height = pdfCanvas.height;
-                const ctx = combinedCanvas.getContext("2d");
+              const newPage = newPdf.addPage([pageWidth, pageHeight]);
 
-                // Draw PDF page
-                ctx.drawImage(pdfCanvas, 0, 0);
+              // Create combined canvas with both PDF and drawings
+              // Use 2x scaling for crisp rendering
+              const scale = 2;
+              const combinedCanvas = document.createElement("canvas");
+              combinedCanvas.width = pdfCanvas.width * scale;
+              combinedCanvas.height = pdfCanvas.height * scale;
+              const ctx = combinedCanvas.getContext("2d");
+              ctx.scale(scale, scale);
 
-                // Draw annotations on top
-                ctx.drawImage(drawCanvas, 0, 0);
+              // Draw PDF page
+              ctx.drawImage(pdfCanvas, 0, 0);
 
-                const imgData = combinedCanvas.toDataURL("image/png");
-                const pngImage = await newPdf.embedPng(imgData);
-                newPage.drawImage(pngImage, {
-                  x: 0,
-                  y: 0,
-                  width: pdfCanvas.width,
-                  height: pdfCanvas.height,
-                });
-              }
+              // Draw annotations on top
+              ctx.drawImage(drawCanvas, 0, 0);
+
+              const imgData = combinedCanvas.toDataURL("image/png");
+              const pngImage = await newPdf.embedPng(imgData);
+              newPage.drawImage(pngImage, {
+                x: 0,
+                y: 0,
+                width: pageWidth,
+                height: pageHeight,
+              });
             }
           }
 
