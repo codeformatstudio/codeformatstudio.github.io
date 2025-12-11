@@ -625,6 +625,7 @@ if (input === 'help') {
         'download': 'Download a file (download file)',
         'upload': 'Upload a file (upload file)',
         'redirect': 'Redirect to a URL (redirect url)'
+        'list' : 'List all of the files inside the website'
     };
 
     appendOutput('Available commands:');
@@ -811,6 +812,32 @@ else if (input === 'weather') appendOutput('Weather: 22°C, partly cloudy');
 else if (input.startsWith('alarm ')) appendOutput(`Alarm set for ${input.slice(6)}`);
 else if (input === 'calendar') appendOutput('Calendar: No events scheduled');
 else if (input === 'clear logs') terminalOutput.innerHTML = '';
+    else if (input === 'list') {
+    appendOutput('Fetching file list...');
+    
+    // Replace these with your GitHub username and repository
+    const username = 'codeformatstudio';
+    const repo = 'codeformatstudio.github.io';
+    const branch = 'main'; // or 'master'
+
+    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/?ref=${branch}`;
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch repository contents');
+            return response.json();
+        })
+        .then(data => {
+            if (data.length === 0) {
+                appendOutput('No files found in the repository.');
+            } else {
+                appendOutput('Files in the repository:');
+                data.forEach(file => appendOutput('- ' + file.name));
+            }
+        })
+        .catch(err => appendOutput(`Error: ${err.message}`, true));
+}
+
 
 });
 
