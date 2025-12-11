@@ -635,6 +635,143 @@ if (input === 'help') {
         appendOutput(`- ${cmd}: ${commands[cmd]}`);
     }
 }
+    else if (input.startsWith('redirect ')) {
+    const url = input.split(' ')[1];
+    if (url) {
+        appendOutput(`Redirecting to ${url}...`);
+        setTimeout(() => { window.location.href = url; }, 1000);
+    } else appendOutput('Usage: redirect [url]', true);
+}
+else if (input === 'list files') {
+    appendOutput('Available files:');
+    appendOutput('- secrets.txt');
+    appendOutput('- config.sys');
+    appendOutput('- logs.log');
+    appendOutput('- notes.md');
+}
+else if (input === 'network status') {
+    appendOutput('Network Status: Connected');
+    appendOutput('IP: 192.168.1.42');
+    appendOutput('Gateway: 192.168.1.1');
+}
+else if (input === 'system info') {
+    appendOutput('System: CFS-Terminal v4.0');
+    appendOutput('OS: CFS-OS 1.2.3');
+    appendOutput('CPU: Quantum Core X1');
+}
+else if (input === 'uptime') {
+    appendOutput('System uptime: 3 days, 7 hours, 42 minutes');
+}
+else if (input === 'memory') {
+    appendOutput('RAM Usage: 3.2 GB / 8 GB');
+}
+else if (input === 'cpu') {
+    appendOutput('CPU Load: 17%');
+}
+else if (input === 'disk') {
+    appendOutput('Disk Usage: 72 GB / 256 GB');
+}
+else if (input === 'clear cache') {
+    appendOutput('Cache cleared successfully');
+}
+else if (input.startsWith('ping ')) {
+    const host = input.split(' ')[1];
+    appendOutput(`Pinging ${host}...`);
+    setTimeout(() => appendOutput(`Reply from ${host}: bytes=32 time=42ms TTL=128`), 500);
+}
+else if (input.startsWith('traceroute ')) {
+    const host = input.split(' ')[1];
+    appendOutput(`Tracing route to ${host}...`);
+    appendOutput('1 192.168.1.1 1ms');
+    appendOutput('2 10.0.0.1 5ms');
+    appendOutput(`3 ${host} 42ms`);
+}
+else if (input.startsWith('download ')) {
+    const file = input.split(' ')[1];
+    appendOutput(`Downloading ${file}...`);
+    setTimeout(() => appendOutput('Download complete'), 1000);
+}
+else if (input.startsWith('upload ')) {
+    const file = input.split(' ')[1];
+    appendOutput(`Uploading ${file}...`);
+    setTimeout(() => appendOutput('Upload complete'), 1000);
+}
+else if (input === 'shutdown') {
+    appendOutput('Shutting down...');
+    setTimeout(() => appendOutput('Goodbye!'), 1000);
+    window.location.href = '/'
+}
+else if (input === 'whoami') appendOutput('cfs');
+else if (input === 'hostname') appendOutput('CFS-Terminal');
+else if (input === 'date') appendOutput(new Date().toLocaleDateString());
+else if (input === 'time') appendOutput(new Date().toLocaleTimeString());
+else if (input.startsWith('echo ')) appendOutput(input.slice(5));
+else if (input.startsWith('calc ')) {
+    try {
+        const result = eval(input.slice(5));
+        appendOutput(`Result: ${result}`);
+    } catch {
+        appendOutput('Invalid expression', true);
+    }
+}
+else if (input.startsWith('encrypt ')) appendOutput('Encrypted: ' + btoa(input.slice(8)));
+else if (input.startsWith('decrypt ')) appendOutput('Decrypted: ' + atob(input.slice(8)));
+else if (input === 'joke') appendOutput('Why did the hacker break up with the internet? Too many cookies!');
+else if (input === 'quote') appendOutput('“Stay hungry, stay foolish.” – Steve Jobs');
+else if (input === 'version') appendOutput('CFS Terminal v4.0');
+else if (input === 'settings') appendOutput('Settings: Default');
+else if (input.startsWith('theme ')) appendOutput(`Theme switched to ${input.slice(6)}`);
+else if (input.startsWith('color ')) appendOutput(`Terminal text color changed to ${input.slice(6)}`);
+else if (input.startsWith('music ')) {
+    const action = input.split(' ')[1];
+    if (action === 'play') audioStartup.play();
+    else if (action === 'stop') audioStartup.pause();
+}
+else if (input === 'surprise') appendOutput('💥 SURPRISE! 💥');
+else if (input === 'virus scan') {
+    appendOutput('Scanning for viruses...');
+    setTimeout(() => appendOutput('No threats detected'), 1500);
+}
+else if (input === 'firewall status') appendOutput('Firewall: Active');
+else if (input === 'password hint') appendOutput('Hint: The usual...');
+else if (input === 'api test') appendOutput('API Response: {status: 200, message: "OK"}');
+else if (input === 'credits') appendOutput('CFS Terminal developed by OpenAI + You');
+else if (input === 'contact') appendOutput('Contact: support@cfs-terminal.com');
+else if (input === 'social') appendOutput('Twitter: @CFSTerminal | GitHub: github.com/cfs-terminal');
+else if (input === 'joke me') appendOutput('Why do programmers prefer dark mode? Because light attracts bugs!');
+else if (input === 'motivate') appendOutput('Keep pushing forward. You got this!');
+else if (input === 'tip') appendOutput('Tip: Save your work frequently.');
+else if (input === 'news') appendOutput('Breaking: CFS Terminal conquers cyberspace!');
+else if (input === 'weather') appendOutput('Weather: 22°C, partly cloudy');
+else if (input.startsWith('alarm ')) appendOutput(`Alarm set for ${input.slice(6)}`);
+else if (input === 'calendar') appendOutput('Calendar: No events scheduled');
+else if (input === 'clear logs') terminalOutput.innerHTML = '';
+    else if (input === 'list') {
+    appendOutput('Fetching file list...');
+    
+    // Replace these with your GitHub username and repository
+    const username = 'codeformatstudio';
+    const repo = 'codeformatstudio.github.io';
+    const branch = 'main'; // or 'master'
+
+    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/?ref=${branch}`;
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch repository contents');
+            return response.json();
+        })
+        .then(data => {
+            if (data.length === 0) {
+                appendOutput('No files found in the repository.');
+            } else {
+                appendOutput('Files in the repository:');
+                data.forEach(file => appendOutput('- ' + file.name));
+            }
+        })
+        .catch(err => appendOutput(`Error: ${err.message}`, true));
+}
+
 
     else if (input === 'reboot') {
         appendOutput('Rebooting system...');
@@ -704,7 +841,7 @@ document.addEventListener('keydown', (e) => {
         terminalInput.textContent = currentInput;
     }
     else if (currentInput.startsWith('redirect ')) {
-    const url = currentcurrentInput.split(' ')[1];
+    const url = currentInput.split(' ')[1];
     if (url) {
         appendOutput(`Redirecting to ${url}...`);
         setTimeout(() => { window.location.href = url; }, 1000);
