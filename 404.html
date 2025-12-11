@@ -643,19 +643,19 @@ if (input === 'help') {
         setTimeout(() => { window.location.href = url; }, 1000);
     } else appendOutput('Usage: redirect [url]', true);
 }
+            else if (input.startsWith('open ')) {
+    const url = input.split(' ')[1];
+    if (url) {
+        appendOutput(`Openning ${url}...`);
+        setTimeout(() => { window.location.href = url; }, 1000);
+    } else appendOutput('Usage: redirect [url]', true);
+}
 else if (input === 'list files') {
     appendOutput('Available files:');
     appendOutput('- secrets.txt');
     appendOutput('- config.sys');
     appendOutput('- logs.log');
     appendOutput('- notes.md');
-}
-    else if (input === 'open' + input.replace("open ", "")) {
-        let file = input.replace("open ", "");
-        appendOutput("Openning " + file + "...");
-        setTimeout(function () {
-            window.location.href = "/" + file;
-        }, 1000)
 }
 else if (input === 'network status') {
     appendOutput('Network Status: Connected');
