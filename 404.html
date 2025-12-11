@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - System Offline</title>
+    <!-- Import a cyber/terminal-style font from Google Fonts -->
+    <link href='fonts.googleapis.com' rel='stylesheet'>
+    <style>
+        /* Define variables for easy color changes */
+        :root {
+            --neon-blue: #00ffff;
+            --neon-pink: #ff0077;
+            --dark-bg: #0a0a0a;
+            --font: 'VT323', monospace; /* */
+        }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--dark-bg);
+            color: var(--neon-blue);
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Hide potential scrollbar from scanlines */
+            position: relative;
+        }
+
+        /* Subtle scanline background effect */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 0, 0, 0.3) 50%
+            );
+            background-size: 100% 4px; /* Adjust height for line density */
+            pointer-events: none;
+            animation: scanlines 1s infinite linear;
+            opacity: 0.7;
+        }
+
+        @keyframes scanlines {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 0 4px;
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 20px;
+            /* Optional CRT curvature effect */
+            transform: skew(-5deg) rotate(1deg) scale(1);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 120px;
+            margin: 0;
+            text-shadow:
+                0 0 10px var(--neon-blue),
+                0 0 20px rgba(0, 255, 255, 0.5),
+                0 0 40px rgba(0, 255, 255, 0.3);
+            /* Apply a glitch animation to the main number */
+            animation: glitch 1s infinite linear alternate-reverse; /* */
+        }
+
+        p {
+            font-size: 24px;
+            margin: 10px 0;
+            color: white;
+            text-shadow: 0 0 5px white;
+        }
+
+        a {
+            color: var(--neon-pink);
+            text-decoration: none;
+            font-size: 18px;
+            display: inline-block;
+            margin-top: 20px;
+            padding: 5px 10px;
+            border: 1px solid var(--neon-pink);
+            box-shadow:
+                0 0 5px var(--neon-pink),
+                inset 0 0 5px var(--neon-pink);
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            background-color: var(--neon-pink);
+            color: var(--dark-bg);
+            box-shadow: none;
+        }
+        
+        /* Keyframes for the text glitch effect */
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+            20% {
+                transform: translate(-2px, 2px);
+            }
+            40% {
+                transform: translate(-2px, -2px);
+            }
+            60% {
+                transform: translate(2px, 2px);
+            }
+            80% {
+                transform: translate(2px, -2px);
+            }
+            100% {
+                transform: translate(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <p>>>> ERROR: FILE NOT FOUND</p>
+        <p>_The digital matrix you requested does not exist._</p>
+        <a href="/">[ RETURN TO HOMEBASE ]</a>
+    </div>
+</body>
+</html>
