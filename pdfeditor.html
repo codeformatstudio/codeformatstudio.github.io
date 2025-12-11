@@ -6,10 +6,6 @@
     <link rel="icon" href="icons/icon.png" />
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad/dist/signature_pad.umd.min.js"></script>
-    <link
-      href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.css"
-      rel="stylesheet"
-    />
     <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script>
       pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -160,6 +156,7 @@
         background: #222;
         box-shadow: 0 0 10px #0ff;
         border-radius: 5px;
+        display: block;
       }
       .drawCanvas {
         position: absolute;
@@ -169,6 +166,20 @@
       }
       .drawCanvas.text-tool {
         cursor: text;
+      }
+
+      /* Text Input */
+      .text-input-area {
+        position: absolute;
+        background: #222;
+        border: 2px solid #0ff;
+        color: #0ff;
+        padding: 4px;
+        border-radius: 3px;
+        font-family: Arial, sans-serif;
+        resize: none;
+        z-index: 100;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
       }
 
       /* Thumbnails */
@@ -194,6 +205,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+        overflow-y: auto;
       }
       #propertiesContent input,
       #propertiesContent select {
@@ -202,6 +214,167 @@
         border: none;
         background: #222;
         color: #0ff;
+      }
+      #propertiesContent fieldset {
+        border: 1px solid #0ff;
+        border-radius: 3px;
+        padding: 6px;
+        margin: 4px 0;
+      }
+      #propertiesContent legend {
+        color: #0ff;
+        font-size: 12px;
+      }
+      #propertiesContent label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 12px;
+        margin: 4px 0;
+      }
+
+      /* Signature Modal */
+      #signatureModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+      #signatureModal.active {
+        display: flex;
+      }
+      .signature-modal-content {
+        background: #111;
+        border: 2px solid #0ff;
+        border-radius: 8px;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+      }
+      .signature-modal-content h2 {
+        color: #0ff;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .signature-mode-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+      .signature-mode-btn {
+        padding: 10px 20px;
+        background: #222;
+        color: #0ff;
+        border: 2px solid #0ff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+      .signature-mode-btn.active {
+        background: #0ff;
+        color: #111;
+      }
+      .signature-mode-btn:hover {
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+      }
+
+      #signatureDrawCanvas {
+        border: 2px solid #0ff;
+        border-radius: 6px;
+        background: #222;
+        display: block;
+        width: 100%;
+        max-width: 450px;
+        height: 200px;
+        cursor: crosshair;
+        margin: 0 auto 15px;
+      }
+      #signatureDrawCanvas.hidden {
+        display: none;
+      }
+
+      #signatureTypeInput {
+        width: 100%;
+        padding: 12px;
+        background: #222;
+        color: #0ff;
+        border: 2px solid #0ff;
+        border-radius: 6px;
+        font-size: 40px;
+        text-align: center;
+        font-family: cursive;
+        margin-bottom: 15px;
+      }
+      #signatureTypeInput.hidden {
+        display: none;
+      }
+
+      .signature-preview {
+        background: #222;
+        border: 2px solid #0ff;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 15px 0;
+        text-align: center;
+        min-height: 100px;
+        color: #0ff;
+      }
+      #signaturePreviewCanvas {
+        max-width: 100%;
+        max-height: 150px;
+        border-radius: 3px;
+      }
+
+      .signature-modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      .signature-modal-buttons button {
+        padding: 10px 20px;
+        border: 2px solid #0ff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+      .signature-modal-buttons .confirm-btn {
+        background: #0ff;
+        color: #111;
+      }
+      .signature-modal-buttons .confirm-btn:hover {
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+      }
+      .signature-modal-buttons .cancel-btn {
+        background: #222;
+        color: #0ff;
+      }
+      .signature-modal-buttons .cancel-btn:hover {
+        background: #333;
+      }
+
+      .signature-manage-btn {
+        margin-top: 10px;
+        padding: 6px 12px;
+        background: #222;
+        color: #0ff;
+        border: 1px solid #0ff;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        width: 100%;
+      }
+      .signature-manage-btn:hover {
+        background: #333;
       }
 
       /* Responsive */
@@ -232,98 +405,6 @@
         #toolbar {
           padding: 4px;
           gap: 3px;
-        }
-        #zoomLabel {
-          font-size: 12px;
-        }
-      }
-      @media (max-width: 350px) {
-        .tool-btn {
-          padding: 4px 5px;
-          font-size: 11px;
-        }
-        #toolbar {
-          padding: 3px;
-          gap: 2px;
-        }
-        .toolbar-separator {
-          margin: 0 3px;
-          height: 20px;
-        }
-      }
-      @media (max-width: 250px) {
-        .tool-btn {
-          padding: 3px 4px;
-          font-size: 10px;
-        }
-        #toolbar {
-          padding: 2px;
-          gap: 1px;
-        }
-        #subToolbar {
-          padding: 3px;
-          min-height: 35px;
-          font-size: 11px;
-        }
-        #subToolbar label {
-          font-size: 10px;
-          display: block;
-        }
-        #subToolbar input,
-        #subToolbar select {
-          max-width: 60px;
-          font-size: 10px;
-        }
-      }
-      @media (max-width: 150px) {
-        #app {
-          grid-template-columns: 1fr;
-        }
-        #toolbar {
-          overflow-x: auto;
-          padding: 1px;
-          gap: 0;
-        }
-        .tool-btn {
-          padding: 2px 3px;
-          font-size: 9px;
-          min-width: 30px;
-        }
-        .toolbar-separator {
-          display: none;
-        }
-        #zoomLabel {
-          display: none;
-        }
-        #zoomIn,
-        #zoomOut {
-          padding: 2px 3px;
-          font-size: 8px;
-        }
-        #subToolbar {
-          padding: 2px;
-          min-height: 25px;
-          max-height: 40px;
-          overflow-y: auto;
-          font-size: 9px;
-        }
-        #subToolbar label {
-          font-size: 8px;
-          margin: 1px 0;
-        }
-        #subToolbar input,
-        #subToolbar select {
-          padding: 1px 2px;
-          font-size: 8px;
-          max-width: 50px;
-        }
-        #pageContainer {
-          padding: 5px;
-          gap: 10px;
-        }
-        .pdfCanvas {
-          max-width: 100%;
-          height: auto;
         }
       }
     </style>
@@ -377,8 +458,47 @@
       <!-- Right Properties Panel -->
       <aside id="propertiesPanel">
         <div class="panel-title">Properties</div>
-        <div id="propertiesContent">Select an object</div>
+        <div id="propertiesContent">Select a tool</div>
       </aside>
+    </div>
+
+    <!-- Signature Modal -->
+    <div id="signatureModal">
+      <div class="signature-modal-content">
+        <h2>Manage Your Signature</h2>
+
+        <div class="signature-mode-selector">
+          <button class="signature-mode-btn active" data-mode="draw">
+            ✏️ Draw
+          </button>
+          <button class="signature-mode-btn" data-mode="type">📝 Type</button>
+        </div>
+
+        <canvas id="signatureDrawCanvas"></canvas>
+        <input
+          type="text"
+          id="signatureTypeInput"
+          class="hidden"
+          placeholder="Type your signature..."
+        />
+
+        <div class="signature-preview">
+          <div>Preview:</div>
+          <canvas id="signaturePreviewCanvas"></canvas>
+        </div>
+
+        <div class="signature-modal-buttons">
+          <button class="confirm-btn" id="confirmSignature">✓ Save</button>
+          <button class="cancel-btn" id="cancelSignature">✕ Cancel</button>
+          <button
+            class="cancel-btn"
+            id="clearSignature"
+            style="background: #c00"
+          >
+            🗑️ Clear
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -413,8 +533,54 @@
           const arrayBuffer = await file.arrayBuffer();
           const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
           pdfDoc = await loadingTask.promise;
+          
+          // Validate PDF is not rasterized
+          await validatePDFQuality();
+          
           await renderAllPages();
         });
+
+      async function validatePDFQuality() {
+        if (!pdfDoc || pdfDoc.numPages === 0) return;
+
+        try {
+          const firstPage = await pdfDoc.getPage(1);
+          const operatorList = await firstPage.getOperatorList();
+          
+          // Check for text content
+          const textContent = await firstPage.getTextContent();
+          const hasText = textContent.items && textContent.items.length > 0;
+          
+          // Check for vector graphics (not just images)
+          const hasVectorOps = operatorList.fnArray && 
+            operatorList.fnArray.some((fn, idx) => {
+              // Check for drawing operations (not image operations)
+              const opName = operatorList.fnArray[idx];
+              return opName !== 'paintImageXObject' && opName !== 'paintInlineImageXObject';
+            });
+
+          // If no text and only images, warn user
+          if (!hasText && !hasVectorOps) {
+            const confirm = window.confirm(
+              "⚠️ This PDF appears to be a scanned image or rasterized PDF.\n\n" +
+              "It may have limited editability. Vector-based PDFs work best.\n\n" +
+              "Continue anyway?"
+            );
+            if (!confirm) {
+              pdfDoc = null;
+              objects = [];
+              clearPages();
+            }
+          } else if (!hasText && hasVectorOps) {
+            console.warn("PDF has vector content but no selectable text");
+          } else {
+            console.log("✓ PDF has vector and text content");
+          }
+        } catch (e) {
+          console.warn("Could not validate PDF quality:", e);
+          // Allow user to continue even if validation fails
+        }
+      }
 
       function clearPages() {
         pageContainer.innerHTML = "";
@@ -424,13 +590,12 @@
 
       async function renderAllPages() {
         clearPages();
-        const containerWidth = pageContainer.clientWidth - 40; // 20px padding each side
+        const containerWidth = pageContainer.clientWidth - 40;
         for (let i = 1; i <= pdfDoc.numPages; i++) {
           const page = await pdfDoc.getPage(i);
-          const viewport = page.getViewport({ scale: 1 }); // base scale
-          // Scale to fit width
+          const viewport = page.getViewport({ scale: 1 });
           const scaleFit = containerWidth / viewport.width;
-          const scaledViewport = page.getViewport({ scale: scaleFit });
+          const scaledViewport = page.getViewport({ scale: scaleFit * scale });
 
           const wrapper = document.createElement("div");
           wrapper.className = "pageCanvasWrapper";
@@ -449,13 +614,11 @@
 
           pageContainer.appendChild(wrapper);
 
-          // Render PDF page
           await page.render({
             canvasContext: pdfCanvas.getContext("2d"),
             viewport: scaledViewport,
           }).promise;
 
-          // Thumbnail (optional)
           const thumb = document.createElement("canvas");
           thumb.className = "thumbnail";
           const thumbCtx = thumb.getContext("2d");
@@ -467,7 +630,6 @@
             viewport: page.getViewport({ scale: 200 / viewport.width }),
           }).promise;
 
-          // Thumbnail click scroll
           thumb.onclick = () => {
             wrapper.scrollIntoView({ behavior: "smooth" });
             document
@@ -476,8 +638,9 @@
             thumb.classList.add("selected");
           };
 
-          pages.push({ pdfCanvas, drawCanvas, wrapper, scale: scaleFit }); // save scale
+          pages.push({ pdfCanvas, drawCanvas, wrapper, scale: scaleFit });
         }
+        drawObjects();
         attachCanvasEvents();
       }
 
@@ -500,275 +663,105 @@
           document
             .querySelectorAll(".tool-btn")
             .forEach((b) => b.classList.remove("active"));
-
+          const selectedTool = btn.getAttribute("data-tool");
           if (!isActive) {
             btn.classList.add("active");
-            tool = btn.dataset.tool;
-          } else {
-            tool = "select"; // fallback tool when none active
+            tool = selectedTool;
+            updateSubToolbar();
           }
-
-          selectedObject = null;
-          updatePropertiesPanel();
-          updateSubToolbar();
         };
       });
 
       function updateSubToolbar() {
-        const bar = document.getElementById("subToolbar");
-        bar.innerHTML = "";
+        const subToolbar = document.getElementById("subToolbar");
+        subToolbar.innerHTML = "";
+
         if (tool === "text") {
-          bar.innerHTML = `
-    <label>Font:<select id="fontFamily">
-      <option>Arial</option>
-      <option>Verdana</option>
-      <option>Courier New</option>
-      <option>Times New Roman</option>
-      <option>Georgia</option>
-      <option>Trebuchet MS</option>
-      <option>Comic Sans MS</option>
-      <option>Impact</option>
-      <option>Palatino</option>
-      <option>Garamond</option>
-      <option>Bookman</option>
-      <option>Lucida Console</option>
-      <option>Tahoma</option>
-      <option>Lucida Grande</option>
-      <option>Constanza</option>
-      <option>Segoe UI</option>
-      <option>Helvetica</option>
-      <option>Monaco</option>
-      <option>Courier</option>
-      <option>Consolas</option>
-      <option>Liberation Mono</option>
-      <option>DejaVu Sans Mono</option>
-      <option>Inconsolata</option>
-      <option>Source Code Pro</option>
-      <option>Ubuntu Mono</option>
-      <option>Roboto</option>
-      <option>Open Sans</option>
-      <option>Lato</option>
-      <option>Raleway</option>
-      <option>Playfair Display</option>
-      <option>Montserrat</option>
-      <option>Poppins</option>
-      <option>Nunito</option>
-      <option>Merriweather</option>
-    </select></label>
-    <label>Size:<input type="number" id="fontSize" value="20" min="6" max="200" style="width:60px"></label>
-    <label>Color:<input type="color" id="fontColor" value="#0ff"></label>`;
+          subToolbar.innerHTML = `
+            <label>Font: <select id="fontFamily"><option>Arial</option><option>Verdana</option><option>Courier New</option></select></label>
+            <label>Size: <input type="number" id="fontSize" value="20" min="6" max="200"></label>
+            <label>Color: <input type="color" id="fontColor" value="#0ff"></label>
+          `;
         } else if (tool === "pen" || tool === "highlight") {
-          bar.innerHTML = `
-    <label>Color:<input type="color" id="penColor" value="${
-      tool === "pen" ? "#0ff" : "#0ff"
-    }"></label>
-    <label>Size:<input type="number" id="penSize" value="${
-      tool === "pen" ? 2 : 10
-    }" min="1" max="50" style="width:60px"></label>`;
+          subToolbar.innerHTML = `
+            <label>Color: <input type="color" id="penColor" value="#0ff"></label>
+            <label>Size: <input type="number" id="penSize" value="2" min="1" max="50"></label>
+          `;
         } else if (tool === "shape") {
-          bar.innerHTML = `
-    <label>Shape:<select id="shapeType"><option value="rect">Rectangle</option><option value="ellipse">Ellipse</option><option value="line">Line</option><option value="arrow">Arrow</option></select></label>
-    <label>Color:<input type="color" id="shapeColor" value="#0ff"></label>
-    <label>Thickness:<input type="number" id="shapeSize" value="2" min="1" max="50" style="width:60px"></label>
-    <label>Fill:<input type="color" id="shapeFill" value="#0ff" style="opacity:0.3"></label>`;
+          subToolbar.innerHTML = `
+            <label>Shape: <select id="shapeType"><option value="rect">Rectangle</option><option value="ellipse">Ellipse</option><option value="line">Line</option><option value="arrow">Arrow</option></select></label>
+            <label>Color: <input type="color" id="shapeColor" value="#0ff"></label>
+            <label>Size: <input type="number" id="shapeSize" value="2" min="1" max="50"></label>
+            <label>Fill: <input type="color" id="shapeFill" value="#0ff"></label>
+          `;
+        } else if (tool === "signature") {
+          subToolbar.innerHTML = `<p style="color:#0ff; font-size:12px;">Draw your signature below</p>`;
+          setTimeout(() => initSignaturePad(), 100);
+        } else if (tool === "eraser") {
+          subToolbar.innerHTML = `
+            <label>Size: <input type="number" id="eraserSize" value="20" min="5" max="100"></label>
+          `;
         }
       }
-      updateSubToolbar();
 
-      function saveState() {
-        undoStack.push(JSON.stringify(objects));
-        if (undoStack.length > 50) undoStack.shift();
-        redoStack.length = 0;
-      }
-      function undo() {
-        if (!undoStack.length) return;
-        redoStack.push(JSON.stringify(objects));
-        objects = JSON.parse(undoStack.pop());
-        drawObjects();
-      }
-      function redo() {
-        if (!redoStack.length) return;
-        undoStack.push(JSON.stringify(objects));
-        objects = JSON.parse(redoStack.pop());
-        drawObjects();
-      }
-      document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey && e.key === "z") undo();
-        if (e.ctrlKey && e.key === "y") redo();
-      });
-
-      // ===================== DRAWING =====================
-      function getMousePos(e, canvas) {
-        const rect = canvas.getBoundingClientRect();
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      function initSignaturePad() {
+        const sigCanvas = document.getElementById("signatureCanvas");
+        if (sigCanvas) {
+          signaturePad = new SignaturePad(sigCanvas);
+        }
       }
 
       function attachCanvasEvents() {
         pages.forEach((pg, pageIndex) => {
-          const canvas = pg.drawCanvas;
-          canvas.onmousedown = (e) => {
-            if (tool === "select") {
-              selectObject(e, pageIndex);
-              if (selectedObject) {
-                isDragging = true;
-                const pos = getMousePos(e, canvas);
-                dragOffset.x =
-                  pos.x - (selectedObject.x || selectedObject.x1 || 0);
-                dragOffset.y =
-                  pos.y - (selectedObject.y || selectedObject.y1 || 0);
-              }
-            } else startTool(e, pageIndex);
-          };
-          canvas.onmousemove = (e) => {
-            if (tool === "select" && isDragging && selectedObject) {
-              const pos = getMousePos(e, canvas);
-              setObjectX(selectedObject, pos.x - dragOffset.x);
-              setObjectY(selectedObject, pos.y - dragOffset.y);
-              drawObjects();
-            } else moveTool(e, pageIndex);
-          };
-          canvas.onmouseup = (e) => {
-            isDragging = false;
-            endTool(e, pageIndex);
-          };
-          canvas.ondblclick = (e) => {
-            selectObject(e, pageIndex);
-            if (selectedObject && selectedObject.type === "text") {
-              editTextObject(selectedObject, pageIndex);
-            }
-          };
+          pg.drawCanvas.addEventListener("mousedown", (e) =>
+            handleMouseDown(e, pageIndex)
+          );
+          pg.drawCanvas.addEventListener("mousemove", (e) =>
+            handleMouseMove(e, pageIndex)
+          );
+          pg.drawCanvas.addEventListener("mouseup", (e) =>
+            handleMouseUp(e, pageIndex)
+          );
         });
       }
 
-      function editTextObject(textObj, pageIndex) {
-        showTextEditor(textObj, pageIndex);
+      function getMousePos(e, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
       }
 
-      function showTextEditor(textObj, pageIndex) {
-        const wrapper = pages[pageIndex].wrapper;
-        const textarea = document.createElement("textarea");
-        textarea.value = textObj.text;
-
-        const font = textObj.font || "Arial";
-        const size = textObj.size || 20;
-        const color = textObj.color || "#0ff";
-
-        Object.assign(textarea.style, {
-          position: "absolute",
-          left: textObj.x + "px",
-          top: textObj.y - size + "px",
-          padding: "4px",
-          font: `${size}px ${font}`,
-          color: color,
-          backgroundColor: "rgba(0, 0, 0, 0.3)",
-          border: "2px solid #0ff",
-          borderRadius: "4px",
-          minWidth: "100px",
-          minHeight: size + 8 + "px",
-          maxWidth: "500px",
-          resize: "both",
-          fontFamily: font,
-          zIndex: "1000",
-          overflow: "hidden",
-          lineHeight: "1.2",
-          outline: "none",
-          boxShadow: "0 0 10px rgba(0, 255, 255, 0.5)",
-        });
-
-        textarea.onblur = () => {
-          if (textarea.parentNode) {
-            textObj.text = textarea.value || textObj.text;
-            wrapper.removeChild(textarea);
-            drawObjects();
-            saveState();
-          }
-        };
-
-        textarea.onkeydown = (e) => {
-          if (e.key === "Escape") {
-            if (textarea.parentNode) {
-              wrapper.removeChild(textarea);
-            }
-          }
-          // Allow Enter to create newlines (default behavior in textarea)
-        };
-
-        textarea.oninput = () => {
-          textarea.style.height = "auto";
-          textarea.style.height =
-            Math.max(size + 8, textarea.scrollHeight) + "px";
-          textarea.style.width = "auto";
-          textarea.style.width = Math.max(100, textarea.scrollWidth) + "px";
-        };
-
-        wrapper.appendChild(textarea);
-        setTimeout(() => {
-          textarea.focus();
-          textarea.select();
-        }, 10);
-      }
-
-      // ===================== TOOL LOGIC =====================
-      function startTool(e, pageIndex) {
-        const canvas = pages[pageIndex].drawCanvas;
-        const pos = getMousePos(e, canvas);
-        if (tool === "pen" || tool === "highlight") {
-          isDrawing = true;
-          tempPath = [{ x: pos.x, y: pos.y }];
-        }
-        if (tool === "shape") {
-          isDrawing = true;
-          tempPath = [
-            { x: pos.x, y: pos.y },
-            { x: pos.x, y: pos.y },
-          ];
-        }
-        if (tool === "text") {
-          const textObj = {
-            id: objectId++,
-            type: "text",
-            page: pageIndex,
-            x: pos.x,
-            y: pos.y,
-            font: document.getElementById("fontFamily").value,
-            size: parseInt(document.getElementById("fontSize").value),
-            color: document.getElementById("fontColor").value,
-            text: "",
-          };
-          objects.push(textObj);
-          selectedObject = textObj;
-          showTextEditor(textObj, pageIndex);
-        }
-        if (tool === "signature") {
-          isDrawing = true;
-          if (!signaturePad) signaturePad = new SignaturePad(canvas);
-          signaturePad.clear();
+      function handleMouseDown(e, pageIndex) {
+        if (tool === "select") {
+          selectObject(e, pageIndex);
+          return;
         }
         if (tool === "eraser") {
+          const pos = getMousePos(e, pages[pageIndex].drawCanvas);
           eraseAtPoint(pos, pageIndex);
+          return;
         }
+        isDrawing = true;
+        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
+        tempPath = [pos];
       }
 
-      function moveTool(e, pageIndex) {
+      function handleMouseMove(e, pageIndex) {
         if (!isDrawing) return;
-        const canvas = pages[pageIndex].drawCanvas;
-        const pos = getMousePos(e, canvas);
-        if (tool === "pen" || tool === "highlight") {
-          tempPath.push({ x: pos.x, y: pos.y });
-          drawTemp(pageIndex);
-        }
-        if (tool === "shape") {
-          tempPath[1] = { x: pos.x, y: pos.y };
-          drawTemp(pageIndex);
-        }
-        if (tool === "eraser") {
-          eraseAtPoint(pos, pageIndex);
-        }
+        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
+        tempPath.push(pos);
+        drawTemp(pageIndex);
       }
 
-      function endTool(e, pageIndex) {
+      function handleMouseUp(e, pageIndex) {
         if (!isDrawing) return;
         isDrawing = false;
+
+        if (tool === "text") {
+          createTextInput(pageIndex, tempPath[0].x, tempPath[0].y);
+        }
         if (tool === "pen") {
           objects.push({
             id: objectId++,
@@ -806,8 +799,8 @@
             fill,
             x1: tempPath[0].x,
             y1: tempPath[0].y,
-            x2: tempPath[1].x,
-            y2: tempPath[1].y,
+            x2: tempPath[tempPath.length - 1].x,
+            y2: tempPath[tempPath.length - 1].y,
           });
           saveState();
         }
@@ -823,6 +816,7 @@
           signaturePad.clear();
         }
         tempPath = [];
+        drawObjects();
       }
 
       // ===================== DRAWING FUNCTIONS =====================
@@ -853,6 +847,7 @@
         );
         ctx.stroke();
       }
+
       function drawHighlight(o, ctx) {
         ctx.strokeStyle = o.color;
         ctx.lineWidth = o.size;
@@ -864,6 +859,7 @@
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
+
       function drawText(o, ctx) {
         ctx.fillStyle = o.color;
         ctx.font = `${o.size}px ${o.font}`;
@@ -873,6 +869,7 @@
           ctx.fillText(line, o.x, o.y + i * lineHeight);
         });
       }
+
       function drawShape(o, ctx) {
         ctx.strokeStyle = o.color;
         ctx.lineWidth = o.size;
@@ -913,6 +910,7 @@
           ctx.stroke();
         }
       }
+
       function drawSignature(o, ctx) {
         ctx.strokeStyle = "#0ff";
         ctx.lineWidth = 2;
@@ -957,8 +955,8 @@
           const fill = document.getElementById("shapeFill")?.value || "#0ff";
           const x1 = tempPath[0].x,
             y1 = tempPath[0].y,
-            x2 = tempPath[1].x,
-            y2 = tempPath[1].y;
+            x2 = tempPath[tempPath.length - 1].x,
+            y2 = tempPath[tempPath.length - 1].y;
           ctx.strokeStyle = color;
           ctx.lineWidth = size;
           if (st === "rect") {
@@ -996,7 +994,6 @@
         }
       }
 
-      // ===================== SELECT & PROPERTIES =====================
       function selectObject(e, pageIndex) {
         const pos = getMousePos(e, pages[pageIndex].drawCanvas);
         selectedObject = objects.find(
@@ -1029,10 +1026,10 @@
             x2 = o.x2 || x1,
             y2 = o.y2 || y1;
           return (
-            pos.x >= Math.min(x1, x2) &&
-            pos.x <= Math.max(x1, x2) &&
-            pos.y >= Math.min(y1, y2) &&
-            pos.y <= Math.max(y1, y2)
+            pos.x >= Math.min(x1, x2) - 10 &&
+            pos.x <= Math.max(x1, x2) + 10 &&
+            pos.y >= Math.min(y1, y2) - 10 &&
+            pos.y <= Math.max(y1, y2) + 10
           );
         }
         return false;
@@ -1041,161 +1038,24 @@
       function updatePropertiesPanel() {
         const panel = document.getElementById("propertiesContent");
         panel.innerHTML = `
-    <h3>Tools Properties</h3>
-
-    <fieldset>
-      <legend>Text Tool</legend>
-      <label>Font:
-        <select id="propFont">
-          <option>Arial</option>
-          <option>Verdana</option>
-          <option>Courier New</option>
-          <option>Times New Roman</option>
-          <option>Georgia</option>
-          <option>Trebuchet MS</option>
-          <option>Comic Sans MS</option>
-          <option>Impact</option>
-          <option>Palatino</option>
-          <option>Garamond</option>
-          <option>Bookman</option>
-          <option>Lucida Console</option>
-          <option>Tahoma</option>
-          <option>Lucida Grande</option>
-          <option>Constanza</option>
-          <option>Segoe UI</option>
-          <option>Helvetica</option>
-          <option>Monaco</option>
-          <option>Courier</option>
-          <option>Consolas</option>
-          <option>Liberation Mono</option>
-          <option>DejaVu Sans Mono</option>
-          <option>Inconsolata</option>
-          <option>Source Code Pro</option>
-          <option>Ubuntu Mono</option>
-          <option>Roboto</option>
-          <option>Open Sans</option>
-          <option>Lato</option>
-          <option>Raleway</option>
-          <option>Playfair Display</option>
-          <option>Montserrat</option>
-          <option>Poppins</option>
-          <option>Nunito</option>
-          <option>Merriweather</option>
-        </select>
-      </label>
-      <label>Size:<input type="number" id="propTextSize" value="20" min="6" max="200"></label>
-      <label>Color:<input type="color" id="propTextColor" value="#0ff"></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Pen Tool</legend>
-      <label>Color:<input type="color" id="propPenColor" value="#0ff"></label>
-      <label>Size:<input type="number" id="propPenSize" value="2" min="1" max="50"></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Highlight Tool</legend>
-      <label>Color:<input type="color" id="propHighlightColor" value="#0ff"></label>
-      <label>Size:<input type="number" id="propHighlightSize" value="10" min="1" max="50"></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Shape Tool</legend>
-      <label>Shape:
-        <select id="propShapeType">
-          <option value="rect">Rectangle</option>
-          <option value="ellipse">Ellipse</option>
-          <option value="line">Line</option>
-          <option value="arrow">Arrow</option>
-        </select>
-      </label>
-      <label>Color:<input type="color" id="propShapeColor" value="#0ff"></label>
-      <label>Thickness:<input type="number" id="propShapeSize" value="2" min="1" max="50"></label>
-      <label>Fill:<input type="color" id="propShapeFill" value="#0ff" style="opacity:0.3"></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Signature Tool</legend>
-      <label>Stroke Color:<input type="color" id="propSignatureColor" value="#0ff"></label>
-      <label>Stroke Width:<input type="number" id="propSignatureWidth" value="2" min="1" max="10"></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Eraser Tool</legend>
-      <label>Size:<input type="number" id="propEraserSize" value="20" min="5" max="100"></label>
-    </fieldset>
-  `;
-
-        // Hook inputs to tool options
-        const propFont = document.getElementById("propFont");
-        if (propFont)
-          propFont.onchange = (e) =>
-            (document.getElementById("fontFamily").value = e.target.value);
-
-        const propTextSize = document.getElementById("propTextSize");
-        if (propTextSize)
-          propTextSize.oninput = (e) =>
-            (document.getElementById("fontSize").value = e.target.value);
-
-        const propTextColor = document.getElementById("propTextColor");
-        if (propTextColor)
-          propTextColor.oninput = (e) =>
-            (document.getElementById("fontColor").value = e.target.value);
-
-        const propPenColor = document.getElementById("propPenColor");
-        if (propPenColor)
-          propPenColor.oninput = (e) =>
-            (document.getElementById("penColor").value = e.target.value);
-
-        const propPenSize = document.getElementById("propPenSize");
-        if (propPenSize)
-          propPenSize.oninput = (e) =>
-            (document.getElementById("penSize").value = e.target.value);
-
-        const propHighlightColor =
-          document.getElementById("propHighlightColor");
-        if (propHighlightColor)
-          propHighlightColor.oninput = (e) =>
-            (document.getElementById("penColor").value = e.target.value);
-
-        const propHighlightSize = document.getElementById("propHighlightSize");
-        if (propHighlightSize)
-          propHighlightSize.oninput = (e) =>
-            (document.getElementById("penSize").value = e.target.value);
-
-        const propShapeType = document.getElementById("propShapeType");
-        if (propShapeType)
-          propShapeType.onchange = (e) =>
-            (document.getElementById("shapeType").value = e.target.value);
-
-        const propShapeColor = document.getElementById("propShapeColor");
-        if (propShapeColor)
-          propShapeColor.oninput = (e) =>
-            (document.getElementById("shapeColor").value = e.target.value);
-
-        const propShapeSize = document.getElementById("propShapeSize");
-        if (propShapeSize)
-          propShapeSize.oninput = (e) =>
-            (document.getElementById("shapeSize").value = e.target.value);
-
-        const propShapeFill = document.getElementById("propShapeFill");
-        if (propShapeFill)
-          propShapeFill.oninput = (e) =>
-            (document.getElementById("shapeFill").value = e.target.value);
-      }
-
-      // Always show properties for tools
-      updatePropertiesPanel();
-
-      function setObjectX(o, x) {
-        if (o.x !== undefined) o.x = x;
-        if (o.x1 !== undefined) o.x1 += x - (o.x1 || 0);
-        if (o.x2 !== undefined) o.x2 += x - (o.x2 || 0);
-      }
-      function setObjectY(o, y) {
-        if (o.y !== undefined) o.y = y;
-        if (o.y1 !== undefined) o.y1 += y - (o.y1 || 0);
-        if (o.y2 !== undefined) o.y2 += y - (o.y2 || 0);
+          <h3>Tool Properties</h3>
+          <fieldset>
+            <legend>Text</legend>
+            <label>Font: <select id="propFont"><option>Arial</option><option>Verdana</option><option>Courier New</option><option>Times New Roman</option></select></label>
+            <label>Size: <input type="number" id="propTextSize" value="20" min="6" max="200"></label>
+            <label>Color: <input type="color" id="propTextColor" value="#0ff"></label>
+          </fieldset>
+          <fieldset>
+            <legend>Pen</legend>
+            <label>Color: <input type="color" id="propPenColor" value="#0ff"></label>
+            <label>Size: <input type="number" id="propPenSize" value="2" min="1" max="50"></label>
+          </fieldset>
+          <fieldset>
+            <legend>Shapes</legend>
+            <label>Color: <input type="color" id="propShapeColor" value="#0ff"></label>
+            <label>Size: <input type="number" id="propShapeSize" value="2" min="1" max="50"></label>
+          </fieldset>
+        `;
       }
 
       function eraseAtPoint(pos, pageIndex) {
@@ -1209,54 +1069,123 @@
         }
       }
 
+      function createTextInput(pageIndex, x, y) {
+        // Remove any existing text input
+        const existingInput = document.querySelector(".text-input-area");
+        if (existingInput) existingInput.remove();
+
+        const wrapper = pages[pageIndex].wrapper;
+        const fontSize = parseInt(
+          document.getElementById("fontSize")?.value || 20
+        );
+
+        const textarea = document.createElement("textarea");
+        textarea.className = "text-input-area";
+        textarea.style.left = x + "px";
+        textarea.style.top = y + "px";
+        textarea.style.fontSize = fontSize + "px";
+        textarea.style.width = "300px";
+        textarea.style.height = fontSize * 2 + "px";
+        textarea.placeholder = "Type text here...";
+
+        wrapper.appendChild(textarea);
+        textarea.focus();
+
+        function saveText() {
+          const text = textarea.value.trim();
+          if (text) {
+            objects.push({
+              id: objectId++,
+              type: "text",
+              page: pageIndex,
+              text,
+              font: document.getElementById("fontFamily")?.value || "Arial",
+              size: fontSize,
+              color: document.getElementById("fontColor")?.value || "#0ff",
+              x: x,
+              y: y,
+            });
+            saveState();
+            drawObjects();
+          }
+          textarea.remove();
+        }
+
+        textarea.addEventListener("blur", saveText);
+        textarea.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && e.ctrlKey) {
+            saveText();
+          }
+        });
+      }
+
+      function saveState() {
+        undoStack.push(JSON.stringify(objects));
+        redoStack = [];
+      }
+
       // ===================== EXPORT PDF =====================
       document.getElementById("exportPDF").onclick = async () => {
-        if (!pages || pages.length === 0) {
+        if (!pdfDoc) {
           alert("No PDF loaded");
           return;
         }
 
         try {
-          const { PDFDocument } = PDFLib;
-          const newPdf = await PDFDocument.create();
-          const DPI = 300; // Ultra-high DPI (300 DPI = print quality)
-          const PX_TO_POINTS = 72 / DPI; // Convert pixels to PDF points
+          const { PDFDocument, rgb } = PDFLib;
 
-          for (let i = 0; i < pages.length; i++) {
-            const pdfCanvas = pages[i].pdfCanvas;
-            const drawCanvas = pages[i].drawCanvas;
+          // Load original PDF file
+          const pdfBytes = await pdfDoc.getData();
+          const newPdf = await PDFDocument.load(pdfBytes);
 
-            if (pdfCanvas.width > 0 && pdfCanvas.height > 0) {
-              // Use rendered size - maintains what you see on screen
-              const pageWidth = pdfCanvas.width * PX_TO_POINTS;
-              const pageHeight = pdfCanvas.height * PX_TO_POINTS;
+          const pages_list = await newPdf.getPages();
 
-              const newPage = newPdf.addPage([pageWidth, pageHeight]);
+          // Get scale factor from rendered pages
+          const scaleFactor = pages[0] ? pages[0].scale : 1;
 
-              // Create combined canvas with both PDF and drawings
-              // Use 2x scaling for crisp rendering
-              const scale = 2;
-              const combinedCanvas = document.createElement("canvas");
-              combinedCanvas.width = pdfCanvas.width * scale;
-              combinedCanvas.height = pdfCanvas.height * scale;
-              const ctx = combinedCanvas.getContext("2d");
-              ctx.scale(scale, scale);
+          // Add annotations to each page
+          for (let i = 0; i < pages_list.length; i++) {
+            const page = pages_list[i];
+            const pageAnnotations = objects.filter((o) => o.page === i);
+            const pageSize = page.getSize();
+            const pageHeight = pageSize.height;
 
-              // Draw PDF page
-              ctx.drawImage(pdfCanvas, 0, 0);
-
-              // Draw annotations on top
-              ctx.drawImage(drawCanvas, 0, 0);
-
-              const imgData = combinedCanvas.toDataURL("image/png");
-              const pngImage = await newPdf.embedPng(imgData);
-              newPage.drawImage(pngImage, {
-                x: 0,
-                y: 0,
-                width: pageWidth,
-                height: pageHeight,
-              });
-            }
+            // Draw each annotation as vector
+            pageAnnotations.forEach((annotation) => {
+              if (annotation.type === "text") {
+                const fontSize = annotation.size / scaleFactor;
+                const fontColor = hexToRgb(annotation.color);
+                page.drawText(annotation.text, {
+                  x: annotation.x / scaleFactor,
+                  y: pageHeight - annotation.y / scaleFactor,
+                  size: fontSize,
+                  color: rgb(
+                    fontColor.r / 255,
+                    fontColor.g / 255,
+                    fontColor.b / 255
+                  ),
+                });
+              } else if (
+                annotation.type === "pen" ||
+                annotation.type === "highlight"
+              ) {
+                drawPathOnPage(
+                  page,
+                  annotation.path,
+                  annotation.color,
+                  annotation.size / scaleFactor,
+                  annotation.type === "highlight" ? 0.35 : 1,
+                  pageHeight,
+                  scaleFactor
+                );
+              } else if (
+                ["rect", "ellipse", "line", "arrow"].includes(annotation.type)
+              ) {
+                drawShapeOnPage(page, annotation, pageHeight, scaleFactor);
+              } else if (annotation.type === "signature") {
+                drawSignatureOnPage(page, annotation, pageHeight, scaleFactor);
+              }
+            });
           }
 
           const pdfBytesExport = await newPdf.save();
@@ -1267,12 +1196,441 @@
           a.download = "edited.pdf";
           a.click();
           URL.revokeObjectURL(url);
-          alert("PDF exported successfully!");
+          console.log("✓ Exported as vector PDF (no rasterization)");
+          alert("✓ Vector PDF exported successfully!\n\nYour PDF contains:\n• Original vector content\n• Vector annotations (text, shapes, drawings)");
         } catch (e) {
           console.error("Export error:", e);
           alert("Error exporting PDF: " + e.message);
         }
       };
+
+      // Helper function to convert hex color to RGB
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+          ? {
+              r: parseInt(result[1], 16),
+              g: parseInt(result[2], 16),
+              b: parseInt(result[3], 16),
+            }
+          : { r: 0, g: 255, b: 255 };
+      }
+
+      // Draw path (pen, highlight) on PDF page
+      function drawPathOnPage(
+        page,
+        path,
+        color,
+        size,
+        opacity,
+        pageHeight,
+        scaleFactor
+      ) {
+        if (!path || path.length < 2) return;
+
+        const { rgb } = PDFLib;
+        const colorRgb = hexToRgb(color);
+        const pdfColor = rgb(
+          colorRgb.r / 255,
+          colorRgb.g / 255,
+          colorRgb.b / 255
+        );
+
+        // Draw as vector line segments (pure PDF vectors, not rasterized)
+        for (let i = 0; i < path.length - 1; i++) {
+          const p1 = path[i];
+          const p2 = path[i + 1];
+
+          page.drawLine({
+            start: {
+              x: p1.x / scaleFactor,
+              y: pageHeight - p1.y / scaleFactor,
+            },
+            end: {
+              x: p2.x / scaleFactor,
+              y: pageHeight - p2.y / scaleFactor,
+            },
+            thickness: size,
+            color: pdfColor,
+            opacity: opacity,
+          });
+        }
+      }
+
+      // Draw shape on PDF page - VECTOR ONLY
+      function drawShapeOnPage(page, shape, pageHeight, scaleFactor) {
+        const { rgb } = PDFLib;
+        const colorRgb = hexToRgb(shape.color);
+        const pdfColor = rgb(
+          colorRgb.r / 255,
+          colorRgb.g / 255,
+          colorRgb.b / 255
+        );
+
+        const x1 = shape.x1 / scaleFactor;
+        const y1 = pageHeight - shape.y1 / scaleFactor;
+        const x2 = shape.x2 / scaleFactor;
+        const y2 = pageHeight - shape.y2 / scaleFactor;
+        const thickness = shape.size / scaleFactor;
+
+        if (shape.type === "rect") {
+          // Vector rectangle (pure PDF path)
+          page.drawRectangle({
+            x: Math.min(x1, x2),
+            y: Math.min(y1, y2),
+            width: Math.abs(x2 - x1),
+            height: Math.abs(y1 - y2),
+            color: pdfColor,
+            borderColor: pdfColor,
+            borderWidth: thickness,
+          });
+        } else if (shape.type === "line" || shape.type === "arrow") {
+          // Vector line (pure PDF vector)
+          page.drawLine({
+            start: { x: x1, y: y1 },
+            end: { x: x2, y: y2 },
+            thickness: thickness,
+            color: pdfColor,
+          });
+        } else if (shape.type === "ellipse") {
+          // Vector ellipse (pure PDF path)
+          page.drawEllipse({
+            x: (x1 + x2) / 2,
+            y: (y1 + y2) / 2,
+            xScale: Math.abs(x2 - x1) / 2,
+            yScale: Math.abs(y1 - y2) / 2,
+            color: pdfColor,
+            borderColor: pdfColor,
+            borderWidth: thickness,
+          });
+        }
+      }
+
+      // Draw signature on PDF page - VECTOR ONLY
+      function drawSignatureOnPage(page, sig, pageHeight, scaleFactor) {
+        if (!sig.storedSignatureData) return;
+
+        const signatureData = sig.storedSignatureData;
+        const { rgb } = PDFLib;
+        const pdfColor = rgb(0, 1, 1); // Cyan color
+
+        if (signatureData.mode === "draw" && signatureData.data) {
+          // Draw signature as vector paths (pure PDF vectors, not rasterized)
+          signatureData.data.forEach((stroke) => {
+            if (!stroke.points || stroke.points.length < 2) return;
+            for (let i = 0; i < stroke.points.length - 1; i++) {
+              const p1 = stroke.points[i];
+              const p2 = stroke.points[i + 1];
+              page.drawLine({
+                start: {
+                  x: sig.x / scaleFactor + p1.x / scaleFactor,
+                  y: pageHeight - (sig.y / scaleFactor + p1.y / scaleFactor),
+                },
+                end: {
+                  x: sig.x / scaleFactor + p2.x / scaleFactor,
+                  y: pageHeight - (sig.y / scaleFactor + p2.y / scaleFactor),
+                },
+                thickness: 1.5,
+                color: pdfColor,
+              });
+            }
+          });
+        } else if (signatureData.mode === "type" && signatureData.text) {
+          // Draw signature text as vector text (pure PDF font rendering)
+          page.drawText(signatureData.text, {
+            x: sig.x / scaleFactor,
+            y: pageHeight - sig.y / scaleFactor,
+            size: 20,
+            color: pdfColor,
+          });
+        }
+      }
+
+      updatePropertiesPanel();
+
+      // ===================== SIGNATURE MANAGEMENT =====================
+      let storedSignature = null;
+      let signatureMode = "draw";
+      let signaturePadEditor = null;
+      let tempSignatureData = null;
+
+      function loadSignatureFromStorage() {
+        const stored = localStorage.getItem("userSignature");
+        if (stored) {
+          storedSignature = JSON.parse(stored);
+        }
+      }
+
+      function saveSignatureToStorage(signature) {
+        localStorage.setItem("userSignature", JSON.stringify(signature));
+        storedSignature = signature;
+      }
+
+      function openSignatureModal() {
+        document.getElementById("signatureModal").classList.add("active");
+        signatureMode = "draw";
+        updateSignatureModeUI();
+        setTimeout(() => initSignatureDrawCanvas(), 100);
+      }
+
+      function closeSignatureModal() {
+        document.getElementById("signatureModal").classList.remove("active");
+        if (signaturePadEditor) {
+          signaturePadEditor.clear();
+          signaturePadEditor = null;
+        }
+      }
+
+      function initSignatureDrawCanvas() {
+        const canvas = document.getElementById("signatureDrawCanvas");
+        if (!canvas) return;
+
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 200;
+
+        signaturePadEditor = new SignaturePad(canvas, {
+          backgroundColor: "rgba(34, 34, 34, 1)",
+        });
+      }
+
+      function updateSignatureModeUI() {
+        document.querySelectorAll(".signature-mode-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        document
+          .querySelector(`[data-mode="${signatureMode}"]`)
+          .classList.add("active");
+
+        const drawCanvas = document.getElementById("signatureDrawCanvas");
+        const typeInput = document.getElementById("signatureTypeInput");
+
+        if (signatureMode === "draw") {
+          drawCanvas.classList.remove("hidden");
+          typeInput.classList.add("hidden");
+          setTimeout(() => {
+            if (!signaturePadEditor) initSignatureDrawCanvas();
+          }, 50);
+        } else {
+          drawCanvas.classList.add("hidden");
+          typeInput.classList.remove("hidden");
+          typeInput.value = "";
+          typeInput.focus();
+        }
+      }
+
+      function updateSignaturePreview() {
+        const previewCanvas = document.getElementById("signaturePreviewCanvas");
+        const previewCtx = previewCanvas.getContext("2d");
+
+        previewCanvas.width = 400;
+        previewCanvas.height = 150;
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+        if (signatureMode === "draw" && signaturePadEditor) {
+          const srcCanvas = signaturePadEditor.canvas;
+          const ratio = Math.min(
+            previewCanvas.width / srcCanvas.width,
+            previewCanvas.height / srcCanvas.height
+          );
+          const x = (previewCanvas.width - srcCanvas.width * ratio) / 2;
+          const y = (previewCanvas.height - srcCanvas.height * ratio) / 2;
+          previewCtx.drawImage(
+            srcCanvas,
+            x,
+            y,
+            srcCanvas.width * ratio,
+            srcCanvas.height * ratio
+          );
+        } else {
+          const text = document.getElementById("signatureTypeInput").value;
+          if (text) {
+            previewCtx.fillStyle = "#0ff";
+            previewCtx.font = "italic 48px cursive";
+            previewCtx.textAlign = "center";
+            previewCtx.textBaseline = "middle";
+            previewCtx.fillText(
+              text,
+              previewCanvas.width / 2,
+              previewCanvas.height / 2
+            );
+          }
+        }
+      }
+
+      function saveCurrentSignature() {
+        if (signatureMode === "draw") {
+          if (!signaturePadEditor || signaturePadEditor.isEmpty()) {
+            alert("Please draw your signature");
+            return;
+          }
+          const signature = {
+            mode: "draw",
+            data: signaturePadEditor.toData(),
+          };
+          saveSignatureToStorage(signature);
+        } else {
+          const text = document
+            .getElementById("signatureTypeInput")
+            .value.trim();
+          if (!text) {
+            alert("Please type your signature");
+            return;
+          }
+          const signature = {
+            mode: "type",
+            text: text,
+          };
+          saveSignatureToStorage(signature);
+        }
+        alert("Signature saved successfully!");
+        closeSignatureModal();
+      }
+
+      function clearStoredSignature() {
+        if (confirm("Are you sure you want to clear your signature?")) {
+          localStorage.removeItem("userSignature");
+          storedSignature = null;
+          document.getElementById("signatureTypeInput").value = "";
+          if (signaturePadEditor) signaturePadEditor.clear();
+          updateSignaturePreview();
+        }
+      }
+
+      // Mode selector
+      document.querySelectorAll(".signature-mode-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          signatureMode = e.target.getAttribute("data-mode");
+          updateSignatureModeUI();
+          setTimeout(() => updateSignaturePreview(), 50);
+        });
+      });
+
+      // Input listeners
+      document
+        .getElementById("signatureTypeInput")
+        ?.addEventListener("input", () => {
+          updateSignaturePreview();
+        });
+
+      if (signaturePadEditor) {
+        signaturePadEditor.addEventListener("endStroke", () => {
+          updateSignaturePreview();
+        });
+      }
+
+      // Modal buttons
+      document
+        .getElementById("confirmSignature")
+        .addEventListener("click", saveCurrentSignature);
+      document
+        .getElementById("cancelSignature")
+        .addEventListener("click", closeSignatureModal);
+      document
+        .getElementById("clearSignature")
+        .addEventListener("click", clearStoredSignature);
+
+      // Close modal on backdrop click
+      document
+        .getElementById("signatureModal")
+        .addEventListener("click", (e) => {
+          if (e.target.id === "signatureModal") {
+            closeSignatureModal();
+          }
+        });
+
+      // Add signature button to tool options
+      function updateSignatureToolUI() {
+        const subToolbar = document.getElementById("subToolbar");
+        if (
+          tool === "signature" &&
+          !subToolbar.querySelector(".signature-manage-btn")
+        ) {
+          const btn = document.createElement("button");
+          btn.className = "signature-manage-btn";
+          btn.textContent = "⚙️ Manage Signature";
+          btn.addEventListener("click", openSignatureModal);
+          subToolbar.appendChild(btn);
+        }
+      }
+
+      // Override updateSubToolbar to add signature button
+      const originalUpdateSubToolbar = updateSubToolbar;
+      updateSubToolbar = function () {
+        originalUpdateSubToolbar.call(this);
+        if (tool === "signature") {
+          updateSignatureToolUI();
+        }
+      };
+
+      // Draw stored signature on canvas
+      function drawStoredSignature(o, ctx) {
+        if (!o.storedSignatureData) return;
+
+        const sig = o.storedSignatureData;
+        if (sig.mode === "draw" && sig.data) {
+          ctx.strokeStyle = "#0ff";
+          ctx.lineWidth = 2;
+          sig.data.forEach((stroke) => {
+            if (!stroke.points) return;
+            ctx.beginPath();
+            stroke.points.forEach((p, i) => {
+              i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+          });
+        } else if (sig.mode === "type" && sig.text) {
+          ctx.fillStyle = "#0ff";
+          ctx.font = "italic 20px cursive";
+          ctx.fillText(sig.text, o.x, o.y);
+        }
+      }
+
+      // Store signature reference when adding signature object
+      const originalHandleMouseUp = handleMouseUp;
+      handleMouseUp = function (e, pageIndex) {
+        if (tool === "signature" && isDrawing) {
+          isDrawing = false;
+          if (storedSignature) {
+            objects.push({
+              id: objectId++,
+              type: "signature",
+              page: pageIndex,
+              x: tempPath[0].x,
+              y: tempPath[0].y,
+              storedSignatureData: storedSignature,
+            });
+            saveState();
+            tempPath = [];
+            drawObjects();
+          } else {
+            alert("Please set up your signature first!");
+            openSignatureModal();
+          }
+          return;
+        }
+        originalHandleMouseUp.call(this, e, pageIndex);
+      };
+
+      // Override drawSignature to use stored data
+      function drawSignature(o, ctx) {
+        if (o.storedSignatureData) {
+          drawStoredSignature(o, ctx);
+        } else if (o.path) {
+          ctx.strokeStyle = "#0ff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          o.path.forEach((stroke) => {
+            if (!stroke.points) return;
+            stroke.points.forEach((p, i) =>
+              i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
+            );
+          });
+          ctx.stroke();
+        }
+      }
+
+      // Initialize
+      loadSignatureFromStorage();
     </script>
   </body>
 </html>
