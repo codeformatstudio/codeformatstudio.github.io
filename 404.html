@@ -3,177 +3,655 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 - System Offline</title>
-<!-- Import a cyber/terminal-style font from Google Fonts -->
-<link href='fonts.googleapis.com' rel='stylesheet'>
+
+<title>404 — CFS Terminal</title>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- MATRIX BACKGROUND CANVAS -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- CRT OVERLAYS -->
+<div class="crt-scanlines"></div>
+<div class="crt-overlay"></div>
+
+<!-- ASCII BORDER -->
+<div class="ascii-frame">
+    <div class="ascii-top">+-----------------------------------------------------------+</div>
+    <div class="ascii-bottom">+-----------------------------------------------------------+</div>
+</div>
+
+<!-- BOOT SCREEN -->
+<div id="boot-screen" class="boot-container">
+    <div class="boot-text" id="boot-text">
+        <!-- Boot sequence inserted by JS -->
+    </div>
+</div>
+
+<!-- TERMINAL WRAPPER -->
+<div id="terminal-wrapper" class="terminal-wrapper hidden">
+
+    <!-- RED ALERT BANNERS -->
+    <div id="alert-banner" class="alert-banner hidden">
+        <div class="alert-text" id="alert-text">INTRUSION DETECTED — SYSTEM OVERRIDE</div>
+    </div>
+
+    <!-- TRACE PROGRESS BAR -->
+    <div id="trace-container" class="trace-container hidden">
+        <div class="trace-label">TRACE PROGRESS</div>
+        <div class="trace-bar">
+            <div id="trace-progress" class="trace-progress"></div>
+        </div>
+        <div id="trace-percent" class="trace-percent">0%</div>
+    </div>
+
+    <!-- TERMINAL OUTPUT -->
+    <div id="terminal" class="terminal">
+        <div id="terminal-output"></div>
+
+        <!-- INPUT LINE -->
+        <div id="terminal-input-line" class="terminal-input-line">
+            <span id="terminal-prompt" class="terminal-prompt">cfs@CFS-Terminal:~$</span>
+            <span id="terminal-input" class="terminal-input"></span>
+            <span class="cursor" id="cursor"></span>
+        </div>
+    </div>
+</div>
+
+<!-- FILE SUGGESTION LIST -->
+<div id="file-suggestions" class="file-suggestions hidden"></div>
+
+<!-- AUDIO ELEMENTS -->
+<audio id="audio-startup" src="https://assets.mixkit.co/sfx/download/mixkit-retro-video-game-notification-234.wav"></audio>
+<audio id="audio-type" src="https://assets.mixkit.co/sfx/download/mixkit-classic-click-1117.wav"></audio>
+<audio id="audio-siren" src="https://assets.mixkit.co/sfx/download/mixkit-police-siren-us-1640.wav" loop></audio>
+<audio id="audio-error" src="https://assets.mixkit.co/sfx/download/mixkit-arcade-retro-game-over-213.wav"></audio>
 <style>
-/* Define variables for easy color changes */
-:root {
-    --neon-blue: #00ffff;
-    --neon-pink: #ff0077;
-    --dark-bg: #0a0a0a;
-    --font: 'VT323', monospace;
+
+/* -------------------------------------------------
+   GLOBAL + RESET
+------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-body {
-    font-family: var(--font);
-    background-color: var(--dark-bg);
-    color: var(--neon-blue);
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    font-family: 'VT323', monospace;
+    color: #00faff;
+}
+
+/* -------------------------------------------------
+   MATRIX BACKGROUND CANVAS
+------------------------------------------------- */
+#matrix-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* -------------------------------------------------
+   CRT EFFECTS
+------------------------------------------------- */
+.crt-scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.04) 0px,
+        rgba(255,255,255,0.04) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+    z-index: 20;
+    opacity: 0.12;
+    animation: scanlineMove 1.2s linear infinite;
+}
+
+@keyframes scanlineMove {
+    0% { background-position: 0 -4px; }
+    100% { background-position: 0 0; }
+}
+
+.crt-overlay {
+    position: fixed;
+    inset: -10%;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 65%, rgba(0,0,0,0.6));
+    z-index: 21;
+}
+
+/* -------------------------------------------------
+   ASCII BORDER FRAME
+------------------------------------------------- */
+.ascii-frame {
+    position: fixed;
+    inset: 20px;
+    pointer-events: none;
+    z-index: 40;
+    color: #00faff;
+    font-size: 18px;
     text-align: center;
+}
+
+.ascii-top {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.ascii-bottom {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* -------------------------------------------------
+   BOOT SCREEN
+------------------------------------------------- */
+.boot-container {
+    position: absolute;
+    inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-    position: relative;
+    z-index: 50;
+    background: black;
 }
-body::before {
-    content: '';
+
+.boot-text {
+    color: #00faff;
+    font-size: 24px;
+    white-space: pre;
+    text-shadow: 0 0 8px #00faff;
+}
+
+/* -------------------------------------------------
+   TERMINAL WINDOW
+------------------------------------------------- */
+.terminal-wrapper {
+    position: relative;
+    z-index: 100;
+    padding: 40px;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(2px);
+}
+
+.terminal {
+    font-size: 22px;
+    line-height: 1.4em;
+    color: #00faff;
+}
+
+.terminal-output {
+    white-space: pre-wrap;
+}
+
+.terminal-input-line {
+    display: flex;
+    font-size: 22px;
+    margin-top: 10px;
+}
+
+.terminal-prompt {
+    color: #00faff;
+}
+
+.terminal-input {
+    margin-left: 8px;
+    color: #fff;
+}
+
+/* -------------------------------------------------
+   CURSOR
+------------------------------------------------- */
+.cursor {
+    width: 10px;
+    height: 22px;
+    background: #ff006e;
+    margin-left: 3px;
+    animation: blink 0.8s steps(1) infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* -------------------------------------------------
+   HIDDEN UTILITY
+------------------------------------------------- */
+.hidden {
+    display: none !important;
+}
+
+/* -------------------------------------------------
+   FILE SUGGESTION LIST
+------------------------------------------------- */
+.file-suggestions {
+    position: absolute;
+    bottom: 20px;
+    left: 40px;
+    padding: 20px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #00faff;
+    box-shadow: 0 0 10px #00faff;
+    color: #00faff;
+    font-size: 20px;
+    z-index: 200;
+}
+
+.file-suggestions a {
+    color: #ff006e;
+    text-decoration: none;
+}
+
+.file-suggestions a:hover {
+    text-shadow: 0 0 6px #ff006e;
+}
+
+/* -------------------------------------------------
+   TRACE PROGRESS BAR
+------------------------------------------------- */
+.trace-container {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    background: rgba(255,0,0,0.15);
+    padding: 15px;
+    border: 1px solid red;
+    box-shadow: 0 0 10px red;
+    z-index: 300;
+    width: 300px;
+}
+
+.trace-label {
+    font-size: 18px;
+    color: red;
+    margin-bottom: 8px;
+}
+
+.trace-bar {
+    width: 100%;
+    height: 18px;
+    border: 1px solid red;
+    background: rgba(255,0,0,0.2);
+}
+
+.trace-progress {
+    height: 100%;
+    width: 0%;
+    background: red;
+    box-shadow: 0 0 6px red;
+}
+
+.trace-percent {
+    text-align: right;
+    font-size: 16px;
+    color: #ff8080;
+    margin-top: 5px;
+}
+
+/* -------------------------------------------------
+   ALERT MODE (SEVERE)
+------------------------------------------------- */
+.alert-banner {
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: linear-gradient(to bottom,transparent 50%,rgba(0, 0, 0, 0.3) 50%);
-    background-size: 100% 4px;
-    pointer-events: none;
-    animation: scanlines 1s infinite linear;
-    opacity: 0.7;
-}
-@keyframes scanlines {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 4px; }
-}
-.container {
-    max-width: 600px;
+    width: 100%;
     padding: 20px;
-    transform: skew(-5deg) rotate(1deg) scale(1);
-    position: relative;
-    z-index: 10;
+    text-align: center;
+    background: rgba(255,0,0,0.4);
+    border-bottom: 2px solid red;
+    z-index: 350;
+    display: none;
 }
-h1 {
-    font-size: 120px;
-    margin: 0;
-    text-shadow:0 0 10px var(--neon-blue),0 0 20px rgba(0, 255, 255, 0.5),0 0 40px rgba(0, 255, 255, 0.3);
-    animation: glitch 1s infinite linear alternate-reverse;
-}
-p {
-    font-size: 24px;
-    margin: 10px 0;
+
+.alert-text {
     color: white;
-    text-shadow: 0 0 5px white;
-}
-a {
-    color: var(--neon-pink);
-    text-decoration: none;
-    font-size: 18px;
-    display: inline-block;
-    margin-top: 20px;
-    padding: 5px 10px;
-    border: 1px solid var(--neon-pink);
-    box-shadow:0 0 5px var(--neon-pink),inset 0 0 5px var(--neon-pink);
-    transition: all 0.3s ease;
-}
-a:hover {
-    background-color: var(--neon-pink);
-    color: var(--dark-bg);
-    box-shadow: none;
-}
-.file-list {
-    margin-top: 20px;
-    text-align: left;
-    display: inline-block;
-}
-.file-list ul {
-    list-style-type: '>> ';
-    padding-left: 20px;
-}
-.file-list li a {
-    color: var(--neon-blue);
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    margin: 5px 0;
-}
-.file-list li a:hover {
-    color: var(--neon-pink);
-    background-color: transparent;
+    font-size: 28px;
+    text-shadow: 0 0 10px red;
+    animation: alertFlash 0.4s infinite alternate;
 }
 
-@keyframes glitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(-2px, -2px); }
-    60% { transform: translate(2px, 2px); }
-    80% { transform: translate(2px, -2px); }
-    100% { transform: translate(0); }
+@keyframes alertFlash {
+    0% { opacity: 0.2; }
+    100% { opacity: 1; }
 }
+
+/* Severe shake */
+.shake {
+    animation: severeShake 0.08s infinite;
+}
+
+@keyframes severeShake {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(-8px, 5px); }
+    50% { transform: translate(10px, -5px); }
+    75% { transform: translate(-6px, 8px); }
+    100% { transform: translate(0,0); }
+}
+
+/* Red tint overlay */
+.alert-tint {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,0,0,0.08);
+    z-index: 500;
+    pointer-events: none;
+    animation: tintPulse 0.4s infinite alternate;
+}
+
+@keyframes tintPulse {
+    0% { opacity: 0.05; }
+    100% { opacity: 0.3; }
+}
+
+/* Distortion scan */
+.alert-distort {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,0,0,0.08) 0px,
+        rgba(255,0,0,0.08) 2px,
+        transparent 3px,
+        transparent 6px
+    );
+    animation: distortMove 0.3s linear infinite;
+    z-index: 510;
+}
+
+@keyframes distortMove {
+    0% { background-position: 0 -10px; }
+    100% { background-position: 0 0; }
+}
+
+/* -------------------------------------------------
+   GLITCH TEXT
+------------------------------------------------- */
+.glitch {
+    animation: glitchPulse 0.15s infinite;
+}
+
+@keyframes glitchPulse {
+    0% { text-shadow: 0 0 4px red; }
+    50% { text-shadow: 0 0 12px red; }
+    100% { text-shadow: 0 0 4px red; }
+}
+
+
 </style>
-</head>
-<body>
-<div class="container">
-    <h1>404</h1>
-    <p>>>> ERROR: FILE NOT FOUND</p>
-    <p>_The digital matrix you requested does not exist._</p>
-    <p>Perhaps you were looking for one of these files?</p>
-    
-    <div class="file-list" id="file-list-container">
-        <!-- File list will be injected here by JavaScript -->
-    </div>
-
-    <a href="/">[ RETURN TO HOMEBASE ]</a>
-</div>
-
 <script>
-    const GH_USERNAME = 'codeformatstudio';
-    const GH_REPO = 'codeformatstudio.github.io';
+/* ----------------------------
+   GLOBAL ELEMENT REFERENCES
+---------------------------- */
+const bootScreen = document.getElementById('boot-screen');
+const bootText = document.getElementById('boot-text');
 
-    const API_URL =
-        `https://api.github.com/repos/${GH_USERNAME}/${GH_REPO}/contents`;
+const terminalWrapper = document.getElementById('terminal-wrapper');
+const terminalOutput = document.getElementById('terminal-output');
+const terminalInput = document.getElementById('terminal-input');
+const cursor = document.getElementById('cursor');
 
-    async function fetchFiles() {
-        try {
-            const response = await fetch(API_URL);
-            if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+const traceContainer = document.getElementById('trace-container');
+const traceProgress = document.getElementById('trace-progress');
+const tracePercent = document.getElementById('trace-percent');
 
-            const files = await response.json();
-            displayFiles(files);
+const alertBanner = document.getElementById('alert-banner');
+const alertText = document.getElementById('alert-text');
 
-        } catch (error) {
-            console.error("Could not fetch files:", error);
-            document.getElementById('file-list-container').innerHTML =
-                '<p>_Could not retrieve file list due to a system error._</p>';
+const matrixCanvas = document.getElementById('matrix-canvas');
+const ctx = matrixCanvas.getContext('2d');
+
+const audioStartup = document.getElementById('audio-startup');
+const audioType = document.getElementById('audio-type');
+const audioSiren = document.getElementById('audio-siren');
+const audioError = document.getElementById('audio-error');
+
+const fileSuggestions = document.getElementById('file-suggestions');
+
+/* ----------------------------
+   MATRIX EFFECT SETUP
+---------------------------- */
+let columns;
+let drops = [];
+let fontSize = 16;
+
+function resizeMatrix() {
+    matrixCanvas.width = window.innerWidth;
+    matrixCanvas.height = window.innerHeight;
+    columns = Math.floor(matrixCanvas.width / fontSize);
+    drops = Array(columns).fill(1);
+}
+
+window.addEventListener('resize', resizeMatrix);
+resizeMatrix();
+
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+    ctx.fillStyle = '#00FF00';
+    ctx.font = fontSize + 'px VT323';
+
+    for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+
+        drops[i]++;
+    }
+}
+
+setInterval(drawMatrix, 33);
+
+/* ----------------------------
+   BOOT SEQUENCE
+---------------------------- */
+const bootLines = [
+    "CFS Terminal v4.0",
+    "SYSTEM INITIALIZING...",
+    "LOADING CORE MODULES...",
+    "CHECKING SECURITY...",
+    "NETWORK SYNCHRONIZATION...",
+    "BOOT SEQUENCE COMPLETE",
+];
+
+function bootSequence() {
+    let i = 0;
+    function typeNextLine() {
+        if (i < bootLines.length) {
+            bootText.textContent += bootLines[i] + '\n';
+            audioType.currentTime = 0; audioType.play();
+            i++;
+            setTimeout(typeNextLine, 500);
+        } else {
+            audioStartup.currentTime = 0; audioStartup.play();
+            setTimeout(() => {
+                bootScreen.classList.add('hidden');
+                terminalWrapper.classList.remove('hidden');
+                terminalInput.focus();
+            }, 600);
         }
     }
+    typeNextLine();
+}
 
-    function displayFiles(files) {
-        const listContainer = document.getElementById('file-list-container');
-        const ul = document.createElement('ul');
+bootSequence();
 
-        files
-          .filter(file =>
-              file.type === 'file' &&
-              !file.name.startsWith('_') &&
-              (file.name.endsWith('.html') ||
-               file.name.endsWith('.md') ||
-               file.name.endsWith('.txt'))
-          )
-          .forEach(file => {
-              const li = document.createElement('li');
-              const a = document.createElement('a');
-              a.href = `/${file.path}`;
-              a.textContent = file.name;
-              li.appendChild(a);
-              ul.appendChild(li);
-          });
+/* ----------------------------
+   TERMINAL ENGINE
+---------------------------- */
+let commandHistory = [];
+let historyIndex = 0;
 
-        listContainer.innerHTML = '';
-        listContainer.appendChild(ul);
+let fakeFilesystem = [
+    'index.html',
+    'about.html',
+    'contact.html',
+    'README.md',
+    'LICENSE.txt',
+    'tutorial.html'
+];
+
+function appendOutput(text, isError = false) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    if (isError) div.style.color = '#FF006E';
+    terminalOutput.appendChild(div);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+}
+
+function showFileSuggestions() {
+    fileSuggestions.innerHTML = '<strong>Files you may be looking for:</strong><br>';
+    fakeFilesystem.forEach(file => {
+        const a = document.createElement('a');
+        a.href = '/' + file;
+        a.textContent = file;
+        fileSuggestions.appendChild(a);
+        fileSuggestions.appendChild(document.createElement('br'));
+    });
+    fileSuggestions.classList.remove('hidden');
+}
+
+function triggerRedAlert() {
+    alertBanner.classList.remove('hidden');
+    document.body.classList.add('shake');
+    const tint = document.createElement('div');
+    tint.classList.add('alert-tint');
+    document.body.appendChild(tint);
+    const distort = document.createElement('div');
+    distort.classList.add('alert-distort');
+    document.body.appendChild(distort);
+
+    audioSiren.currentTime = 0;
+    audioSiren.play();
+}
+
+function traceProgressBar(callback) {
+    traceContainer.classList.remove('hidden');
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 4) + 1;
+        if (progress > 100) progress = 100;
+        traceProgress.style.width = progress + '%';
+        tracePercent.textContent = progress + '%';
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => callback(), 500);
+        }
+    }, 120);
+}
+
+/* ----------------------------
+   COMMAND PARSER
+---------------------------- */
+function parseCommand(input) {
+    input = input.trim().toLowerCase();
+    appendOutput(`cfs@CFS-Terminal:~$ ${input}`);
+
+    if (!input) return;
+
+    if (input === 'help') {
+        appendOutput('Available commands: help, reboot, logs, clear, override security, files');
     }
+    else if (input === 'reboot') {
+        appendOutput('Rebooting system...');
+        location.reload();
+    }
+    else if (input === 'clear') {
+        terminalOutput.innerHTML = '';
+    }
+    else if (input === 'logs') {
+        appendOutput('System Logs:');
+        appendOutput('- Boot sequence OK');
+        appendOutput('- No threats detected');
+        appendOutput('- All systems nominal');
+    }
+    else if (input === 'files') {
+        showFileSuggestions();
+    }
+    else if (input === 'override security' || input === 'override' || input === 'security override') {
+        appendOutput('> Initiating security override...');
+        appendOutput('> Establishing uplink...');
+        appendOutput('> Beginning trace countermeasure...');
+        traceProgressBar(triggerRedAlert);
+    }
+    else {
+        appendOutput(`Command not found: ${input}`, true);
+        audioError.currentTime = 0;
+        audioError.play();
+    }
+}
 
-    fetchFiles();
+/* ----------------------------
+   TERMINAL INPUT HANDLING
+---------------------------- */
+let currentInput = '';
+
+document.addEventListener('keydown', (e) => {
+    if (terminalWrapper.classList.contains('hidden')) return;
+
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        currentInput += e.key;
+        terminalInput.textContent = currentInput;
+        audioType.currentTime = 0;
+        audioType.play();
+    }
+    else if (e.key === 'Backspace') {
+        currentInput = currentInput.slice(0, -1);
+        terminalInput.textContent = currentInput;
+        audioType.currentTime = 0;
+        audioType.play();
+    }
+    else if (e.key === 'Enter') {
+        parseCommand(currentInput);
+        commandHistory.push(currentInput);
+        historyIndex = commandHistory.length;
+        currentInput = '';
+        terminalInput.textContent = '';
+    }
+    else if (e.key === 'ArrowUp') {
+        if (historyIndex > 0) historyIndex--;
+        currentInput = commandHistory[historyIndex] || '';
+        terminalInput.textContent = currentInput;
+    }
+    else if (e.key === 'ArrowDown') {
+        if (historyIndex < commandHistory.length - 1) historyIndex++;
+        else historyIndex = commandHistory.length;
+        currentInput = commandHistory[historyIndex] || '';
+        terminalInput.textContent = currentInput;
+    }
+});
+
+/* ----------------------------
+   INITIAL FILE SUGGESTION
+---------------------------- */
+showFileSuggestions();
+
 </script>
 
-
+<!-- SCRIPT BLOCK (CSS + JS delivered next messages) -->
 </body>
 </html>
