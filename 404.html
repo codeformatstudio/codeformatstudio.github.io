@@ -651,7 +651,10 @@ else if (input === 'list files') {
     appendOutput('- notes.md');
 }
     else if (input === 'open' + file) {
-        window.location.href = file
+        appendOutput("Openning " + file + "...");
+        setTimeout(function () {
+            window.location.href = "/" + file;
+        }, 1000)
 }
 else if (input === 'network status') {
     appendOutput('Network Status: Connected');
