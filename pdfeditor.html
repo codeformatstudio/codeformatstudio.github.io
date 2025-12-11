@@ -156,7 +156,7 @@
         <i class="lucide-file-up"></i> Load PDF
       </button>
 
-      <button id="exportPDF"><i class="lucide-file-down"></i> Export</button>
+      <button id="exportPDF" id="exportFullPDF"><i class="lucide-file-down"></i> Export</button>
     </header>
 
     <!-- Subtoolbar -->
@@ -1176,6 +1176,80 @@ async function exportPDF(){
 }
 async function fetchCurrentPDFBytes(){const url=pdfDoc._pdfInfo.url;const resp=await fetch(url);return await resp.arrayBuffer();}
 document.getElementById("exportPDF").onclick=exportPDF;
+</script>
+<script>
+/* ======================================================
+ PHASE 8 — FULL WYSIWYG PDF EXPORT
+====================================================== */
+async function exportFullPDF() {
+  if(!pdfDoc) return;
+  const pdfBytes = await fetchCurrentPDFBytes();
+  const pdfLibDoc = await PDFLib.PDFDocument.load(pdfBytes);
+  const pagesLib = pdfLibDoc.getPages();
+
+  objects.forEach(o => {
+    const pg = pagesLib[o.page];
+    const pgHeight = pg.getHeight();
+
+    if(o.type === "text") {
+      pg.drawText(o.text, {
+        x: o.x,
+        y: pgHeight - o.y,
+        size: o.size,
+        color: PDFLib.rgb(
+          parseInt(o.color.substr(1,2),16)/255,
+          parseInt(o.color.substr(3,2),16)/255,
+          parseInt(o.color.substr(5,2),16)/255
+        )
+      });
+    }
+
+    else if(o.type === "pen" || o.type === "highlight" || o.type === "signature") {
+      const path = o.path;
+      if(path.length < 2) return;
+      for(let i=1; i<path.length; i++){
+        pg.drawLine({
+          start: {x: path[i-1].x, y: pgHeight - path[i-1].y},
+          end: {x: path[i].x, y: pgHeight - path[i].y},
+          thickness: o.size || 2,
+          color: PDFLib.rgb(
+            parseInt(o.color?.substr(1,2)||"0",16)/255,
+            parseInt(o.color?.substr(3,2)||"0",16)/255,
+            parseInt(o.color?.substr(5,2)||"0",16)/255
+          ),
+          opacity: o.opacity || 1
+        });
+      }
+    }
+
+    else if(["rect","ellipse","line","arrow"].includes(o.type)){
+      const x1 = o.x1, y1 = pgHeight - o.y1;
+      const x2 = o.x2, y2 = pgHeight - o.y2;
+
+      if(o.type==="rect"){
+        pg.drawRectangle({x: Math.min(x1,x2), y: Math.min(y1,y2), width: Math.abs(x2-x1), height: Math.abs(y2-y1), borderColor: PDFLib.rgb(parseInt(o.color.substr(1,2),16)/255, parseInt(o.color.substr(3,2),16)/255, parseInt(o.color.substr(5,2),16)/255), borderWidth: o.size, color: PDFLib.rgb(parseInt(o.fill.substr(1,2),16)/255,parseInt(o.fill.substr(3,2),16)/255,parseInt(o.fill.substr(5,2),16)/255) });
+      }
+
+      if(o.type==="ellipse"){
+        // Approximate ellipse with a thin rectangle with border (pdf-lib lacks ellipse primitive)
+        pg.drawEllipse({x:(x1+x2)/2, y:(y1+y2)/2, xScale:Math.abs(x2-x1)/2, yScale:Math.abs(y2-y1)/2, borderColor: PDFLib.rgb(parseInt(o.color.substr(1,2),16)/255, parseInt(o.color.substr(3,2),16)/255, parseInt(o.color.substr(5,2),16)/255), borderWidth:o.size, color: PDFLib.rgb(parseInt(o.fill.substr(1,2),16)/255,parseInt(o.fill.substr(3,2),16)/255,parseInt(o.fill.substr(5,2),16)/255) });
+      }
+
+      if(o.type==="line" || o.type==="arrow"){
+        pg.drawLine({start:{x:x1,y:y1}, end:{x:x2,y:y2}, thickness:o.size, color: PDFLib.rgb(parseInt(o.color.substr(1,2),16)/255, parseInt(o.color.substr(3,2),16)/255, parseInt(o.color.substr(5,2),16)/255)});
+      }
+    }
+  });
+
+  const pdfDataUri = await pdfLibDoc.saveAsBase64({dataUri:true});
+  const link = document.createElement("a");
+  link.href = pdfDataUri;
+  link.download = "edited_full.pdf";
+  link.click();
+}
+
+/* Bind full export button */
+document.getElementById("exportPDF").onclick = exportFullPDF;
 </script>
 
 </body>
