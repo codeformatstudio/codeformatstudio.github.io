@@ -26,7 +26,8 @@ const pdfjsLib = window["pdfjs-dist/build/pdf"];
 let pdfDoc = null,
     scale = 1.0,
     pages = [],
-    currentPage = 1;
+    currentPage = 1,
+    pdfFileName = "document";
 const pageContainer = document.getElementById("pageContainer");
 const pagesList = document.getElementById("pagesList");
 const zoomInBtn = document.getElementById("zoomIn");
@@ -45,12 +46,31 @@ let undoStack = [],
 let signaturePad = null;
 let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+// Font name to standard font mapping - simpler approach
+const fontNameMap = {
+    "serif": ["Times New Roman", "Playfair Display", "Merriweather", "Lora", "Cormorant Garamond", "EB Garamond", "Cinzel", "Bodoni Moda"],
+    "mono": ["Courier New", "IBM Plex Mono", "JetBrains Mono", "Source Code Pro", "Space Mono", "Inconsolata", "Fira Code", "Roboto Mono", "Ubuntu Mono", "Courier Prime", "Oxygen Mono", "Anonymous Pro", "Overpass Mono"],
+};
+
+// Get font name string for use with PDFLib (do NOT pass font to drawText, let PDFLib use default)
+const getStandardFontName = (fontName) => {
+    if (!fontName) return "Helvetica";
+    
+    const isSerif = fontNameMap.serif.includes(fontName);
+    const isMono = fontNameMap.mono.includes(fontName);
+    
+    if (isSerif) return "TimesRoman";
+    if (isMono) return "Courier";
+    return "Helvetica";
+};
+
 // ===================== LOAD PDF =====================
 document
     .getElementById("loadPDF")
     .addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        pdfFileName = file.name.replace(/\.pdf$/i, "");
         const arrayBuffer = await file.arrayBuffer();
         const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
         pdfDoc = await loadingTask.promise;
@@ -1477,49 +1497,6 @@ document.getElementById("exportPDF").onclick = async () => {
     try {
         const { PDFDocument, rgb, StandardFonts } = PDFLib;
 
-        // Font mapping for PDF export
-        const fontMap = {
-            "Arial": StandardFonts.Helvetica,
-            "Verdana": StandardFonts.Helvetica,
-            "Courier New": StandardFonts.Courier,
-            "Times New Roman": StandardFonts.TimesRoman,
-            "Roboto": StandardFonts.Helvetica,
-            "Open Sans": StandardFonts.Helvetica,
-            "Lato": StandardFonts.Helvetica,
-            "Montserrat": StandardFonts.Helvetica,
-            "Playfair Display": StandardFonts.TimesRoman,
-            "Poppins": StandardFonts.Helvetica,
-            "Raleway": StandardFonts.Helvetica,
-            "Ubuntu": StandardFonts.Helvetica,
-            "Merriweather": StandardFonts.TimesRoman,
-            "Lora": StandardFonts.TimesRoman,
-            "Oswald": StandardFonts.Helvetica,
-            "Pacifico": StandardFonts.Helvetica,
-            "Dancing Script": StandardFonts.Helvetica,
-            "Caveat": StandardFonts.Helvetica,
-            "Great Vibes": StandardFonts.Helvetica,
-            "Satisfy": StandardFonts.Helvetica,
-            "Indie Flower": StandardFonts.Helvetica,
-            "Fredoka": StandardFonts.Helvetica,
-            "Inter": StandardFonts.Helvetica,
-            "Work Sans": StandardFonts.Helvetica,
-            "Quicksand": StandardFonts.Helvetica,
-            "Nunito": StandardFonts.Helvetica,
-            "Mulish": StandardFonts.Helvetica,
-            "Outfit": StandardFonts.Helvetica,
-            "Sora": StandardFonts.Helvetica,
-            "IBM Plex Mono": StandardFonts.Courier,
-            "JetBrains Mono": StandardFonts.Courier,
-            "Source Code Pro": StandardFonts.Courier,
-            "Space Mono": StandardFonts.Courier,
-            "Inconsolata": StandardFonts.Courier,
-            "Fira Code": StandardFonts.Courier,
-            "Cormorant Garamond": StandardFonts.TimesRoman,
-            "EB Garamond": StandardFonts.TimesRoman,
-            "Cinzel": StandardFonts.TimesRoman,
-            "Bodoni Moda": StandardFonts.TimesRoman,
-        };
-
         // Load original PDF file
         const pdfBytes = await pdfDoc.getData();
         const newPdf = await PDFDocument.load(pdfBytes);
@@ -1528,6 +1505,11 @@ document.getElementById("exportPDF").onclick = async () => {
 
         // Get scale factor from rendered pages
         const scaleFactor = pages[0] ? pages[0].scale : 1;
+
+        // Embed standard fonts for use in PDF
+        const helveticaFont = await newPdf.embedFont(StandardFonts.Helvetica);
+        const timesFont = await newPdf.embedFont(StandardFonts.TimesRoman);
+        const courierFont = await newPdf.embedFont(StandardFonts.Courier);
 
         // Add annotations to each page
         for (let i = 0; i < pages_list.length; i++) {
@@ -1541,7 +1523,11 @@ document.getElementById("exportPDF").onclick = async () => {
                 if (annotation.type === "text") {
                     const fontSize = annotation.size / scaleFactor;
                     const fontColor = hexToRgb(annotation.color);
-                    const pdfFont = fontMap[annotation.font] || StandardFonts.Helvetica;
+                    const fontName = getStandardFontName(annotation.font);
+                    let selectedFont = helveticaFont;
+                    if (fontName === "TimesRoman") selectedFont = timesFont;
+                    else if (fontName === "Courier") selectedFont = courierFont;
+                    
                     page.drawText(annotation.text, {
                         x: annotation.x / scaleFactor,
                         y: pageHeight - annotation.y / scaleFactor,
@@ -1551,7 +1537,7 @@ document.getElementById("exportPDF").onclick = async () => {
                             fontColor.g / 255,
                             fontColor.b / 255
                         ),
-                        font: pdfFont,
+                        font: selectedFont,
                     });
                 } else if (
                     annotation.type === "pen" ||
@@ -1571,10 +1557,14 @@ document.getElementById("exportPDF").onclick = async () => {
                 ) {
                     drawShapeOnPage(page, annotation, pageHeight, scaleFactor);
                 } else if (annotation.type === "signature") {
-                    drawSignatureOnPage(page, annotation, pageHeight, scaleFactor);
+                    drawSignatureOnPage(page, annotation, pageHeight, scaleFactor, helveticaFont, timesFont, courierFont);
                 } else if (annotation.type === "note") {
                     const noteColor = hexToRgb(annotation.color);
-                    const pdfFont = fontMap[annotation.font] || StandardFonts.Helvetica;
+                    const fontName = getStandardFontName(annotation.font);
+                    let selectedFont = helveticaFont;
+                    if (fontName === "TimesRoman") selectedFont = timesFont;
+                    else if (fontName === "Courier") selectedFont = courierFont;
+                    
                     page.drawText(annotation.text, {
                         x: annotation.x / scaleFactor,
                         y: pageHeight - annotation.y / scaleFactor,
@@ -1584,7 +1574,7 @@ document.getElementById("exportPDF").onclick = async () => {
                             noteColor.g / 255,
                             noteColor.b / 255
                         ),
-                        font: pdfFont,
+                        font: selectedFont,
                     });
                 }
             });
@@ -1595,11 +1585,11 @@ document.getElementById("exportPDF").onclick = async () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "edited.pdf";
+        a.download = `${pdfFileName}-edited.pdf`;
         a.click();
         URL.revokeObjectURL(url);
         console.log("✓ Exported as vector PDF (no rasterization)");
-        alert("✓ Vector PDF exported successfully!\n\nYour PDF contains:\n• Original vector content\n• Vector annotations (text, shapes, drawings)");
+        console.log("✓ Vector PDF exported successfully!\n\nYour PDF contains:\n• Original vector content\n• Vector annotations (text, shapes, drawings)");
     } catch (e) {
         console.error("Export error:", e);
         alert("Error exporting PDF: " + e.message);
@@ -1709,11 +1699,11 @@ function drawShapeOnPage(page, shape, pageHeight, scaleFactor) {
 }
 
 // Draw signature on PDF page - VECTOR ONLY
-function drawSignatureOnPage(page, sig, pageHeight, scaleFactor) {
+function drawSignatureOnPage(page, sig, pageHeight, scaleFactor, helveticaFont, timesFont, courierFont) {
     if (!sig.storedSignatureData) return;
 
     const signatureData = sig.storedSignatureData;
-    const { rgb, StandardFonts } = PDFLib;
+    const { rgb } = PDFLib;
     const pdfColor = rgb(0, 1, 1); // Cyan color
 
     if (signatureData.mode === "draw" && signatureData.data) {
@@ -1738,59 +1728,19 @@ function drawSignatureOnPage(page, sig, pageHeight, scaleFactor) {
             }
         });
     } else if (signatureData.mode === "type" && signatureData.text) {
-        // Map font names to PDF standard fonts
-        const fontMap = {
-            "Arial": StandardFonts.Helvetica,
-            "Verdana": StandardFonts.Helvetica,
-            "Courier New": StandardFonts.Courier,
-            "Times New Roman": StandardFonts.TimesRoman,
-            "Roboto": StandardFonts.Helvetica,
-            "Open Sans": StandardFonts.Helvetica,
-            "Lato": StandardFonts.Helvetica,
-            "Montserrat": StandardFonts.Helvetica,
-            "Playfair Display": StandardFonts.TimesRoman,
-            "Poppins": StandardFonts.Helvetica,
-            "Raleway": StandardFonts.Helvetica,
-            "Ubuntu": StandardFonts.Helvetica,
-            "Merriweather": StandardFonts.TimesRoman,
-            "Lora": StandardFonts.TimesRoman,
-            "Oswald": StandardFonts.Helvetica,
-            "Pacifico": StandardFonts.Helvetica,
-            "Dancing Script": StandardFonts.Helvetica,
-            "Caveat": StandardFonts.Helvetica,
-            "Great Vibes": StandardFonts.Helvetica,
-            "Satisfy": StandardFonts.Helvetica,
-            "Indie Flower": StandardFonts.Helvetica,
-            "Fredoka": StandardFonts.Helvetica,
-            "Inter": StandardFonts.Helvetica,
-            "Work Sans": StandardFonts.Helvetica,
-            "Quicksand": StandardFonts.Helvetica,
-            "Nunito": StandardFonts.Helvetica,
-            "Mulish": StandardFonts.Helvetica,
-            "Outfit": StandardFonts.Helvetica,
-            "Sora": StandardFonts.Helvetica,
-            "IBM Plex Mono": StandardFonts.Courier,
-            "JetBrains Mono": StandardFonts.Courier,
-            "Source Code Pro": StandardFonts.Courier,
-            "Space Mono": StandardFonts.Courier,
-            "Inconsolata": StandardFonts.Courier,
-            "Fira Code": StandardFonts.Courier,
-            "Cormorant Garamond": StandardFonts.TimesRoman,
-            "EB Garamond": StandardFonts.TimesRoman,
-            "Cinzel": StandardFonts.TimesRoman,
-            "Bodoni Moda": StandardFonts.TimesRoman,
-        };
-
-        const selectedFont = signatureData.font || "cursive";
-        const pdfFont = fontMap[selectedFont] || StandardFonts.Helvetica;
-
-        // Draw signature text as vector text (pure PDF font rendering)
+        // Select font based on the signature's font choice
+        const fontName = getStandardFontName(signatureData.font);
+        let selectedFont = helveticaFont;
+        if (fontName === "TimesRoman") selectedFont = timesFont;
+        else if (fontName === "Courier") selectedFont = courierFont;
+        
+        // Draw signature text as vector text with proper font
         page.drawText(signatureData.text, {
             x: sig.x / scaleFactor,
             y: pageHeight - sig.y / scaleFactor,
             size: 20,
             color: pdfColor,
-            font: pdfFont,
+            font: selectedFont,
         });
     }
 }
@@ -1933,7 +1883,6 @@ function saveCurrentSignature() {
         };
         saveSignatureToStorage(signature);
     }
-    alert("Signature saved successfully!");
     closeSignatureModal();
 }
 
