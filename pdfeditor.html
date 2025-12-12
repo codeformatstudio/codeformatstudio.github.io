@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <title>Cyber PDF Editor</title>
     <link rel="icon" href="icons/icon.png" />
@@ -8,2010 +9,1275 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad/dist/signature_pad.umd.min.js"></script>
     <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script>
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Ubuntu:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Oswald:wght@400;700&family=Pacifico&family=Dancing+Script:wght@400;700&family=Caveat:wght@400;700&family=Great+Vibes&family=Satisfy&family=Indie+Flower&family=Fredoka:wght@400;700&family=Inter:wght@400;700&family=Work+Sans:wght@400;700&family=Quicksand:wght@400;700&family=Nunito:wght@400;700&family=Mulish:wght@400;700&family=Outfit:wght@400;700&family=Sora:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Space+Mono&family=Inconsolata&family=Fira+Code:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=EB+Garamond&family=Cinzel&family=Bodoni+Moda&display=swap"
+        rel="stylesheet">
     <style>
-      /* ================= CYBER NEON STYLES ================= */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Orbitron", sans-serif;
-      }
-      body,
-      html {
-        width: 100%;
-        height: 100%;
-        background: #0a0a0a;
-        overflow: hidden;
-        color: #0ff;
-      }
-      #app {
-        display: grid;
-        grid-template-columns: 220px 1fr 260px;
-        height: 100vh;
-        transition: all 0.3s ease;
-      }
+        /* ================= CYBER NEON STYLES ================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Orbitron", sans-serif;
+        }
 
-      /* Panels */
-      #pagesPanel,
-      #propertiesPanel {
-        background: #111;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        border: 1px solid #0ff;
-      }
-      #propertiesPanel {
-        border-left: 1px solid #0ff;
-      }
-      .panel-title {
-        padding: 12px;
-        font-weight: bold;
-        background: #111;
-        border-bottom: 1px solid #0ff;
-        color: #0ff;
-      }
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            overflow: hidden;
+            color: #0ff;
+        }
 
-      /* Editor */
-      #editor {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      /* Toolbar */
-      #toolbar {
-        display: flex;
-        align-items: center;
-        padding: 6px;
-        background: #111;
-        border-bottom: 1px solid #0ff;
-        gap: 5px;
-        flex-wrap: wrap;
-      }
-      .tool-btn {
-        padding: 8px 12px;
-        background: #222;
-        color: #0ff;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        transition: all 0.2s ease;
-        box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
-      }
-      .tool-btn:hover {
-        background: #0ff;
-        color: #111;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-        transform: scale(1.05);
-      }
-      .tool-btn.active {
-        background: #0ff;
-        color: #111;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 1);
-      }
-      #zoomIn,
-      #zoomOut,
-      #exportPDF,
-      button[onclick*="loadPDF"] {
-        padding: 8px 12px;
-        background: #222;
-        color: #0ff;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-        transition: all 0.2s ease;
-        box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
-      }
-      #zoomIn:hover,
-      #zoomOut:hover,
-      #exportPDF:hover,
-      button[onclick*="loadPDF"]:hover {
-        background: #0ff;
-        color: #111;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-        transform: scale(1.05);
-      }
-      .toolbar-separator {
-        width: 1px;
-        height: 25px;
-        background: #0ff;
-        margin: 0 6px;
-      }
-
-      /* Sub Toolbar */
-      #subToolbar {
-        background: #111;
-        border-bottom: 1px solid #0ff;
-        padding: 6px;
-        min-height: 45px;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      /* Pages container */
-      #pageContainer {
-        flex: 1;
-        overflow: auto;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-        justify-content: flex-start;
-        align-items: center;
-      }
-
-      .pageCanvasWrapper {
-        position: relative;
-      }
-      .pdfCanvas {
-        background: #222;
-        box-shadow: 0 0 10px #0ff;
-        border-radius: 5px;
-        display: block;
-      }
-      .drawCanvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        cursor: crosshair;
-        touch-action: none;
-      }
-      .drawCanvas.text-tool {
-        cursor: text;
-      }
-
-      /* Text Input */
-      .text-input-area {
-        position: absolute;
-        background: transparent;
-        border: none;
-        outline: 2px solid #0ff;
-        outline-offset: 2px;
-        color: #0ff;
-        padding: 4px 8px;
-        border-radius: 0;
-        font-family: Arial, sans-serif;
-        resize: none;
-        overflow: hidden;
-        z-index: 100;
-        min-height: 1.5em;
-        line-height: 1.5;
-      }
-
-      /* Thumbnails */
-      #pagesList {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .thumbnail {
-        width: 100%;
-        cursor: pointer;
-        border: 2px solid transparent;
-        border-radius: 3px;
-        transition: all 0.2s ease;
-      }
-      .thumbnail:hover {
-        border-color: #0ff;
-        box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
-      }
-      .thumbnail.selected {
-        border-color: #0ff;
-        box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
-      }
-
-      /* Page Preview Modal */
-      #pagePreviewModal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 999;
-        justify-content: center;
-        align-items: center;
-      }
-      #pagePreviewModal.active {
-        display: flex;
-      }
-      .page-preview-content {
-        background: #111;
-        border: 2px solid #0ff;
-        border-radius: 8px;
-        padding: 20px;
-        max-width: 90vw;
-        max-height: 90vh;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
-      }
-      .page-preview-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: #0ff;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #0ff;
-      }
-      .page-preview-header h2 {
-        margin: 0;
-        font-size: 20px;
-      }
-      .page-preview-close {
-        background: none;
-        border: none;
-        color: #0ff;
-        font-size: 24px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .page-preview-close:hover {
-        transform: scale(1.2);
-        color: #fff;
-      }
-      .page-preview-canvas {
-        max-width: 100%;
-        max-height: 60vh;
-        border: 1px solid #0ff;
-        border-radius: 4px;
-        background: #222;
-      }
-      .page-preview-footer {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-      }
-      .page-preview-btn {
-        padding: 10px 20px;
-        background: #222;
-        color: #0ff;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-      .page-preview-btn:hover {
-        background: #0ff;
-        color: #111;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-      }
-      .page-preview-info {
-        color: #0ff;
-        text-align: center;
-        font-size: 14px;
-        opacity: 0.8;
-      }
-
-      /* Properties Panel */
-      #propertiesContent {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        overflow-y: auto;
-      }
-      #propertiesContent input,
-      #propertiesContent select {
-        padding: 4px;
-        border-radius: 3px;
-        border: none;
-        background: #222;
-        color: #0ff;
-      }
-      #propertiesContent fieldset {
-        border: 1px solid #0ff;
-        border-radius: 3px;
-        padding: 6px;
-        margin: 4px 0;
-      }
-      #propertiesContent legend {
-        color: #0ff;
-        font-size: 12px;
-      }
-      #propertiesContent label {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 12px;
-        margin: 4px 0;
-      }
-
-      /* Signature Modal */
-      #signatureModal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-      }
-      #signatureModal.active {
-        display: flex;
-      }
-      .signature-modal-content {
-        background: #111;
-        border: 2px solid #0ff;
-        border-radius: 8px;
-        padding: 20px;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-      }
-      .signature-modal-content h2 {
-        color: #0ff;
-        margin-bottom: 20px;
-        text-align: center;
-      }
-      .signature-mode-selector {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-        justify-content: center;
-      }
-      .signature-mode-btn {
-        padding: 10px 20px;
-        background: #222;
-        color: #0ff;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-      .signature-mode-btn.active {
-        background: #0ff;
-        color: #111;
-      }
-      .signature-mode-btn:hover {
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
-      }
-
-      #signatureDrawCanvas {
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        background: #222;
-        display: block;
-        width: 100%;
-        max-width: 450px;
-        height: 200px;
-        cursor: crosshair;
-        margin: 0 auto 15px;
-      }
-      #signatureDrawCanvas.hidden {
-        display: none;
-      }
-
-      #signatureTypeInput {
-        width: 100%;
-        padding: 12px;
-        background: #222;
-        color: #0ff;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        font-size: 40px;
-        text-align: center;
-        font-family: cursive;
-        margin-bottom: 15px;
-      }
-      #signatureTypeInput.hidden {
-        display: none;
-      }
-
-      .signature-preview {
-        background: #222;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        padding: 15px;
-        margin: 15px 0;
-        text-align: center;
-        min-height: 100px;
-        color: #0ff;
-      }
-      #signaturePreviewCanvas {
-        max-width: 100%;
-        max-height: 150px;
-        border-radius: 3px;
-      }
-
-      .signature-modal-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-      }
-      .signature-modal-buttons button {
-        padding: 10px 20px;
-        border: 2px solid #0ff;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-      .signature-modal-buttons .confirm-btn {
-        background: #0ff;
-        color: #111;
-      }
-      .signature-modal-buttons .confirm-btn:hover {
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-      }
-      .signature-modal-buttons .cancel-btn {
-        background: #222;
-        color: #0ff;
-      }
-      .signature-modal-buttons .cancel-btn:hover {
-        background: #333;
-      }
-
-      .signature-manage-btn {
-        margin-top: 10px;
-        padding: 6px 12px;
-        background: #222;
-        color: #0ff;
-        border: 1px solid #0ff;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        width: 100%;
-      }
-      .signature-manage-btn:hover {
-        background: #333;
-      }
-
-      /* Responsive */
-      @media (max-width: 1024px) {
         #app {
-          grid-template-columns: 180px 1fr 200px;
+            display: grid;
+            grid-template-columns: 220px 1fr 260px;
+            height: 100vh;
+            transition: all 0.3s ease;
         }
-        .tool-btn {
-          padding: 8px 10px;
-          font-size: 14px;
-        }
-      }
 
-      @media (max-width: 768px) {
-        #app {
-          grid-template-columns: 80px 1fr;
-        }
-        #propertiesPanel {
-          display: none;
-        }
-        #pagesPanel {
-          width: 80px;
-        }
-        .tool-btn {
-          padding: 6px 6px;
-          font-size: 12px;
-        }
-        #toolbar {
-          padding: 6px;
-          gap: 4px;
-          flex-wrap: wrap;
-        }
-        #pageContainer {
-          padding: 10px;
-          gap: 15px;
-        }
-      }
+        @media (max-width: 1024px) {
+            #app {
+                grid-template-columns: 1fr;
+                height: 100vh;
+            }
 
-      @media (max-width: 600px) {
-        #app {
-          grid-template-columns: 1fr;
+            #pagesPanel,
+            #propertiesPanel {
+                display: none;
+            }
+
+            #pagesPanel.mobile-visible,
+            #propertiesPanel.mobile-visible {
+                display: flex;
+                position: fixed;
+                z-index: 500;
+                top: 0;
+                width: 100%;
+                height: 70vh;
+                max-height: 70vh;
+                border: 1px solid #0ff;
+            }
+
+            #pagesPanel.mobile-visible {
+                left: 0;
+                border-right: 1px solid #0ff;
+                border-bottom: 1px solid #0ff;
+            }
+
+            #propertiesPanel.mobile-visible {
+                right: 0;
+                border-left: 1px solid #0ff;
+                border-bottom: 1px solid #0ff;
+            }
         }
+
+        /* Panels */
         #pagesPanel,
         #propertiesPanel {
-          display: none;
+            background: #111;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #0ff;
         }
+
+        #propertiesPanel {
+            border-left: 1px solid #0ff;
+        }
+
+        .panel-title {
+            padding: 12px;
+            font-weight: bold;
+            background: #111;
+            border-bottom: 1px solid #0ff;
+            color: #0ff;
+        }
+
+        /* Editor */
+        #editor {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Toolbar */
         #toolbar {
-          padding: 4px;
-          gap: 2px;
-          flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            background: #111;
+            border-bottom: 1px solid #0ff;
+            gap: 5px;
+            flex-wrap: wrap;
+            overflow-x: auto;
         }
+
         .tool-btn {
-          padding: 4px 6px;
-          font-size: 11px;
+            padding: 8px 12px;
+            background: #222;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
         }
+
+        .tool-btn:hover,
+        .tool-btn:active {
+            background: #0ff;
+            color: #111;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .tool-btn.active {
+            background: #0ff;
+            color: #111;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+        }
+
+        @media (max-width: 768px) {
+            .tool-btn {
+                padding: 10px 14px;
+                font-size: 14px;
+                min-width: 50px;
+                touch-action: manipulation;
+            }
+        }
+
+        /* Tool-specific colors */
+        .tool-btn[data-tool="note"] {
+            color: #ffff00;
+        }
+
+        .tool-btn[data-tool="note"]:hover {
+            background: #ffff00;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
+        }
+
+        .tool-btn[data-tool="note"].active {
+            background: #ffff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 1);
+        }
+
+        .tool-btn[data-tool="arrow"] {
+            color: #ff6b6b;
+        }
+
+        .tool-btn[data-tool="arrow"]:hover {
+            background: #ff6b6b;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+        }
+
+        .tool-btn[data-tool="arrow"].active {
+            background: #ff6b6b;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 1);
+        }
+
+        /* Edit Tool Styling */
+        .tool-btn[data-tool="edit"] {
+            color: #00ff88;
+            border-color: #00ff88;
+        }
+
+        .tool-btn[data-tool="edit"]:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        .tool-btn[data-tool="edit"].active {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 1);
+        }
+
+        #zoomIn,
+        #zoomOut,
+        #zoomFit,
+        #undoBtn,
+        #redoBtn,
+        #deleteBtn,
+        #exportPDF,
+        button[onclick*="loadPDF"] {
+            padding: 8px 12px;
+            background: #222;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+
+        #zoomIn:hover,
+        #zoomOut:hover,
+        #zoomFit:hover,
+        #undoBtn:hover,
+        #redoBtn:hover,
+        #exportPDF:hover,
+        button[onclick*="loadPDF"]:hover {
+            background: #0ff;
+            color: #111;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        /* Delete Button Styling */
+        #deleteBtn {
+            background: #222;
+            color: #ff4444;
+            border-color: #ff4444;
+        }
+
+        #deleteBtn:hover {
+            background: #ff4444;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.8);
+            transform: scale(1.05);
+        }
+
+        #deleteBtn:active {
+            background: #cc0000;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 1);
+        }
+
+        #undoBtn:disabled,
+        #redoBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #undoBtn:disabled:hover,
+        #redoBtn:disabled:hover {
+            transform: none;
+            background: #222;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+
         .toolbar-separator {
-          display: none;
+            width: 1px;
+            height: 25px;
+            background: #0ff;
+            margin: 0 6px;
         }
-        #zoomLabel {
-          font-size: 10px;
-        }
-        #zoomIn,
-        #zoomOut {
-          padding: 4px 6px;
-          font-size: 10px;
-        }
-        #pageContainer {
-          padding: 8px;
-          gap: 12px;
-        }
-        .pdfCanvas {
-          max-width: 100%;
-          height: auto;
-        }
-        .text-input-area {
-          max-width: 200px;
-          font-size: 14px !important;
-        }
-      }
 
-      @media (max-width: 480px) {
-        #toolbar {
-          padding: 3px;
-          gap: 1px;
-        }
-        .tool-btn {
-          padding: 3px 4px;
-          font-size: 10px;
-          min-width: 32px;
-          min-height: 32px;
-        }
-        #zoomIn,
-        #zoomOut {
-          padding: 3px 4px;
-          font-size: 9px;
-        }
-        #pageContainer {
-          padding: 4px;
-          gap: 8px;
-        }
+        /* Sub Toolbar */
         #subToolbar {
-          padding: 3px;
-          min-height: 35px;
-          font-size: 11px;
+            background: #111;
+            border-bottom: 1px solid #0ff;
+            padding: 6px;
+            min-height: 45px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
         }
+
         #subToolbar label {
-          font-size: 10px;
-          display: block;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #0ff;
+            font-size: 12px;
         }
-        #subToolbar input,
+
+        #subToolbar input[type="color"],
+        #subToolbar input[type="number"],
         #subToolbar select {
-          max-width: 80px;
-          font-size: 11px;
-          padding: 3px;
+            height: 28px;
+            border: 1px solid #0ff;
+            border-radius: 3px;
+            padding: 2px 4px;
+            background: #222;
+            color: #0ff;
+            cursor: pointer;
         }
-      }
 
-      @media (max-width: 320px) {
-        .tool-btn {
-          padding: 2px 3px;
-          font-size: 9px;
-          min-width: 28px;
-          min-height: 28px;
+        #subToolbar input[type="color"]:hover,
+        #subToolbar input[type="number"]:focus,
+        #subToolbar select:focus {
+            border-color: #fff;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
         }
-        #toolbar {
-          padding: 2px;
-          gap: 0;
+
+        #noteColorPreview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #999;
+            border-radius: 2px;
+            vertical-align: middle;
         }
-        #zoomLabel {
-          display: none;
+
+        #arrowPreview {
+            display: inline-block;
+            width: 30px;
+            height: 20px;
+            border: 1px solid #0ff;
+            border-radius: 2px;
+            background: #222;
+            vertical-align: middle;
         }
-      }
+
+        /* Pages container */
+        #pageContainer {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            justify-content: flex-start;
+            align-items: center;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @media (max-width: 768px) {
+            #pageContainer {
+                padding: 10px;
+                gap: 15px;
+            }
+        }
+
+        .pageCanvasWrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .pdfCanvas {
+            background: #222;
+            box-shadow: 0 0 10px #0ff;
+            border-radius: 5px;
+            display: block;
+            touch-action: none;
+        }
+
+        .drawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .drawCanvas.text-tool {
+            cursor: text;
+        }
+
+        @media (max-width: 768px) {
+
+            .pdfCanvas,
+            .drawCanvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* Text Input */
+        .text-input-area {
+            position: absolute;
+            background: transparent;
+            border: none;
+            outline: 2px solid #0ff;
+            outline-offset: 2px;
+            color: #0ff;
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+            font-family: Arial, sans-serif;
+            resize: none;
+            overflow: visible;
+            z-index: 100;
+            min-height: 1.2em;
+            line-height: 1.2;
+            font-size: 14px;
+            box-sizing: border-box;
+            cursor: move;
+            touch-action: none;
+        }
+
+        .text-input-area:focus {
+            outline: 2px solid #00ffff;
+            outline-offset: 2px;
+        }
+
+        .text-input-area.dragging {
+            cursor: grabbing;
+        }
+
+        @media (max-width: 768px) {
+            .text-input-area {
+                font-size: 16px;
+                padding: 0;
+                min-height: 1.5em;
+            }
+        }
+
+        /* Note Input */
+        .note-input-area {
+            position: absolute;
+            background: #ffff00;
+            border: 1px solid #999;
+            outline: 2px solid #ffff00;
+            outline-offset: -2px;
+            color: #000;
+            padding: 4px;
+            margin: 0;
+            border-radius: 0;
+            font-family: Arial, sans-serif;
+            resize: none;
+            overflow: visible;
+            z-index: 100;
+            min-height: 1.2em;
+            line-height: 1.2;
+            font-size: 15px;
+            box-sizing: border-box;
+            cursor: move;
+            touch-action: none;
+            opacity: 0.9;
+        }
+
+        .note-input-area:focus {
+            outline: 2px solid #000;
+            outline-offset: -2px;
+            opacity: 1;
+        }
+
+        .note-input-area.dragging {
+            cursor: grabbing;
+        }
+
+        @media (max-width: 768px) {
+            .note-input-area {
+                font-size: 16px;
+                padding: 4px;
+                min-height: 1.5em;
+            }
+        }
+
+        /* Thumbnails */
+        #pagesList {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .thumbnail {
+            width: 100%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .thumbnail:hover {
+            border-color: #0ff;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        .thumbnail.selected {
+            border-color: #0ff;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
+        }
+
+        /* Page Preview Modal */
+        #pagePreviewModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #pagePreviewModal.active {
+            display: flex;
+        }
+
+        .page-preview-content {
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .page-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #0ff;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #0ff;
+        }
+
+        .page-preview-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .page-preview-close {
+            background: none;
+            border: none;
+            color: #0ff;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-preview-close:hover {
+            transform: scale(1.2);
+            color: #fff;
+        }
+
+        .page-preview-canvas {
+            max-width: 100%;
+            max-height: 60vh;
+            border: 1px solid #0ff;
+            border-radius: 4px;
+            background: #222;
+        }
+
+        .page-preview-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .page-preview-btn {
+            padding: 10px 20px;
+            background: #222;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .page-preview-btn:hover {
+            background: #0ff;
+            color: #111;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .page-preview-info {
+            color: #0ff;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Properties Panel */
+        #propertiesContent {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+
+        #propertiesContent input,
+        #propertiesContent select {
+            padding: 4px;
+            border-radius: 3px;
+            border: none;
+            background: #222;
+            color: #0ff;
+        }
+
+        #propertiesContent fieldset {
+            border: 1px solid #0ff;
+            border-radius: 3px;
+            padding: 6px;
+            margin: 4px 0;
+        }
+
+        #propertiesContent legend {
+            color: #0ff;
+            font-size: 12px;
+        }
+
+        #propertiesContent label {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        /* Signature Modal */
+        #signatureModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #signatureModal.active {
+            display: flex;
+        }
+
+        .signature-modal-content {
+            background: #111;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .signature-modal-content h2 {
+            color: #0ff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .signature-mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .signature-mode-btn {
+            padding: 10px 20px;
+            background: #222;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .signature-mode-btn.active {
+            background: #0ff;
+            color: #111;
+        }
+
+        .signature-mode-btn:hover {
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        #signatureDrawCanvas {
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            background: #222;
+            display: block;
+            width: 100%;
+            max-width: 450px;
+            height: 200px;
+            cursor: crosshair;
+            margin: 0 auto 15px;
+        }
+
+        #signatureDrawCanvas.hidden {
+            display: none;
+        }
+
+        #signatureTypeInput {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            font-size: 40px;
+            text-align: center;
+            font-family: cursive;
+            margin-bottom: 15px;
+        }
+
+        #signatureTypeInput.hidden {
+            display: none;
+        }
+
+        .signature-preview {
+            background: #222;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            min-height: 100px;
+            color: #0ff;
+        }
+
+        #signaturePreviewCanvas {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 3px;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+
+            /* Prevent zoom on double-tap */
+            input,
+            button,
+            textarea {
+                font-size: 16px;
+            }
+
+            /* Improve button tap area */
+            button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            /* Mobile button styling */
+            #deleteBtn {
+                padding: 10px 14px;
+            }
+
+            .tool-btn[data-tool="edit"] {
+                padding: 10px 14px;
+            }
+
+            /* Better modal sizing on mobile */
+            .signature-modal-content,
+            .page-preview-content {
+                max-width: 95vw;
+                max-height: 95vh;
+                margin: 0 auto;
+            }
+
+            #signatureDrawCanvas {
+                height: 250px;
+                max-width: 100%;
+            }
+
+            /* Better toolbar on mobile */
+            #subToolbar {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            #subToolbar label {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
+
+        /* Prevent unwanted zoom/pan behavior on touch devices */
+        input[type="color"],
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .signature-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .signature-modal-buttons button {
+            padding: 10px 20px;
+            border: 2px solid #0ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .signature-modal-buttons .confirm-btn {
+            background: #0ff;
+            color: #111;
+        }
+
+        .signature-modal-buttons .confirm-btn:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .signature-modal-buttons .cancel-btn {
+            background: #222;
+            color: #0ff;
+        }
+
+        .signature-modal-buttons .cancel-btn:hover {
+            background: #333;
+        }
+
+        .signature-manage-btn {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: #222;
+            color: #0ff;
+            border: 1px solid #0ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        .signature-manage-btn:hover {
+            background: #333;
+        }
+
+        /* Responsive Design */
+
+        /* Desktop: 1440px+ */
+        @media (min-width: 1440px) {
+            #app {
+                grid-template-columns: 220px 1fr 300px;
+            }
+        }
+
+        /* Laptop: 1024px - 1439px */
+        @media (max-width: 1439px) and (min-width: 1024px) {
+            #app {
+                grid-template-columns: 200px 1fr 260px;
+            }
+
+            .tool-btn {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+        }
+
+        /* Tablet Landscape: 768px - 1023px */
+        @media (max-width: 1023px) and (min-width: 768px) {
+            #app {
+                grid-template-columns: 90px 1fr;
+            }
+
+            #propertiesPanel {
+                display: none;
+            }
+
+            #pagesPanel {
+                width: 90px;
+            }
+
+            .tool-btn {
+                padding: 6px 6px;
+                font-size: 11px;
+            }
+
+            #toolbar {
+                padding: 5px;
+                gap: 3px;
+                flex-wrap: wrap;
+            }
+
+            .toolbar-separator {
+                height: 20px;
+                margin: 0 4px;
+            }
+
+            #pageContainer {
+                padding: 12px;
+                gap: 15px;
+            }
+        }
+
+        /* Tablet Portrait: 600px - 767px */
+        @media (max-width: 767px) and (min-width: 600px) {
+            #app {
+                grid-template-columns: 1fr;
+            }
+
+            #pagesPanel,
+            #propertiesPanel {
+                display: none;
+            }
+
+            #toolbar {
+                padding: 4px;
+                gap: 2px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .tool-btn {
+                padding: 5px 6px;
+                font-size: 10px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .toolbar-separator {
+                display: none;
+            }
+
+            #zoomLabel {
+                font-size: 11px;
+                min-width: 40px;
+            }
+
+            #zoomIn,
+            #zoomOut {
+                padding: 5px 6px;
+                font-size: 10px;
+            }
+
+            #pageContainer {
+                padding: 8px;
+                gap: 12px;
+            }
+
+            .pdfCanvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .text-input-area {
+                max-width: 90vw;
+                font-size: 14px !important;
+            }
+        }
+
+        /* Mobile: 480px - 599px */
+        @media (max-width: 599px) and (min-width: 480px) {
+            #app {
+                grid-template-columns: 1fr;
+            }
+
+            #pagesPanel,
+            #propertiesPanel {
+                display: none;
+            }
+
+            #toolbar {
+                padding: 3px;
+                gap: 1px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .tool-btn {
+                padding: 4px 5px;
+                font-size: 9px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                min-width: 35px;
+                min-height: 35px;
+            }
+
+            .toolbar-separator {
+                display: none;
+            }
+
+            #zoomLabel {
+                font-size: 9px;
+                min-width: 35px;
+            }
+
+            #zoomIn,
+            #zoomOut {
+                padding: 4px 5px;
+                font-size: 9px;
+                min-width: 35px;
+            }
+
+            #pageContainer {
+                padding: 6px;
+                gap: 10px;
+            }
+
+            #subToolbar {
+                padding: 3px;
+                min-height: 40px;
+                font-size: 10px;
+                overflow-x: auto;
+            }
+
+            #subToolbar label {
+                font-size: 10px;
+                display: inline-block;
+                margin-right: 8px;
+                white-space: nowrap;
+            }
+
+            #subToolbar input,
+            #subToolbar select {
+                max-width: 70px;
+                font-size: 10px;
+                padding: 2px;
+            }
+        }
+
+        /* Small Mobile: 360px - 479px */
+        @media (max-width: 479px) and (min-width: 360px) {
+            #app {
+                grid-template-columns: 1fr;
+            }
+
+            #pagesPanel,
+            #propertiesPanel {
+                display: none;
+            }
+
+            #toolbar {
+                padding: 2px;
+                gap: 1px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .tool-btn {
+                padding: 3px 4px;
+                font-size: 8px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                min-width: 32px;
+                min-height: 32px;
+            }
+
+            .toolbar-separator {
+                display: none;
+            }
+
+            #zoomLabel {
+                display: none;
+            }
+
+            #zoomIn,
+            #zoomOut {
+                padding: 3px 4px;
+                font-size: 8px;
+                min-width: 32px;
+            }
+
+            #pageContainer {
+                padding: 4px;
+                gap: 8px;
+            }
+
+            #subToolbar {
+                padding: 2px;
+                min-height: 35px;
+                font-size: 9px;
+                overflow-x: auto;
+            }
+
+            #subToolbar label {
+                font-size: 9px;
+                display: inline-block;
+                margin-right: 6px;
+                white-space: nowrap;
+            }
+
+            #subToolbar input,
+            #subToolbar select {
+                max-width: 60px;
+                font-size: 9px;
+                padding: 2px;
+            }
+        }
+
+        /* Extra Small Mobile: <360px */
+        @media (max-width: 359px) {
+            #app {
+                grid-template-columns: 1fr;
+            }
+
+            #pagesPanel,
+            #propertiesPanel {
+                display: none;
+            }
+
+            #toolbar {
+                padding: 1px;
+                gap: 0;
+                overflow-x: auto;
+            }
+
+            .tool-btn {
+                padding: 2px 3px;
+                font-size: 7px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                min-width: 28px;
+                min-height: 28px;
+                border-width: 1px;
+            }
+
+            .toolbar-separator {
+                display: none;
+            }
+
+            #zoomLabel {
+                display: none;
+            }
+
+            #zoomIn,
+            #zoomOut {
+                padding: 2px 3px;
+                font-size: 7px;
+                min-width: 28px;
+            }
+
+            #pageContainer {
+                padding: 2px;
+                gap: 4px;
+            }
+
+            #subToolbar {
+                padding: 1px;
+                min-height: 30px;
+                font-size: 8px;
+            }
+        }
+
+        .cancel-btn {
+            background: #c00;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="app">
-      <!-- Left Pages Panel -->
-      <aside id="pagesPanel">
-        <div class="panel-title">Pages</div>
-        <div id="pagesList"></div>
-      </aside>
+        <!-- Left Pages Panel -->
+        <aside id="pagesPanel">
+            <div class="panel-title">Pages</div>
+            <div id="pagesList"></div>
+        </aside>
 
-      <!-- Editor -->
-      <main id="editor">
-        <header id="toolbar">
-          <button class="tool-btn" data-tool="select" title="Select Tool">
-            👆
-          </button>
-          <button class="tool-btn" data-tool="text" title="Text Tool">
-            📝
-          </button>
-          <button class="tool-btn" data-tool="pen" title="Pen Tool">✏️</button>
-          <button class="tool-btn" data-tool="highlight" title="Highlight Tool">
-            🔆
-          </button>
-          <button class="tool-btn" data-tool="shape" title="Shape Tool">
-            ⬜
-          </button>
-          <button class="tool-btn" data-tool="signature" title="Signature">
-            ✍️
-          </button>
-          <button class="tool-btn" data-tool="eraser" title="Eraser">🗑️</button>
-          <div class="toolbar-separator"></div>
-          <button id="zoomOut" title="Zoom Out">🔍−</button>
-          <span id="zoomLabel">100%</span>
-          <button id="zoomIn" title="Zoom In">🔍+</button>
-          <div class="toolbar-separator"></div>
-          <input type="file" id="loadPDF" accept="application/pdf" hidden />
-          <button
-            onclick="document.getElementById('loadPDF').click()"
-            title="Load PDF"
-          >
-            📂 Load
-          </button>
-          <button id="exportPDF" title="Export PDF">💾 Export</button>
-        </header>
-        <div id="subToolbar"></div>
-        <div id="pageContainer"></div>
-      </main>
+        <!-- Editor -->
+        <main id="editor">
+            <header id="toolbar">
+                <button class="tool-btn" data-tool="select" title="Select Tool (A)">
+                    👆
+                </button>
+                <button class="tool-btn" data-tool="text" title="Text Tool (T)">
+                    📝
+                </button>
+                <button class="tool-btn" data-tool="edit" title="Edit Tool (E) - Edit Text & Drag Objects">
+                    ✏️
+                </button>
+                <button class="tool-btn" data-tool="pen" title="Pen Tool">🖋️</button>
+                <button class="tool-btn" data-tool="highlight" title="Highlight Tool">
+                    🔆
+                </button>
+                <button class="tool-btn" data-tool="shape" title="Shape Tool">
+                    ⬜
+                </button>
+                <button class="tool-btn" data-tool="signature" title="Signature">
+                    ✍️
+                </button>
+                <button class="tool-btn" data-tool="eraser" title="Eraser (Delete Selected)">🗑️</button>
+                <button class="tool-btn" data-tool="note" title="Add Note">💬</button>
+                <button class="tool-btn" data-tool="arrow" title="Arrow">➡️</button>
+                <div class="toolbar-separator"></div>
+                <button id="deleteBtn" title="Delete Selected (DEL)">❌</button>
+                <button id="undoBtn" title="Undo">↶</button>
+                <button id="redoBtn" title="Redo">↷</button>
+                <div class="toolbar-separator"></div>
+                <button id="zoomFit" title="Fit to Page">◻️</button>
+                <button id="zoomOut" title="Zoom Out">🔍−</button>
+                <span id="zoomLabel">100%</span>
+                <button id="zoomIn" title="Zoom In">🔍+</button>
+                <div class="toolbar-separator"></div>
+                <input type="file" id="loadPDF" accept="application/pdf" hidden />
+                <button onclick="document.getElementById('loadPDF').click()" title="Load PDF">
+                    📂
+                </button>
+                <button id="exportPDF" title="Export PDF">💾</button>
+            </header>
+            <div id="subToolbar"></div>
+            <div id="pageContainer"></div>
+        </main>
 
-      <!-- Right Properties Panel -->
-      <aside id="propertiesPanel">
-        <div class="panel-title">Properties</div>
-        <div id="propertiesContent">Select a tool</div>
-      </aside>
+        <!-- Right Properties Panel -->
+        <aside id="propertiesPanel">
+            <div class="panel-title">Properties</div>
+            <div id="propertiesContent">Select a tool</div>
+        </aside>
     </div>
 
     <!-- Page Preview Modal -->
     <div id="pagePreviewModal">
-      <div class="page-preview-content">
-        <div class="page-preview-header">
-          <h2 id="pagePreviewTitle">Page 1</h2>
-          <button class="page-preview-close" id="closePreview">✕</button>
+        <div class="page-preview-content">
+            <div class="page-preview-header">
+                <h2 id="pagePreviewTitle">Page 1</h2>
+                <button class="page-preview-close" id="closePreview">✕</button>
+            </div>
+            <canvas id="pagePreviewCanvas" class="page-preview-canvas"></canvas>
+            <div class="page-preview-info">
+                <div id="pagePreviewInfo">Page 1 of 1</div>
+            </div>
+            <div class="page-preview-footer">
+                <button class="page-preview-btn" id="prevPageBtn">← Previous</button>
+                <button class="page-preview-btn" id="goToPageBtn">Go to Page</button>
+                <button class="page-preview-btn" id="nextPageBtn">Next →</button>
+            </div>
         </div>
-        <canvas id="pagePreviewCanvas" class="page-preview-canvas"></canvas>
-        <div class="page-preview-info">
-          <div id="pagePreviewInfo">Page 1 of 1</div>
-        </div>
-        <div class="page-preview-footer">
-          <button class="page-preview-btn" id="prevPageBtn">← Previous</button>
-          <button class="page-preview-btn" id="goToPageBtn">Go to Page</button>
-          <button class="page-preview-btn" id="nextPageBtn">Next →</button>
-        </div>
-      </div>
     </div>
 
     <!-- Signature Modal -->
     <div id="signatureModal">
-      <div class="signature-modal-content">
-        <h2>Manage Your Signature</h2>
+        <div class="signature-modal-content">
+            <h2>Manage Your Signature</h2>
 
-        <div class="signature-mode-selector">
-          <button class="signature-mode-btn active" data-mode="draw">
-            ✏️ Draw
-          </button>
-          <button class="signature-mode-btn" data-mode="type">📝 Type</button>
+            <div class="signature-mode-selector">
+                <button class="signature-mode-btn active" data-mode="draw">
+                    ✏️ Draw
+                </button>
+                <button class="signature-mode-btn" data-mode="type">📝 Type</button>
+            </div>
+
+            <canvas id="signatureDrawCanvas"></canvas>
+            <input type="text" id="signatureTypeInput" class="hidden" placeholder="Type your signature..." />
+
+            <div class="signature-preview">
+                <div>Preview:</div>
+                <canvas id="signaturePreviewCanvas"></canvas>
+            </div>
+
+            <div class="signature-modal-buttons">
+                <button class="confirm-btn" id="confirmSignature">✓ Save</button>
+                <button class="cancel-btn" id="cancelSignature">✕ Cancel</button>
+                <button class="cancel-btn" id="clearSignature">
+                    🗑️ Clear
+                </button>
+            </div>
         </div>
-
-        <canvas id="signatureDrawCanvas"></canvas>
-        <input
-          type="text"
-          id="signatureTypeInput"
-          class="hidden"
-          placeholder="Type your signature..."
-        />
-
-        <div class="signature-preview">
-          <div>Preview:</div>
-          <canvas id="signaturePreviewCanvas"></canvas>
-        </div>
-
-        <div class="signature-modal-buttons">
-          <button class="confirm-btn" id="confirmSignature">✓ Save</button>
-          <button class="cancel-btn" id="cancelSignature">✕ Cancel</button>
-          <button
-            class="cancel-btn"
-            id="clearSignature"
-            style="background: #c00"
-          >
-            🗑️ Clear
-          </button>
-        </div>
-      </div>
     </div>
 
-    <script>
-      const pdfjsLib = window["pdfjs-dist/build/pdf"];
-      let pdfDoc = null,
-        scale = 1.0,
-        pages = [],
-        currentPage = 1;
-      const pageContainer = document.getElementById("pageContainer");
-      const pagesList = document.getElementById("pagesList");
-      const zoomInBtn = document.getElementById("zoomIn");
-      const zoomOutBtn = document.getElementById("zoomOut");
-      const zoomLabel = document.getElementById("zoomLabel");
-      let tool = "select",
-        objects = [],
-        objectId = 1,
-        selectedObject = null;
-      let isDrawing = false,
-        tempPath = [],
-        isDragging = false,
-        dragOffset = { x: 0, y: 0 };
-      let undoStack = [],
-        redoStack = [];
-      let signaturePad = null;
+    <script src="pdfeditor.js"></script>
+</body>
 
-      // ===================== LOAD PDF =====================
-      document
-        .getElementById("loadPDF")
-        .addEventListener("change", async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const arrayBuffer = await file.arrayBuffer();
-          const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-          pdfDoc = await loadingTask.promise;
-          
-          // Validate PDF is not rasterized
-          await validatePDFQuality();
-          
-          await renderAllPages();
-        });
-
-      async function validatePDFQuality() {
-        if (!pdfDoc || pdfDoc.numPages === 0) return;
-
-        try {
-          const firstPage = await pdfDoc.getPage(1);
-          const operatorList = await firstPage.getOperatorList();
-          
-          // Check for text content
-          const textContent = await firstPage.getTextContent();
-          const hasText = textContent.items && textContent.items.length > 0;
-          
-          // Check for vector graphics (not just images)
-          const hasVectorOps = operatorList.fnArray && 
-            operatorList.fnArray.some((fn, idx) => {
-              // Check for drawing operations (not image operations)
-              const opName = operatorList.fnArray[idx];
-              return opName !== 'paintImageXObject' && opName !== 'paintInlineImageXObject';
-            });
-
-          // If no text and only images, warn user
-          if (!hasText && !hasVectorOps) {
-            const confirm = window.confirm(
-              "⚠️ This PDF appears to be a scanned image or rasterized PDF.\n\n" +
-              "It may have limited editability. Vector-based PDFs work best.\n\n" +
-              "Continue anyway?"
-            );
-            if (!confirm) {
-              pdfDoc = null;
-              objects = [];
-              clearPages();
-            }
-          } else if (!hasText && hasVectorOps) {
-            console.warn("PDF has vector content but no selectable text");
-          } else {
-            console.log("✓ PDF has vector and text content");
-          }
-        } catch (e) {
-          console.warn("Could not validate PDF quality:", e);
-          // Allow user to continue even if validation fails
-        }
-      }
-
-      function clearPages() {
-        pageContainer.innerHTML = "";
-        pagesList.innerHTML = "";
-        pages = [];
-      }
-
-      async function renderAllPages() {
-        clearPages();
-        const containerWidth = pageContainer.clientWidth - 40;
-        for (let i = 1; i <= pdfDoc.numPages; i++) {
-          const page = await pdfDoc.getPage(i);
-          const viewport = page.getViewport({ scale: 1 });
-          const scaleFit = containerWidth / viewport.width;
-          const scaledViewport = page.getViewport({ scale: scaleFit * scale });
-
-          const wrapper = document.createElement("div");
-          wrapper.className = "pageCanvasWrapper";
-
-          const pdfCanvas = document.createElement("canvas");
-          pdfCanvas.className = "pdfCanvas";
-          pdfCanvas.width = scaledViewport.width;
-          pdfCanvas.height = scaledViewport.height;
-          wrapper.appendChild(pdfCanvas);
-
-          const drawCanvas = document.createElement("canvas");
-          drawCanvas.className = "drawCanvas";
-          drawCanvas.width = scaledViewport.width;
-          drawCanvas.height = scaledViewport.height;
-          wrapper.appendChild(drawCanvas);
-
-          pageContainer.appendChild(wrapper);
-
-          await page.render({
-            canvasContext: pdfCanvas.getContext("2d"),
-            viewport: scaledViewport,
-          }).promise;
-
-          const thumb = document.createElement("canvas");
-          thumb.className = "thumbnail";
-          const thumbCtx = thumb.getContext("2d");
-          thumb.width = 200;
-          thumb.height = (viewport.height / viewport.width) * 200;
-          pagesList.appendChild(thumb);
-          await page.render({
-            canvasContext: thumbCtx,
-            viewport: page.getViewport({ scale: 200 / viewport.width }),
-          }).promise;
-
-          thumb.onclick = () => {
-            showPagePreview(i - 1);
-          };
-
-          pages.push({ pdfCanvas, drawCanvas, wrapper, scale: scaleFit, page });
-        }
-        drawObjects();
-        attachCanvasEvents();
-      }
-
-      // ===================== ZOOM =====================
-      zoomInBtn.onclick = () => {
-        scale += 0.1;
-        zoomLabel.textContent = Math.round(scale * 100) + "%";
-        if (pdfDoc) renderAllPages();
-      };
-      zoomOutBtn.onclick = () => {
-        scale = Math.max(0.1, scale - 0.1);
-        zoomLabel.textContent = Math.round(scale * 100) + "%";
-        if (pdfDoc) renderAllPages();
-      };
-
-      // ===================== TOOLS =====================
-      document.querySelectorAll(".tool-btn").forEach((btn) => {
-        btn.onclick = () => {
-          const isActive = btn.classList.contains("active");
-          document
-            .querySelectorAll(".tool-btn")
-            .forEach((b) => b.classList.remove("active"));
-          const selectedTool = btn.getAttribute("data-tool");
-          if (!isActive) {
-            btn.classList.add("active");
-            tool = selectedTool;
-            updateSubToolbar();
-          }
-        };
-      });
-
-      function updateSubToolbar() {
-        const subToolbar = document.getElementById("subToolbar");
-        subToolbar.innerHTML = "";
-
-        if (tool === "text") {
-          subToolbar.innerHTML = `
-            <label>Font: <select id="fontFamily"><option>Arial</option><option>Verdana</option><option>Courier New</option></select></label>
-            <label>Size: <input type="number" id="fontSize" value="20" min="6" max="200"></label>
-            <label>Color: <input type="color" id="fontColor" value="#0ff"></label>
-          `;
-        } else if (tool === "pen" || tool === "highlight") {
-          subToolbar.innerHTML = `
-            <label>Color: <input type="color" id="penColor" value="#0ff"></label>
-            <label>Size: <input type="number" id="penSize" value="2" min="1" max="50"></label>
-          `;
-        } else if (tool === "shape") {
-          subToolbar.innerHTML = `
-            <label>Shape: <select id="shapeType"><option value="rect">Rectangle</option><option value="ellipse">Ellipse</option><option value="line">Line</option><option value="arrow">Arrow</option></select></label>
-            <label>Color: <input type="color" id="shapeColor" value="#0ff"></label>
-            <label>Size: <input type="number" id="shapeSize" value="2" min="1" max="50"></label>
-            <label>Fill: <input type="color" id="shapeFill" value="#0ff"></label>
-          `;
-        } else if (tool === "signature") {
-          subToolbar.innerHTML = `<p style="color:#0ff; font-size:12px;">Draw your signature below</p>`;
-          setTimeout(() => initSignaturePad(), 100);
-        } else if (tool === "eraser") {
-          subToolbar.innerHTML = `
-            <label>Size: <input type="number" id="eraserSize" value="20" min="5" max="100"></label>
-          `;
-        }
-      }
-
-      function initSignaturePad() {
-        const sigCanvas = document.getElementById("signatureCanvas");
-        if (sigCanvas) {
-          signaturePad = new SignaturePad(sigCanvas);
-        }
-      }
-
-      let lastTap = 0;
-      let tapCount = 0;
-      const doubleTapDelay = 300;
-
-      function attachCanvasEvents() {
-        pages.forEach((pg, pageIndex) => {
-          // Mouse events
-          pg.drawCanvas.addEventListener("mousedown", (e) =>
-            handleMouseDown(e, pageIndex)
-          );
-          pg.drawCanvas.addEventListener("mousemove", (e) =>
-            handleMouseMove(e, pageIndex)
-          );
-          pg.drawCanvas.addEventListener("mouseup", (e) =>
-            handleMouseUp(e, pageIndex)
-          );
-
-          // Touch events for mobile
-          pg.drawCanvas.addEventListener("touchstart", (e) =>
-            handleTouchStart(e, pageIndex)
-          );
-          pg.drawCanvas.addEventListener("touchmove", (e) =>
-            handleTouchMove(e, pageIndex)
-          );
-          pg.drawCanvas.addEventListener("touchend", (e) =>
-            handleTouchEnd(e, pageIndex)
-          );
-        });
-      }
-
-      function handleTouchStart(e, pageIndex) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousedown", {
-          clientX: touch.clientX,
-          clientY: touch.clientY,
-        });
-        pages[pageIndex].drawCanvas.dispatchEvent(mouseEvent);
-
-        // Double-tap detection for mobile
-        const currentTime = Date.now();
-        const tapLength = currentTime - lastTap;
-
-        if (tapLength < doubleTapDelay && tapLength > 0) {
-          // Double tap detected
-          if (tool !== "select") {
-            isDrawing = true;
-            const pos = getMousePos({ clientX: touch.clientX, clientY: touch.clientY }, pages[pageIndex].drawCanvas);
-            tempPath = [pos];
-          }
-        } else {
-          // Single tap
-          if (tool !== "select") {
-            isDrawing = false;
-          }
-        }
-        lastTap = currentTime;
-      }
-
-      function handleTouchMove(e, pageIndex) {
-        if (!isDrawing) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousemove", {
-          clientX: touch.clientX,
-          clientY: touch.clientY,
-        });
-        pages[pageIndex].drawCanvas.dispatchEvent(mouseEvent);
-      }
-
-      function handleTouchEnd(e, pageIndex) {
-        e.preventDefault();
-        if (isDrawing) {
-          const touch = e.changedTouches[0];
-          const mouseEvent = new MouseEvent("mouseup", {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-          });
-          pages[pageIndex].drawCanvas.dispatchEvent(mouseEvent);
-        }
-      }
-
-      function getMousePos(e, canvas) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
-      }
-
-      function handleMouseDown(e, pageIndex) {
-        if (tool === "select") {
-          selectObject(e, pageIndex);
-          return;
-        }
-        if (tool === "eraser") {
-          const pos = getMousePos(e, pages[pageIndex].drawCanvas);
-          eraseAtPoint(pos, pageIndex);
-          return;
-        }
-        isDrawing = true;
-        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
-        tempPath = [pos];
-      }
-
-      function handleMouseMove(e, pageIndex) {
-        if (!isDrawing) return;
-        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
-        tempPath.push(pos);
-        drawTemp(pageIndex);
-      }
-
-      function handleMouseUp(e, pageIndex) {
-        if (!isDrawing) return;
-        isDrawing = false;
-
-        if (tool === "text") {
-          createTextInput(pageIndex, tempPath[0].x, tempPath[0].y);
-        }
-        if (tool === "pen") {
-          objects.push({
-            id: objectId++,
-            type: "pen",
-            page: pageIndex,
-            color: document.getElementById("penColor").value,
-            size: parseInt(document.getElementById("penSize").value),
-            path: [...tempPath],
-          });
-          saveState();
-        }
-        if (tool === "highlight") {
-          objects.push({
-            id: objectId++,
-            type: "highlight",
-            page: pageIndex,
-            color: document.getElementById("penColor").value,
-            size: parseInt(document.getElementById("penSize").value),
-            opacity: 0.35,
-            path: [...tempPath],
-          });
-          saveState();
-        }
-        if (tool === "shape") {
-          const st = document.getElementById("shapeType").value;
-          const color = document.getElementById("shapeColor").value;
-          const size = parseInt(document.getElementById("shapeSize").value);
-          const fill = document.getElementById("shapeFill").value;
-          objects.push({
-            id: objectId++,
-            type: st,
-            page: pageIndex,
-            color,
-            size,
-            fill,
-            x1: tempPath[0].x,
-            y1: tempPath[0].y,
-            x2: tempPath[tempPath.length - 1].x,
-            y2: tempPath[tempPath.length - 1].y,
-          });
-          saveState();
-        }
-        if (tool === "signature") {
-          const data = signaturePad.toData();
-          objects.push({
-            id: objectId++,
-            type: "signature",
-            page: pageIndex,
-            path: data,
-          });
-          saveState();
-          signaturePad.clear();
-        }
-        tempPath = [];
-        drawObjects();
-      }
-
-      // ===================== DRAWING FUNCTIONS =====================
-      function drawObjects() {
-        pages.forEach((pg, pageIndex) => {
-          const ctx = pg.drawCanvas.getContext("2d");
-          ctx.clearRect(0, 0, pg.drawCanvas.width, pg.drawCanvas.height);
-          objects
-            .filter((o) => o.page === pageIndex)
-            .forEach((o) => {
-              if (o.type === "pen") drawPen(o, ctx);
-              if (o.type === "highlight") drawHighlight(o, ctx);
-              if (o.type === "text") drawText(o, ctx);
-              if (["rect", "ellipse", "line", "arrow"].includes(o.type))
-                drawShape(o, ctx);
-              if (o.type === "signature") drawSignature(o, ctx);
-            });
-        });
-      }
-
-      function drawPen(o, ctx) {
-        ctx.strokeStyle = o.color;
-        ctx.lineWidth = o.size;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        o.path.forEach((p, i) =>
-          i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
-        );
-        ctx.stroke();
-      }
-
-      function drawHighlight(o, ctx) {
-        ctx.strokeStyle = o.color;
-        ctx.lineWidth = o.size;
-        ctx.globalAlpha = o.opacity || 0.35;
-        ctx.beginPath();
-        o.path.forEach((p, i) =>
-          i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
-        );
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
-
-      function drawText(o, ctx) {
-        ctx.fillStyle = o.color;
-        ctx.font = `${o.size}px ${o.font}`;
-        const lines = o.text.split("\n");
-        const lineHeight = o.size * 1.2;
-        lines.forEach((line, i) => {
-          ctx.fillText(line, o.x, o.y + i * lineHeight);
-        });
-      }
-
-      function drawShape(o, ctx) {
-        ctx.strokeStyle = o.color;
-        ctx.lineWidth = o.size;
-        const x1 = o.x1,
-          y1 = o.y1,
-          x2 = o.x2,
-          y2 = o.y2;
-        if (o.type === "rect") {
-          ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-          ctx.fillStyle = o.fill;
-          ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
-        }
-        if (o.type === "ellipse") {
-          ctx.beginPath();
-          ctx.ellipse(
-            (x1 + x2) / 2,
-            (y1 + y2) / 2,
-            Math.abs(x2 - x1) / 2,
-            Math.abs(y2 - y1) / 2,
-            0,
-            0,
-            Math.PI * 2
-          );
-          ctx.fillStyle = o.fill;
-          ctx.fill();
-          ctx.stroke();
-        }
-        if (o.type === "line") {
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
-        }
-        if (o.type === "arrow") {
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
-        }
-      }
-
-      function drawSignature(o, ctx) {
-        ctx.strokeStyle = "#0ff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        o.path.forEach((stroke) => {
-          if (!stroke.points) return;
-          stroke.points.forEach((p, i) =>
-            i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
-          );
-        });
-        ctx.stroke();
-      }
-
-      function drawTemp(pageIndex) {
-        const ctx = pages[pageIndex].drawCanvas.getContext("2d");
-        ctx.clearRect(
-          0,
-          0,
-          pages[pageIndex].drawCanvas.width,
-          pages[pageIndex].drawCanvas.height
-        );
-        drawObjects();
-        if (tool === "pen" || tool === "highlight") {
-          ctx.beginPath();
-          ctx.strokeStyle =
-            document.getElementById("penColor")?.value || "#0ff";
-          ctx.lineWidth = parseInt(
-            document.getElementById("penSize")?.value || 2
-          );
-          ctx.lineCap = "round";
-          tempPath.forEach((p, i) =>
-            i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
-          );
-          ctx.stroke();
-        }
-        if (tool === "shape") {
-          const st = document.getElementById("shapeType")?.value || "rect";
-          const color = document.getElementById("shapeColor")?.value || "#0ff";
-          const size = parseInt(
-            document.getElementById("shapeSize")?.value || 2
-          );
-          const fill = document.getElementById("shapeFill")?.value || "#0ff";
-          const x1 = tempPath[0].x,
-            y1 = tempPath[0].y,
-            x2 = tempPath[tempPath.length - 1].x,
-            y2 = tempPath[tempPath.length - 1].y;
-          ctx.strokeStyle = color;
-          ctx.lineWidth = size;
-          if (st === "rect") {
-            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-            ctx.fillStyle = fill;
-            ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
-          }
-          if (st === "ellipse") {
-            ctx.beginPath();
-            ctx.ellipse(
-              (x1 + x2) / 2,
-              (y1 + y2) / 2,
-              Math.abs(x2 - x1) / 2,
-              Math.abs(y2 - y1) / 2,
-              0,
-              0,
-              Math.PI * 2
-            );
-            ctx.fillStyle = fill;
-            ctx.fill();
-            ctx.stroke();
-          }
-          if (st === "line") {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-          }
-          if (st === "arrow") {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-          }
-        }
-      }
-
-      function selectObject(e, pageIndex) {
-        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
-        selectedObject = objects.find(
-          (o) => o.page === pageIndex && isPointInsideObject(pos, o)
-        );
-        updatePropertiesPanel();
-      }
-
-      function isPointInsideObject(pos, o) {
-        if (o.type === "text") {
-          const lines = o.text.split("\n");
-          const lineHeight = o.size * 1.2;
-          const maxWidth =
-            Math.max(...lines.map((l) => l.length)) * o.size * 0.6;
-          const totalHeight = lines.length * lineHeight;
-          return (
-            pos.x >= o.x &&
-            pos.x <= o.x + maxWidth &&
-            pos.y >= o.y - o.size &&
-            pos.y <= o.y + totalHeight
-          );
-        }
-        if (
-          ["rect", "ellipse", "line", "arrow", "pen", "highlight"].includes(
-            o.type
-          )
-        ) {
-          const x1 = o.x1 || o.x,
-            y1 = o.y1 || o.y,
-            x2 = o.x2 || x1,
-            y2 = o.y2 || y1;
-          return (
-            pos.x >= Math.min(x1, x2) - 10 &&
-            pos.x <= Math.max(x1, x2) + 10 &&
-            pos.y >= Math.min(y1, y2) - 10 &&
-            pos.y <= Math.max(y1, y2) + 10
-          );
-        }
-        return false;
-      }
-
-      function updatePropertiesPanel() {
-        const panel = document.getElementById("propertiesContent");
-        panel.innerHTML = `
-          <h3>Tool Properties</h3>
-          <fieldset>
-            <legend>Text</legend>
-            <label>Font: <select id="propFont"><option>Arial</option><option>Verdana</option><option>Courier New</option><option>Times New Roman</option></select></label>
-            <label>Size: <input type="number" id="propTextSize" value="20" min="6" max="200"></label>
-            <label>Color: <input type="color" id="propTextColor" value="#0ff"></label>
-          </fieldset>
-          <fieldset>
-            <legend>Pen</legend>
-            <label>Color: <input type="color" id="propPenColor" value="#0ff"></label>
-            <label>Size: <input type="number" id="propPenSize" value="2" min="1" max="50"></label>
-          </fieldset>
-          <fieldset>
-            <legend>Shapes</legend>
-            <label>Color: <input type="color" id="propShapeColor" value="#0ff"></label>
-            <label>Size: <input type="number" id="propShapeSize" value="2" min="1" max="50"></label>
-          </fieldset>
-        `;
-      }
-
-      function eraseAtPoint(pos, pageIndex) {
-        const hitObj = objects.find(
-          (o) => o.page === pageIndex && isPointInsideObject(pos, o)
-        );
-        if (hitObj) {
-          objects = objects.filter((o) => o.id !== hitObj.id);
-          drawObjects();
-          saveState();
-        }
-      }
-
-      function createTextInput(pageIndex, x, y) {
-        // Remove any existing text input
-        const existingInput = document.querySelector(".text-input-area");
-        if (existingInput) existingInput.remove();
-
-        const wrapper = pages[pageIndex].wrapper;
-        const fontSize = parseInt(
-          document.getElementById("fontSize")?.value || 20
-        );
-
-        const textarea = document.createElement("textarea");
-        textarea.className = "text-input-area";
-        textarea.style.left = x + "px";
-        textarea.style.top = y + "px";
-        textarea.style.fontSize = fontSize + "px";
-        textarea.style.fontFamily = document.getElementById("fontFamily")?.value || "Arial";
-        textarea.style.maxWidth = "80vw";
-        textarea.placeholder = "Type text here...";
-
-        wrapper.appendChild(textarea);
-        textarea.focus();
-
-        // Auto-scale textarea with content
-        function autoResize() {
-          textarea.style.height = "auto";
-          const newHeight = Math.max(textarea.scrollHeight, fontSize * 1.5);
-          textarea.style.height = newHeight + "px";
-          
-          // Auto-width based on content
-          textarea.style.width = "auto";
-          const newWidth = Math.min(Math.max(textarea.scrollWidth + 16, 100), window.innerWidth * 0.8);
-          textarea.style.width = newWidth + "px";
-        }
-
-        textarea.addEventListener("input", autoResize);
-        textarea.addEventListener("keydown", autoResize);
-        
-        // Initial resize
-        setTimeout(autoResize, 10);
-
-        function saveText() {
-          const text = textarea.value.trim();
-          if (text) {
-            objects.push({
-              id: objectId++,
-              type: "text",
-              page: pageIndex,
-              text,
-              font: document.getElementById("fontFamily")?.value || "Arial",
-              size: fontSize,
-              color: document.getElementById("fontColor")?.value || "#0ff",
-              x: x,
-              y: y,
-            });
-            saveState();
-            drawObjects();
-          }
-          textarea.remove();
-        }
-
-        textarea.addEventListener("blur", saveText);
-        textarea.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && e.ctrlKey) {
-            saveText();
-          }
-        });
-      }
-
-      function saveState() {
-        undoStack.push(JSON.stringify(objects));
-        redoStack = [];
-      }
-
-      // ===================== EXPORT PDF =====================
-      document.getElementById("exportPDF").onclick = async () => {
-        if (!pdfDoc) {
-          alert("No PDF loaded");
-          return;
-        }
-
-        try {
-          const { PDFDocument, rgb } = PDFLib;
-
-          // Load original PDF file
-          const pdfBytes = await pdfDoc.getData();
-          const newPdf = await PDFDocument.load(pdfBytes);
-
-          const pages_list = await newPdf.getPages();
-
-          // Get scale factor from rendered pages
-          const scaleFactor = pages[0] ? pages[0].scale : 1;
-
-          // Add annotations to each page
-          for (let i = 0; i < pages_list.length; i++) {
-            const page = pages_list[i];
-            const pageAnnotations = objects.filter((o) => o.page === i);
-            const pageSize = page.getSize();
-            const pageHeight = pageSize.height;
-
-            // Draw each annotation as vector
-            pageAnnotations.forEach((annotation) => {
-              if (annotation.type === "text") {
-                const fontSize = annotation.size / scaleFactor;
-                const fontColor = hexToRgb(annotation.color);
-                page.drawText(annotation.text, {
-                  x: annotation.x / scaleFactor,
-                  y: pageHeight - annotation.y / scaleFactor,
-                  size: fontSize,
-                  color: rgb(
-                    fontColor.r / 255,
-                    fontColor.g / 255,
-                    fontColor.b / 255
-                  ),
-                });
-              } else if (
-                annotation.type === "pen" ||
-                annotation.type === "highlight"
-              ) {
-                drawPathOnPage(
-                  page,
-                  annotation.path,
-                  annotation.color,
-                  annotation.size / scaleFactor,
-                  annotation.type === "highlight" ? 0.35 : 1,
-                  pageHeight,
-                  scaleFactor
-                );
-              } else if (
-                ["rect", "ellipse", "line", "arrow"].includes(annotation.type)
-              ) {
-                drawShapeOnPage(page, annotation, pageHeight, scaleFactor);
-              } else if (annotation.type === "signature") {
-                drawSignatureOnPage(page, annotation, pageHeight, scaleFactor);
-              }
-            });
-          }
-
-          const pdfBytesExport = await newPdf.save();
-          const blob = new Blob([pdfBytesExport], { type: "application/pdf" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "edited.pdf";
-          a.click();
-          URL.revokeObjectURL(url);
-          console.log("✓ Exported as vector PDF (no rasterization)");
-          alert("✓ Vector PDF exported successfully!\n\nYour PDF contains:\n• Original vector content\n• Vector annotations (text, shapes, drawings)");
-        } catch (e) {
-          console.error("Export error:", e);
-          alert("Error exporting PDF: " + e.message);
-        }
-      };
-
-      // Helper function to convert hex color to RGB
-      function hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result
-          ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
-            }
-          : { r: 0, g: 255, b: 255 };
-      }
-
-      // Draw path (pen, highlight) on PDF page
-      function drawPathOnPage(
-        page,
-        path,
-        color,
-        size,
-        opacity,
-        pageHeight,
-        scaleFactor
-      ) {
-        if (!path || path.length < 2) return;
-
-        const { rgb } = PDFLib;
-        const colorRgb = hexToRgb(color);
-        const pdfColor = rgb(
-          colorRgb.r / 255,
-          colorRgb.g / 255,
-          colorRgb.b / 255
-        );
-
-        // Draw as vector line segments (pure PDF vectors, not rasterized)
-        for (let i = 0; i < path.length - 1; i++) {
-          const p1 = path[i];
-          const p2 = path[i + 1];
-
-          page.drawLine({
-            start: {
-              x: p1.x / scaleFactor,
-              y: pageHeight - p1.y / scaleFactor,
-            },
-            end: {
-              x: p2.x / scaleFactor,
-              y: pageHeight - p2.y / scaleFactor,
-            },
-            thickness: size,
-            color: pdfColor,
-            opacity: opacity,
-          });
-        }
-      }
-
-      // Draw shape on PDF page - VECTOR ONLY
-      function drawShapeOnPage(page, shape, pageHeight, scaleFactor) {
-        const { rgb } = PDFLib;
-        const colorRgb = hexToRgb(shape.color);
-        const pdfColor = rgb(
-          colorRgb.r / 255,
-          colorRgb.g / 255,
-          colorRgb.b / 255
-        );
-
-        const x1 = shape.x1 / scaleFactor;
-        const y1 = pageHeight - shape.y1 / scaleFactor;
-        const x2 = shape.x2 / scaleFactor;
-        const y2 = pageHeight - shape.y2 / scaleFactor;
-        const thickness = shape.size / scaleFactor;
-
-        if (shape.type === "rect") {
-          // Vector rectangle (pure PDF path)
-          page.drawRectangle({
-            x: Math.min(x1, x2),
-            y: Math.min(y1, y2),
-            width: Math.abs(x2 - x1),
-            height: Math.abs(y1 - y2),
-            color: pdfColor,
-            borderColor: pdfColor,
-            borderWidth: thickness,
-          });
-        } else if (shape.type === "line" || shape.type === "arrow") {
-          // Vector line (pure PDF vector)
-          page.drawLine({
-            start: { x: x1, y: y1 },
-            end: { x: x2, y: y2 },
-            thickness: thickness,
-            color: pdfColor,
-          });
-        } else if (shape.type === "ellipse") {
-          // Vector ellipse (pure PDF path)
-          page.drawEllipse({
-            x: (x1 + x2) / 2,
-            y: (y1 + y2) / 2,
-            xScale: Math.abs(x2 - x1) / 2,
-            yScale: Math.abs(y1 - y2) / 2,
-            color: pdfColor,
-            borderColor: pdfColor,
-            borderWidth: thickness,
-          });
-        }
-      }
-
-      // Draw signature on PDF page - VECTOR ONLY
-      function drawSignatureOnPage(page, sig, pageHeight, scaleFactor) {
-        if (!sig.storedSignatureData) return;
-
-        const signatureData = sig.storedSignatureData;
-        const { rgb } = PDFLib;
-        const pdfColor = rgb(0, 1, 1); // Cyan color
-
-        if (signatureData.mode === "draw" && signatureData.data) {
-          // Draw signature as vector paths (pure PDF vectors, not rasterized)
-          signatureData.data.forEach((stroke) => {
-            if (!stroke.points || stroke.points.length < 2) return;
-            for (let i = 0; i < stroke.points.length - 1; i++) {
-              const p1 = stroke.points[i];
-              const p2 = stroke.points[i + 1];
-              page.drawLine({
-                start: {
-                  x: sig.x / scaleFactor + p1.x / scaleFactor,
-                  y: pageHeight - (sig.y / scaleFactor + p1.y / scaleFactor),
-                },
-                end: {
-                  x: sig.x / scaleFactor + p2.x / scaleFactor,
-                  y: pageHeight - (sig.y / scaleFactor + p2.y / scaleFactor),
-                },
-                thickness: 1.5,
-                color: pdfColor,
-              });
-            }
-          });
-        } else if (signatureData.mode === "type" && signatureData.text) {
-          // Draw signature text as vector text (pure PDF font rendering)
-          page.drawText(signatureData.text, {
-            x: sig.x / scaleFactor,
-            y: pageHeight - sig.y / scaleFactor,
-            size: 20,
-            color: pdfColor,
-          });
-        }
-      }
-
-      updatePropertiesPanel();
-
-      // ===================== SIGNATURE MANAGEMENT =====================
-      let storedSignature = null;
-      let signatureMode = "draw";
-      let signaturePadEditor = null;
-      let tempSignatureData = null;
-
-      function loadSignatureFromStorage() {
-        const stored = localStorage.getItem("userSignature");
-        if (stored) {
-          storedSignature = JSON.parse(stored);
-        }
-      }
-
-      function saveSignatureToStorage(signature) {
-        localStorage.setItem("userSignature", JSON.stringify(signature));
-        storedSignature = signature;
-      }
-
-      function openSignatureModal() {
-        document.getElementById("signatureModal").classList.add("active");
-        signatureMode = "draw";
-        updateSignatureModeUI();
-        setTimeout(() => initSignatureDrawCanvas(), 100);
-      }
-
-      function closeSignatureModal() {
-        document.getElementById("signatureModal").classList.remove("active");
-        if (signaturePadEditor) {
-          signaturePadEditor.clear();
-          signaturePadEditor = null;
-        }
-      }
-
-      function initSignatureDrawCanvas() {
-        const canvas = document.getElementById("signatureDrawCanvas");
-        if (!canvas) return;
-
-        canvas.width = canvas.offsetWidth;
-        canvas.height = 200;
-
-        signaturePadEditor = new SignaturePad(canvas, {
-          backgroundColor: "rgba(34, 34, 34, 1)",
-        });
-      }
-
-      function updateSignatureModeUI() {
-        document.querySelectorAll(".signature-mode-btn").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-        document
-          .querySelector(`[data-mode="${signatureMode}"]`)
-          .classList.add("active");
-
-        const drawCanvas = document.getElementById("signatureDrawCanvas");
-        const typeInput = document.getElementById("signatureTypeInput");
-
-        if (signatureMode === "draw") {
-          drawCanvas.classList.remove("hidden");
-          typeInput.classList.add("hidden");
-          setTimeout(() => {
-            if (!signaturePadEditor) initSignatureDrawCanvas();
-          }, 50);
-        } else {
-          drawCanvas.classList.add("hidden");
-          typeInput.classList.remove("hidden");
-          typeInput.value = "";
-          typeInput.focus();
-        }
-      }
-
-      function updateSignaturePreview() {
-        const previewCanvas = document.getElementById("signaturePreviewCanvas");
-        const previewCtx = previewCanvas.getContext("2d");
-
-        previewCanvas.width = 400;
-        previewCanvas.height = 150;
-        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-
-        if (signatureMode === "draw" && signaturePadEditor) {
-          const srcCanvas = signaturePadEditor.canvas;
-          const ratio = Math.min(
-            previewCanvas.width / srcCanvas.width,
-            previewCanvas.height / srcCanvas.height
-          );
-          const x = (previewCanvas.width - srcCanvas.width * ratio) / 2;
-          const y = (previewCanvas.height - srcCanvas.height * ratio) / 2;
-          previewCtx.drawImage(
-            srcCanvas,
-            x,
-            y,
-            srcCanvas.width * ratio,
-            srcCanvas.height * ratio
-          );
-        } else {
-          const text = document.getElementById("signatureTypeInput").value;
-          if (text) {
-            previewCtx.fillStyle = "#0ff";
-            previewCtx.font = "italic 48px cursive";
-            previewCtx.textAlign = "center";
-            previewCtx.textBaseline = "middle";
-            previewCtx.fillText(
-              text,
-              previewCanvas.width / 2,
-              previewCanvas.height / 2
-            );
-          }
-        }
-      }
-
-      function saveCurrentSignature() {
-        if (signatureMode === "draw") {
-          if (!signaturePadEditor || signaturePadEditor.isEmpty()) {
-            alert("Please draw your signature");
-            return;
-          }
-          const signature = {
-            mode: "draw",
-            data: signaturePadEditor.toData(),
-          };
-          saveSignatureToStorage(signature);
-        } else {
-          const text = document
-            .getElementById("signatureTypeInput")
-            .value.trim();
-          if (!text) {
-            alert("Please type your signature");
-            return;
-          }
-          const signature = {
-            mode: "type",
-            text: text,
-          };
-          saveSignatureToStorage(signature);
-        }
-        alert("Signature saved successfully!");
-        closeSignatureModal();
-      }
-
-      function clearStoredSignature() {
-        if (confirm("Are you sure you want to clear your signature?")) {
-          localStorage.removeItem("userSignature");
-          storedSignature = null;
-          document.getElementById("signatureTypeInput").value = "";
-          if (signaturePadEditor) signaturePadEditor.clear();
-          updateSignaturePreview();
-        }
-      }
-
-      // Mode selector
-      document.querySelectorAll(".signature-mode-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          signatureMode = e.target.getAttribute("data-mode");
-          updateSignatureModeUI();
-          setTimeout(() => updateSignaturePreview(), 50);
-        });
-      });
-
-      // Input listeners
-      document
-        .getElementById("signatureTypeInput")
-        ?.addEventListener("input", () => {
-          updateSignaturePreview();
-        });
-
-      if (signaturePadEditor) {
-        signaturePadEditor.addEventListener("endStroke", () => {
-          updateSignaturePreview();
-        });
-      }
-
-      // Modal buttons
-      document
-        .getElementById("confirmSignature")
-        .addEventListener("click", saveCurrentSignature);
-      document
-        .getElementById("cancelSignature")
-        .addEventListener("click", closeSignatureModal);
-      document
-        .getElementById("clearSignature")
-        .addEventListener("click", clearStoredSignature);
-
-      // Close modal on backdrop click
-      document
-        .getElementById("signatureModal")
-        .addEventListener("click", (e) => {
-          if (e.target.id === "signatureModal") {
-            closeSignatureModal();
-          }
-        });
-
-      // Add signature button to tool options
-      function updateSignatureToolUI() {
-        const subToolbar = document.getElementById("subToolbar");
-        if (
-          tool === "signature" &&
-          !subToolbar.querySelector(".signature-manage-btn")
-        ) {
-          const btn = document.createElement("button");
-          btn.className = "signature-manage-btn";
-          btn.textContent = "⚙️ Manage Signature";
-          btn.addEventListener("click", openSignatureModal);
-          subToolbar.appendChild(btn);
-        }
-      }
-
-      // Override updateSubToolbar to add signature button
-      const originalUpdateSubToolbar = updateSubToolbar;
-      updateSubToolbar = function () {
-        originalUpdateSubToolbar.call(this);
-        if (tool === "signature") {
-          updateSignatureToolUI();
-        }
-      };
-
-      // Draw stored signature on canvas
-      function drawStoredSignature(o, ctx) {
-        if (!o.storedSignatureData) return;
-
-        const sig = o.storedSignatureData;
-        if (sig.mode === "draw" && sig.data) {
-          ctx.strokeStyle = "#0ff";
-          ctx.lineWidth = 2;
-          sig.data.forEach((stroke) => {
-            if (!stroke.points) return;
-            ctx.beginPath();
-            stroke.points.forEach((p, i) => {
-              i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
-            });
-            ctx.stroke();
-          });
-        } else if (sig.mode === "type" && sig.text) {
-          ctx.fillStyle = "#0ff";
-          ctx.font = "italic 20px cursive";
-          ctx.fillText(sig.text, o.x, o.y);
-        }
-      }
-
-      // Store signature reference when adding signature object
-      const originalHandleMouseUp = handleMouseUp;
-      handleMouseUp = function (e, pageIndex) {
-        if (tool === "signature" && isDrawing) {
-          isDrawing = false;
-          if (storedSignature) {
-            objects.push({
-              id: objectId++,
-              type: "signature",
-              page: pageIndex,
-              x: tempPath[0].x,
-              y: tempPath[0].y,
-              storedSignatureData: storedSignature,
-            });
-            saveState();
-            tempPath = [];
-            drawObjects();
-          } else {
-            alert("Please set up your signature first!");
-            openSignatureModal();
-          }
-          return;
-        }
-        originalHandleMouseUp.call(this, e, pageIndex);
-      };
-      
-      // Override drawSignature to use stored data
-      function drawSignature(o, ctx) {
-        if (o.storedSignatureData) {
-          drawStoredSignature(o, ctx);
-        } else if (o.path) {
-          ctx.strokeStyle = "#0ff";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          o.path.forEach((stroke) => {
-            if (!stroke.points) return;
-            stroke.points.forEach((p, i) =>
-              i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
-            );
-          });
-          ctx.stroke();
-        }
-      }
-
-      // ===================== PAGE PREVIEW =====================
-      let currentPreviewPage = 0;
-
-      function showPagePreview(pageIndex) {
-        currentPreviewPage = pageIndex;
-        renderPagePreview();
-        document.getElementById("pagePreviewModal").classList.add("active");
-      }
-
-      async function renderPagePreview() {
-        const previewCanvas = document.getElementById("pagePreviewCanvas");
-        const pageNum = currentPreviewPage + 1;
-
-        if (!pdfDoc || pageNum > pdfDoc.numPages) return;
-
-        try {
-          const page = await pdfDoc.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 2 });
-
-          previewCanvas.width = viewport.width;
-          previewCanvas.height = viewport.height;
-
-          await page.render({
-            canvasContext: previewCanvas.getContext("2d"),
-            viewport: viewport,
-          }).promise;
-
-          // Update title and info
-          document.getElementById("pagePreviewTitle").textContent = `Page ${pageNum}`;
-          document.getElementById("pagePreviewInfo").textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
-
-          // Update button states
-          document.getElementById("prevPageBtn").disabled = pageNum === 1;
-          document.getElementById("nextPageBtn").disabled = pageNum === pdfDoc.numPages;
-        } catch (e) {
-          console.error("Preview render error:", e);
-        }
-      }
-
-      function scrollToPage() {
-        const wrapper = pages[currentPreviewPage].wrapper;
-        wrapper.scrollIntoView({ behavior: "smooth" });
-        
-        // Update thumbnail selection
-        document
-          .querySelectorAll(".thumbnail")
-          .forEach((t) => t.classList.remove("selected"));
-        document.querySelectorAll(".thumbnail")[currentPreviewPage]?.classList.add("selected");
-
-        // Close modal
-        document.getElementById("pagePreviewModal").classList.remove("active");
-      }
-
-      // Preview modal controls
-      document.getElementById("closePreview").addEventListener("click", () => {
-        document.getElementById("pagePreviewModal").classList.remove("active");
-      });
-
-      document.getElementById("prevPageBtn").addEventListener("click", () => {
-        if (currentPreviewPage > 0) {
-          currentPreviewPage--;
-          renderPagePreview();
-        }
-      });
-
-      document.getElementById("nextPageBtn").addEventListener("click", () => {
-        if (currentPreviewPage < pdfDoc.numPages - 1) {
-          currentPreviewPage++;
-          renderPagePreview();
-        }
-      });
-
-      document.getElementById("goToPageBtn").addEventListener("click", () => {
-        scrollToPage();
-      });
-
-      // Close modal on backdrop click
-      document.getElementById("pagePreviewModal").addEventListener("click", (e) => {
-        if (e.target.id === "pagePreviewModal") {
-          document.getElementById("pagePreviewModal").classList.remove("active");
-        }
-      });
-
-      // Initialize
-      loadSignatureFromStorage();
-    </script>
-  </body>
 </html>
