@@ -1,51 +1,3 @@
-<?php
-$success = "";
-$error = "";
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  // Sanitize and validate user input
-  $name = htmlspecialchars(trim($_POST["Name"]));
-  $email = filter_var(trim($_POST["Email"]), FILTER_VALIDATE_EMAIL);
-  $time = htmlspecialchars(trim($_POST["Time"]));
-  $date = htmlspecialchars(trim($_POST["Date"]));
-
-  // Check if email is valid
-  if (!$email) {
-      $error = "Invalid email address.";
-  } else {
-      // Set email recipient and subject
-      $to = "moaz96526@gmail.com";
-      $subject = "New Suggestion from $name";
-
-      // Build the message (HTML format)
-      $message = "
-      <html>
-      <head>
-        <title>New Suggestion</title>
-      </head>
-      <body>
-        <p><strong>Name:</strong> $name</p>
-        <p><strong>Email:</strong> $email</p>
-        <p><strong>Time:</strong> $time</p>
-        <p><strong>Date:</strong> $date</p>
-      </body>
-      </html>
-      ";
-
-      // Headers
-      $headers = "From: $email\r\n";
-      $headers .= "Reply-To: $email\r\n";
-      $headers .= "Content-Type: text/html; charset=UTF-8\r\n"; // Sending HTML email
-
-      // Send the email and check the result
-      if (mail($to, $subject, $message, $headers)) {
-          $success = "Suggestion sent successfully!";
-      } else {
-          $error = "Failed to send suggestion.";
-      }
-  }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -160,20 +112,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <body>
     <div class="container">
       <h1>Suggestions</h1>
-
-      <?php if (!empty($success)) : ?>
-        <p style="color: #0f0;"><?= htmlspecialchars($success) ?></p>
+        <p style="color: #0f0;"></p>
         <script>
           document.getElementById('suggestions-form').style.display = 'none';
           setTimeout(() => {
             window.location.href = 'https://codeformatstudio.github.io'; // Redirect to GitHub page after 2 seconds
           }, 2000);
         </script>
-      <?php elseif (!empty($error)) : ?>
-        <p style="color: #f00;"><?= htmlspecialchars($error) ?></p>
-      <?php endif; ?>
-
-      <form method="post" id="suggestions-form">
+      <form method="post" action="https://formspree.io/f/mkgddkeq" id="suggestions-form">
         <input
           type="text"
           name="Name"
