@@ -5,126 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="icons/icon.png" />
 
+  <title>Suggestions</title>
+
   <style>
-    @import url("assets/Otribtion.css");
+    :root {
+      --bg: #0b0d14;
+      --card: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.15);
+      --text: #eafcff;
+      --muted: #9aa4b2;
+      --accent: #4fd1c5;
+      --accent-hover: #38b2ac;
+      --success: #22c55e;
+      --error: #ef4444;
+    }
 
     * {
       box-sizing: border-box;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    body,
-    html {
+    body, html {
       margin: 0;
-      padding: 0;
       height: 100%;
-      background: #0f0f20;
-      font-family: "Orbitron", "Segoe UI", sans-serif;
-      color: #00fff7;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      background:
+        radial-gradient(1000px 600px at 20% -10%, #1b2a4a 0%, transparent 40%),
+        radial-gradient(800px 500px at 100% 0%, #0f766e 0%, transparent 35%),
+        var(--bg);
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
-      text-align: center;
     }
 
     .container {
-      animation: fadeIn 0.6s ease;
-      background: #111122;
-      border: 2px solid #00fff7;
-      border-radius: 12px;
-      padding: 2.5rem 2rem 3rem;
-      width: 400px;
-      box-shadow: 0 0 30px #00fff7;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      width: 420px;
+      padding: 2.2rem;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     h1 {
-      margin-bottom: 1.5rem;
-      text-shadow: 0 0 12px #00fff7;
+      margin: 0 0 1.5rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.3px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
     }
 
     input {
       width: 100%;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1.5px solid #00fff7;
-      background: #0f0f20;
-      color: #00fff7;
-      margin-bottom: 1rem;
-      box-shadow: 0 0 15px #00fff7 inset;
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    input::placeholder {
+      color: var(--muted);
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.15);
     }
 
     button {
-      width: 100%;
+      margin-top: 0.4rem;
       padding: 0.75rem;
-      font-size: 1.1rem;
-      background: #00fff7;
+      border-radius: 10px;
       border: none;
-      color: #0f0f20;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: #042f2e;
       font-weight: 700;
-      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 0 20px #00fff7;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
     button:hover {
-      background: #00c6b6;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(79,209,197,0.4);
     }
 
     #result {
       margin-top: 1rem;
-      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
     }
   </style>
-
-  <title>Suggestions</title>
 </head>
 
 <body>
   <div class="container">
-    <h1>Suggestions</h1>
+    <h1>Send a Suggestion</h1>
 
     <form id="suggestions-form">
-      <input type="text" name="name" placeholder="Enter Your Name" required />
-      <input type="email" name="email" placeholder="Enter Your Email" required />
+      <input type="text" name="name" placeholder="Your Name" required />
+      <input type="email" name="email" placeholder="Your Email" required />
+
+      <!-- ✅ USER SETS EMAIL TITLE -->
+      <input type="text" name="title" placeholder="Suggestion Title" required />
+
       <input type="time" name="time" required />
       <input type="date" name="date" required />
+
       <button type="submit">Submit</button>
     </form>
 
-    <p id="result"></p>
+    <div id="result"></div>
   </div>
 
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
   <script>
-    // 🔴 REPLACE THESE
     emailjs.init("trjtgYxlLIZYbCzfE");
 
     const form = document.getElementById("suggestions-form");
     const result = document.getElementById("result");
 
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", e => {
       e.preventDefault();
 
       result.textContent = "Sending...";
-      result.style.color = "#0ff";
+      result.style.color = "#9aa4b2";
 
       emailjs.sendForm(
         "service_e83393d",
@@ -132,7 +154,8 @@
         form
       ).then(() => {
         result.textContent = "Suggestion sent successfully!";
-        result.style.color = "#0f0";
+        result.style.color = "#22c55e";
+        form.reset();
         form.style.display = "none";
 
         setTimeout(() => {
@@ -140,7 +163,7 @@
         }, 2000);
       }).catch(() => {
         result.textContent = "Failed to send. Try again.";
-        result.style.color = "#f00";
+        result.style.color = "#ef4444";
       });
     });
   </script>
