@@ -224,8 +224,9 @@ form.addEventListener("submit", e => {
     String(now.getSeconds()).padStart(2, "0");
 
   // Inject into hidden inputs
-  form.date.value = date;
-  form.time.value = time;
+form.querySelector('input[name="date"]').value = date;
+form.querySelector('input[name="time"]').value = time;
+
 
   emailjs.sendForm(
     "service_e83393d",
