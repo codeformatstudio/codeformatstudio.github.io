@@ -135,35 +135,52 @@
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
   <script>
-    emailjs.init("trjtgYxlLIZYbCzfE");
+emailjs.init("trjtgYxlLIZYbCzfE");
 
-    const form = document.getElementById("suggestions-form");
-    const result = document.getElementById("result");
+const form = document.getElementById("suggestions-form");
+const result = document.getElementById("result");
 
-    form.addEventListener("submit", e => {
-      e.preventDefault();
+form.addEventListener("submit", e => {
+  e.preventDefault();
 
-      result.textContent = "Sending...";
-      result.style.color = "#9aa4b2";
+  result.textContent = "Sending...";
+  result.style.color = "#9aa4b2";
 
-      emailjs.sendForm(
-        "service_e83393d",
-        "send-form",
-        form
-      ).then(() => {
-        result.textContent = "Suggestion sent successfully!";
-        result.style.color = "#22c55e";
-        form.reset();
-        form.style.display = "none";
+  const now = new Date();
 
-        setTimeout(() => {
-          window.location.href = "https://codeformatstudio.github.io";
-        }, 2000);
-      }).catch(() => {
-        result.textContent = "Failed to send. Try again.";
-        result.style.color = "#ef4444";
-      });
-    });
-  </script>
+  const date =
+    now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0");
+
+  const time =
+    String(now.getHours()).padStart(2, "0") + ":" +
+    String(now.getMinutes()).padStart(2, "0") + ":" +
+    String(now.getSeconds()).padStart(2, "0");
+
+  // Inject into hidden inputs
+  form.date.value = date;
+  form.time.value = time;
+
+  emailjs.sendForm(
+    "service_e83393d",
+    "send-form",
+    form
+  ).then(() => {
+    result.textContent = "Suggestion sent successfully!";
+    result.style.color = "#22c55e";
+    form.reset();
+    form.style.display = "none";
+
+    setTimeout(() => {
+      window.location.href = "https://codeformatstudio.github.io";
+    }, 2000);
+  }).catch(() => {
+    result.textContent = "Failed to send. Try again.";
+    result.style.color = "#ef4444";
+  });
+});
+</script>
+
 </body>
 </html>
