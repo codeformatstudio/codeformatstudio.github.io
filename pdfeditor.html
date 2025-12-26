@@ -41,6 +41,34 @@
             transition: all 0.3s ease;
         }
 
+        #app.sidebar-collapsed {
+            grid-template-columns: 0 1fr 260px;
+        }
+
+        #app.sidebar-collapsed #pagesPanel {
+            display: none;
+        }
+
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            color: #0ff;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 8px;
+            margin-right: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-toggle-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+        }
+
         @media (max-width: 1024px) {
             #app {
                 grid-template-columns: 1fr;
@@ -1172,7 +1200,10 @@
     <div id="app">
         <!-- Left Pages Panel -->
         <aside id="pagesPanel">
-            <div class="panel-title">Pages</div>
+            <div class="panel-title">
+                <button id="toggleSidebar" class="sidebar-toggle-btn" title="Toggle Sidebar">☰</button>
+                Pages
+            </div>
             <div id="pagesList"></div>
         </aside>
 
