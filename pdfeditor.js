@@ -1,3 +1,4 @@
+"use strict";
 // Mobile optimization: Prevent unwanted zoom on double-tap
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function (event) {
@@ -276,6 +277,7 @@ document.querySelectorAll(".tool-btn").forEach((btn) => {
         if (!isActive) {
             btn.classList.add("active");
             tool = selectedTool;
+            updateToolCursor();
             updateSubToolbar();
         }
     }, { passive: false });
@@ -297,6 +299,20 @@ document.querySelectorAll(".tool-btn").forEach((btn) => {
         btn.dispatchEvent(clickEvent);
     }, { passive: false });
 });
+
+function updateToolCursor() {
+    pages.forEach(page => {
+        // Remove all cursor classes
+        page.drawCanvas.classList.remove("text-tool", "select-tool");
+        
+        // Add the appropriate cursor class
+        if (tool === "text") {
+            page.drawCanvas.classList.add("text-tool");
+        } else if (tool === "select") {
+            page.drawCanvas.classList.add("select-tool");
+        }
+    });
+}
 
 function updateSubToolbar() {
     const subToolbar = document.getElementById("subToolbar");
@@ -718,6 +734,7 @@ function getMousePos(e, canvas) {
 }
 
 function handleMouseDown(e, pageIndex) {
+    console.log("Mouse down on page", pageIndex, "with tool:", tool);
     if (tool === "select" || tool === "edit") {
         selectObject(e, pageIndex);
         if (tool === "edit" && selectedObject) {
@@ -733,6 +750,7 @@ function handleMouseDown(e, pageIndex) {
         eraseAtPoint(pos, pageIndex);
         return;
     }
+    // Set isDrawing for all other tools
     isDrawing = true;
     const pos = getMousePos(e, pages[pageIndex].drawCanvas);
     tempPath = [pos];
@@ -758,6 +776,11 @@ function handleMouseMove(e, pageIndex) {
                 p.x += deltaX;
                 p.y += deltaY;
             });
+        } else if (selectedObject.type === "text-highlight") {
+            selectedObject.x1 += deltaX;
+            selectedObject.y1 += deltaY;
+            selectedObject.x2 += deltaX;
+            selectedObject.y2 += deltaY;
         }
         drawObjects();
         return;
@@ -774,12 +797,31 @@ function handleMouseUp(e, pageIndex) {
         saveState();
         return;
     }
+    
+    // Allow text tool to work with just a click (not requiring drag)
+    if (tool === "text") {
+        console.log("Text tool clicked at page", pageIndex);
+        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
+        console.log("Position:", pos);
+        createTextInput(pageIndex, pos.x, pos.y);
+        isDrawing = false;
+        tempPath = [];
+        return;
+    }
+    
+    // Allow note tool to work with just a click (not requiring drag)
+    if (tool === "note") {
+        console.log("Note tool clicked at page", pageIndex);
+        const pos = getMousePos(e, pages[pageIndex].drawCanvas);
+        console.log("Position:", pos);
+        createNoteInput(pageIndex, pos.x, pos.y);
+        isDrawing = false;
+        tempPath = [];
+        return;
+    }
+    
     if (!isDrawing) return;
     isDrawing = false;
-
-    if (tool === "text") {
-        createTextInput(pageIndex, tempPath[0].x, tempPath[0].y);
-    }
     if (tool === "pen") {
         objects.push({
             id: objectId++,
@@ -823,20 +865,43 @@ function handleMouseUp(e, pageIndex) {
         saveState();
     }
     if (tool === "signature") {
+        // For signature tool, allow just a click to place stored signature
+        if (!isDrawing || tempPath.length === 0) {
+            const pos = getMousePos(e, pages[pageIndex].drawCanvas);
+            if (storedSignature) {
+                objects.push({
+                    id: objectId++,
+                    type: "signature",
+                    page: pageIndex,
+                    x: pos.x,
+                    y: pos.y,
+                    storedSignatureData: storedSignature,
+                });
+                saveState();
+                drawObjects();
+            } else {
+                alert("Please set up your signature first!");
+                openSignatureModal();
+            }
+            isDrawing = false;
+            tempPath = [];
+            return;
+        }
+        
+        // If user drew something with signature pad
         const data = signaturePad.toData();
         objects.push({
             id: objectId++,
             type: "signature",
             page: pageIndex,
+            x: tempPath[0].x,
+            y: tempPath[0].y,
             path: data,
         });
         saveState();
         signaturePad.clear();
-    }
-    if (tool === "note") {
-        createNoteInput(pageIndex, tempPath[0].x, tempPath[0].y);
-    }
-    if (tool === "arrow") {
+     }
+        if (tool === "arrow") {
         objects.push({
             id: objectId++,
             type: "arrow-line",
@@ -864,6 +929,7 @@ function drawObjects() {
             .forEach((o) => {
                 if (o.type === "pen") drawPen(o, ctx);
                 if (o.type === "highlight") drawHighlight(o, ctx);
+                if (o.type === "text-highlight") drawTextHighlight(o, ctx);
                 if (o.type === "text") drawText(o, ctx);
                 if (["rect", "ellipse", "line", "arrow"].includes(o.type))
                     drawShape(o, ctx);
@@ -876,7 +942,9 @@ function drawObjects() {
                     drawSelectionBox(o, ctx);
                 }
             });
-    });
+        // Draw text selection on top
+        drawTextSelection();
+     });
 }
 
 function drawSelectionBox(o, ctx) {
@@ -893,6 +961,8 @@ function drawSelectionBox(o, ctx) {
     } else if (["rect", "ellipse", "line", "arrow"].includes(o.type)) {
         const x1 = o.x1, y1 = o.y1, x2 = o.x2, y2 = o.y2;
         ctx.strokeRect(Math.min(x1, x2) - 5, Math.min(y1, y2) - 5, Math.abs(x2 - x1) + 10, Math.abs(y2 - y1) + 10);
+    } else if (o.type === "text-highlight") {
+        ctx.strokeRect(o.x1 - 5, o.y1 - 5, o.x2 - o.x1 + 10, o.y2 - o.y1 + 10);
     } else if (["pen", "highlight"].includes(o.type)) {
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         o.path.forEach(p => {
@@ -982,18 +1052,7 @@ function drawShape(o, ctx) {
     }
 }
 
-function drawSignature(o, ctx) {
-    ctx.strokeStyle = "#0ff";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    o.path.forEach((stroke) => {
-        if (!stroke.points) return;
-        stroke.points.forEach((p, i) =>
-            i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
-        );
-    });
-    ctx.stroke();
-}
+
 
 function drawNote(o, ctx) {
     const noteWidth = o.text.length * (o.size * 0.6);
@@ -1132,7 +1191,7 @@ function isPointInsideObject(pos, o) {
         );
     }
     if (
-        ["rect", "ellipse", "line", "arrow", "pen", "highlight"].includes(
+        ["rect", "ellipse", "line", "arrow", "pen", "highlight", "text-highlight"].includes(
             o.type
         )
     ) {
@@ -1530,7 +1589,7 @@ document.getElementById("exportPDF").onclick = async () => {
                     
                     page.drawText(annotation.text, {
                         x: annotation.x / scaleFactor,
-                        y: pageHeight - annotation.y / scaleFactor,
+                        y: pageHeight - annotation.y / scaleFactor - fontSize,
                         size: fontSize,
                         color: rgb(
                             fontColor.r / 255,
@@ -1552,6 +1611,20 @@ document.getElementById("exportPDF").onclick = async () => {
                         pageHeight,
                         scaleFactor
                     );
+                } else if (annotation.type === "text-highlight") {
+                    const highlightColor = hexToRgb(annotation.color);
+                    page.drawRectangle({
+                        x: annotation.x1 / scaleFactor,
+                        y: pageHeight - annotation.y2 / scaleFactor,
+                        width: (annotation.x2 - annotation.x1) / scaleFactor,
+                        height: (annotation.y2 - annotation.y1) / scaleFactor,
+                        color: rgb(
+                            highlightColor.r / 255,
+                            highlightColor.g / 255,
+                            highlightColor.b / 255
+                        ),
+                        opacity: 0.35,
+                    });
                 } else if (
                     ["rect", "ellipse", "line", "arrow"].includes(annotation.type)
                 ) {
@@ -1564,11 +1637,12 @@ document.getElementById("exportPDF").onclick = async () => {
                     let selectedFont = helveticaFont;
                     if (fontName === "TimesRoman") selectedFont = timesFont;
                     else if (fontName === "Courier") selectedFont = courierFont;
+                    const noteFontSize = annotation.size / scaleFactor;
                     
                     page.drawText(annotation.text, {
                         x: annotation.x / scaleFactor,
-                        y: pageHeight - annotation.y / scaleFactor,
-                        size: annotation.size / scaleFactor,
+                        y: pageHeight - annotation.y / scaleFactor - noteFontSize,
+                        size: noteFontSize,
                         color: rgb(
                             noteColor.r / 255,
                             noteColor.g / 255,
@@ -1759,6 +1833,9 @@ function loadSignatureFromStorage() {
         storedSignature = JSON.parse(stored);
     }
 }
+
+// Load signature from storage on page load
+loadSignatureFromStorage();
 
 function saveSignatureToStorage(signature) {
     localStorage.setItem("userSignature", JSON.stringify(signature));
@@ -1967,6 +2044,9 @@ function drawStoredSignature(o, ctx) {
     if (!o.storedSignatureData) return;
 
     const sig = o.storedSignatureData;
+    const offsetX = o.x || 0;
+    const offsetY = o.y || 0;
+    
     if (sig.mode === "draw" && sig.data) {
         ctx.strokeStyle = "#0ff";
         ctx.lineWidth = 2;
@@ -1974,7 +2054,9 @@ function drawStoredSignature(o, ctx) {
             if (!stroke.points) return;
             ctx.beginPath();
             stroke.points.forEach((p, i) => {
-                i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+                const x = p.x + offsetX;
+                const y = p.y + offsetY;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
             });
             ctx.stroke();
         });
@@ -1982,35 +2064,11 @@ function drawStoredSignature(o, ctx) {
         ctx.fillStyle = "#0ff";
         const font = sig.font || "cursive";
         ctx.font = `italic 20px ${font}`;
-        ctx.fillText(sig.text, o.x, o.y);
+        ctx.fillText(sig.text, offsetX, offsetY);
     }
 }
 
-// Store signature reference when adding signature object
-const originalHandleMouseUp = handleMouseUp;
-handleMouseUp = function (e, pageIndex) {
-    if (tool === "signature" && isDrawing) {
-        isDrawing = false;
-        if (storedSignature) {
-            objects.push({
-                id: objectId++,
-                type: "signature",
-                page: pageIndex,
-                x: tempPath[0].x,
-                y: tempPath[0].y,
-                storedSignatureData: storedSignature,
-            });
-            saveState();
-            tempPath = [];
-            drawObjects();
-        } else {
-            alert("Please set up your signature first!");
-            openSignatureModal();
-        }
-        return;
-    }
-    originalHandleMouseUp.call(this, e, pageIndex);
-};
+// Old signature handler removed - now handled in handleMouseUp function above
 
 // Override drawSignature to use stored data
 function drawSignature(o, ctx) {
@@ -2125,26 +2183,200 @@ document.getElementById("pagePreviewModal").addEventListener("click", (e) => {
     }
 });
 
-// ===================== SIDEBAR TOGGLE =====================
-const toggleSidebarBtn = document.getElementById("toggleSidebar");
+// ===================== PANEL TOGGLES =====================
+const togglePagesBtn = document.getElementById("toggleSidebar");
+const togglePropertiesBtn = document.getElementById("toggleProperties");
 const appContainer = document.getElementById("app");
 
-if (toggleSidebarBtn) {
-    toggleSidebarBtn.addEventListener("click", (e) => {
+if (togglePagesBtn) {
+    togglePagesBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        appContainer.classList.toggle("sidebar-collapsed");
+        appContainer.classList.toggle("pages-hidden");
         
         // Save preference to localStorage
-        const isCollapsed = appContainer.classList.contains("sidebar-collapsed");
-        localStorage.setItem("sidebarCollapsed", isCollapsed);
+        const isPagesHidden = appContainer.classList.contains("pages-hidden");
+        localStorage.setItem("pagesHidden", isPagesHidden);
     });
     
-    // Restore sidebar state from localStorage
-    const isSidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-    if (isSidebarCollapsed) {
-        appContainer.classList.add("sidebar-collapsed");
+    // Restore state from localStorage
+    const isPagesHidden = localStorage.getItem("pagesHidden") === "true";
+    if (isPagesHidden) {
+        appContainer.classList.add("pages-hidden");
     }
 }
 
-// Initialize
-loadSignatureFromStorage();
+if (togglePropertiesBtn) {
+    togglePropertiesBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        appContainer.classList.toggle("properties-hidden");
+        
+        // Save preference to localStorage
+        const isPropertiesHidden = appContainer.classList.contains("properties-hidden");
+        localStorage.setItem("propertiesHidden", isPropertiesHidden);
+    });
+    
+    // Restore state from localStorage
+    const isPropertiesHidden = localStorage.getItem("propertiesHidden") === "true";
+    if (isPropertiesHidden) {
+        appContainer.classList.add("properties-hidden");
+    }
+}
+
+// ===================== WINDOW RESIZE =====================
+window.addEventListener("resize", () => {
+    if (pdfDoc) {
+        renderAllPages();
+    }
+});
+
+// ===================== TEXT SELECTION & HIGHLIGHT =====================
+let selectedTextRanges = []; // Array of {pageIndex, startChar, endChar, textObjectId}
+let isTextSelecting = false;
+let selectionStart = null;
+let selectionCanvas = null;
+let selectionPageIndex = null;
+
+// Enable text selection on canvas - only for select tool
+document.addEventListener("mousedown", (e) => {
+    if (tool === "select" && e.target.classList && e.target.classList.contains("drawCanvas")) {
+        isTextSelecting = true;
+        selectionCanvas = e.target;
+        selectionPageIndex = Array.from(pages).findIndex(p => p.drawCanvas === selectionCanvas);
+        const rect = selectionCanvas.getBoundingClientRect();
+        selectionStart = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+        selectedTextRanges = [];
+    } else {
+        // Reset text selection for other tools
+        isTextSelecting = false;
+        selectionStart = null;
+        selectionCanvas = null;
+        selectionPageIndex = null;
+    }
+});
+
+// Get character index at position for text selection
+function getCharIndexAtPos(textObj, x, y) {
+    const lines = textObj.text.split("\n");
+    const lineHeight = textObj.size * 1.2;
+    
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+        const lineY = textObj.y + lineIdx * lineHeight;
+        if (y >= lineY && y < lineY + lineHeight) {
+            const line = lines[lineIdx];
+            for (let charIdx = 0; charIdx <= line.length; charIdx++) {
+                const charWidth = line.substring(0, charIdx).length * textObj.size * 0.6;
+                if (x <= textObj.x + charWidth) {
+                    let totalChars = 0;
+                    for (let i = 0; i < lineIdx; i++) {
+                        totalChars += lines[i].length + 1; // +1 for newline
+                    }
+                    return totalChars + charIdx;
+                }
+            }
+            let totalChars = 0;
+            for (let i = 0; i < lineIdx; i++) {
+                totalChars += lines[i].length + 1;
+            }
+            return totalChars + line.length;
+        }
+    }
+    return textObj.text.length;
+}
+
+document.addEventListener("mousemove", (e) => {
+    if (isTextSelecting && selectionStart && selectionCanvas && selectionPageIndex >= 0) {
+        const rect = selectionCanvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        
+        // Find all text objects intersecting with selection box
+        const minX = Math.min(selectionStart.x, currentX);
+        const maxX = Math.max(selectionStart.x, currentX);
+        const minY = Math.min(selectionStart.y, currentY);
+        const maxY = Math.max(selectionStart.y, currentY);
+        
+        selectedTextRanges = [];
+        
+        objects.filter(o => o.page === selectionPageIndex && o.type === "text")
+            .forEach(textObj => {
+                const lines = textObj.text.split("\n");
+                const lineHeight = textObj.size * 1.2;
+                const width = Math.max(...lines.map(l => l.length)) * textObj.size * 0.6;
+                const height = lines.length * lineHeight;
+                
+                // Check if text object overlaps with selection
+                if (textObj.x < maxX && textObj.x + width > minX &&
+                    textObj.y < maxY && textObj.y + height > minY) {
+                    
+                    const startChar = getCharIndexAtPos(textObj, minX - textObj.x, minY - textObj.y);
+                    const endChar = getCharIndexAtPos(textObj, maxX - textObj.x, maxY - textObj.y);
+                    
+                    selectedTextRanges.push({
+                        pageIndex: selectionPageIndex,
+                        objectId: textObj.id,
+                        startChar: Math.min(startChar, endChar),
+                        endChar: Math.max(startChar, endChar),
+                    });
+                }
+            });
+        
+        drawObjects();
+    }
+});
+
+document.addEventListener("mouseup", (e) => {
+    isTextSelecting = false;
+    selectionStart = null;
+    selectionCanvas = null;
+    selectionPageIndex = null;
+    drawObjects();
+});
+
+// Draw selected text highlight
+function drawTextSelection() {
+    selectedTextRanges.forEach(range => {
+        const textObj = objects.find(o => o.id === range.objectId);
+        if (!textObj || textObj.page >= pages.length) return;
+        
+        const ctx = pages[textObj.page].drawCanvas.getContext("2d");
+        
+        const lines = textObj.text.split("\n");
+        const lineHeight = textObj.size * 1.2;
+        let charCount = 0;
+        
+        lines.forEach((line, lineIdx) => {
+            for (let i = 0; i < line.length; i++) {
+                if (charCount >= range.startChar && charCount < range.endChar) {
+                    const x = textObj.x + i * textObj.size * 0.6;
+                    const y = textObj.y + lineIdx * lineHeight;
+                    
+                    // Draw light blue background
+                    ctx.fillStyle = "#ADD8E6";
+                    ctx.fillRect(x, y - textObj.size, textObj.size * 0.6, textObj.size * 1.2);
+                    
+                    // Draw white text
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = `${textObj.size}px ${textObj.font}`;
+                    ctx.textBaseline = "top";
+                    ctx.fillText(line[i], x, y - textObj.size);
+                }
+                charCount++;
+            }
+            charCount++; // newline
+        });
+    });
+}
+
+// Draw text highlight boxes
+function drawTextHighlight(o, ctx) {
+    const width = o.x2 - o.x1;
+    const height = o.y2 - o.y1;
+    
+    ctx.fillStyle = o.color || "#ffff00";
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(o.x1, o.y1, width, height);
+    ctx.globalAlpha = 1;
+}
