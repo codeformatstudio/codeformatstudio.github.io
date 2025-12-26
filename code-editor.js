@@ -117,6 +117,9 @@ const RUNTIME_URLS = {
 
   r: [
     "https://webr.r-wasm.org/latest/webr.mjs"
+  ],
+    wat: [
+    "https://cdn.jsdelivr.net/npm/wabt/index.js"
   ]
 };
 function injectRuntime(lang) {
@@ -503,6 +506,39 @@ function generateLanguageScript(lang, code) {
       return `
         <script type="text/r" src="r/main.r"></script>
       `;
+      case "wat":
+  return `
+<script>
+(async () => {
+  if (!window.WabtModule) return;
+
+  const wabt = await WabtModule();
+
+  try {
+    const response = await fetch("wasm/module.wat");
+    const watSource = await response.text();
+
+    const module = wabt.parseWat("module.wat", watSource);
+    const { buffer } = module.toBinary({});
+
+    const wasmModule = await WebAssembly.instantiate(buffer, {
+      env: {
+        log: (x) => console.log("WASM:", x)
+      }
+    });
+
+    if (wasmModule.instance.exports._start) {
+      wasmModule.instance.exports._start();
+    } else if (wasmModule.instance.exports.main) {
+      console.log("Result:", wasmModule.instance.exports.main());
+    }
+
+  } catch (e) {
+    console.error("WAT Error:", e);
+  }
+})();
+</script>
+  `;
 
     default:
       return "";
@@ -608,6 +644,9 @@ pySelect.addEventListener("change", (e) => {
     case "lua":
       pyEditor.setOption("mode", "lua");
       break;
+    case "wat":
+      pyEditor.setOption("mode", "wast"); // ✅ CodeMirror WAT mode
+      break;
     default:
       pyEditor.setOption("mode", "null"); // plain text
   }
@@ -631,6 +670,9 @@ pySelect.addEventListener("load", (e) => {
     case "lua":
       pyEditor.setOption("mode", "lua");
       break;
+    case "wat":
+      pyEditor.setOption("mode", "wast"); // ✅ CodeMirror WAT mode
+      break;
     default:
       pyEditor.setOption("mode", "null"); // plain text
   }
@@ -650,15 +692,20 @@ function downloadMultipleFilesFallback(projectName) {
   const lang = pySelect.value;
   let ext = null;
 
-  if (lang === "python" || lang === "brython") ext = "py";
-  else if (lang === "ruby") ext = "rb";
-  else if (lang === "lua") ext = "lua";
-  else if (lang === "scheme") ext = "scm";
-  else if (lang === "r") ext = "r";
+if (lang === "python" || lang === "brython") ext = "py";
+else if (lang === "ruby") ext = "rb";
+else if (lang === "lua") ext = "lua";
+else if (lang === "scheme") ext = "scm";
+else if (lang === "r") ext = "r";
+else if (lang === "wat") ext = "wat";
 
-  if (ext) {
-    files[`main.${ext}`] = pyEditor.getValue();
-  }
+
+ if (lang === "wat") {
+  files["wasm_module.wat"] = pyEditor.getValue();
+} else if (ext) {
+  files[`main.${ext}`] = pyEditor.getValue();
+}
+
 
   for (const [filename, content] of Object.entries(files)) {
     const blob = new Blob([content], { type: "text/plain" });
@@ -722,11 +769,25 @@ async function downloadProjectAsFolder() {
     let folderName = null;
     let fileName = null;
 
-    if (lang === "python" || lang === "brython") { folderName = "python"; fileName = "main.py"; }
-    else if (lang === "ruby")  { folderName = "ruby"; fileName = "main.rb"; }
-    else if (lang === "r")     { folderName = "r"; fileName = "main.r"; }
-    else if (lang === "lua")   { folderName = "lua"; fileName = "main.lua"; }
-    else if (lang === "scheme"){ folderName = "scheme"; fileName = "main.scm"; }
+if (lang === "python" || lang === "brython") {
+  folderName = "python"; fileName = "main.py";
+}
+else if (lang === "ruby") {
+  folderName = "ruby"; fileName = "main.rb";
+}
+else if (lang === "r") {
+  folderName = "r"; fileName = "main.r";
+}
+else if (lang === "lua") {
+  folderName = "lua"; fileName = "main.lua";
+}
+else if (lang === "scheme") {
+  folderName = "scheme"; fileName = "main.scm";
+}
+else if (lang === "wat") {
+  folderName = "wasm"; fileName = "module.wat";
+}
+
 
     if (folderName && fileName) {
       const langFolder = await projectFolder.getDirectoryHandle(folderName, { create: true });
