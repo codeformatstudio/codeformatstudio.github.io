@@ -428,12 +428,12 @@ function updateSubToolbar() {
     <label>Size: <input type="number" id="penSize" value="2" min="1" max="50"></label>
   `;
     } else if (tool === "shape") {
-        subToolbar.innerHTML = `
-    <label>Shape: <select id="shapeType"><option value="rect">Rectangle</option><option value="ellipse">Ellipse</option><option value="line">Line</option><option value="arrow">Arrow</option></select></label>
-    <label>Color: <input type="color" id="shapeColor" value="#0ff"></label>
-    <label>Size: <input type="number" id="shapeSize" value="2" min="1" max="50"></label>
-    <label>Fill: <input type="color" id="shapeFill" value="#0ff"></label>
-  `;
+         subToolbar.innerHTML = `
+     <label>Shape: <select id="shapeType"><option value="rect">Rectangle</option><option value="ellipse">Ellipse</option><option value="line">Line</option><option value="arrow">Arrow</option></select></label>
+     <label>Color: <input type="color" id="shapeColor" value="#0ff"></label>
+     <label>Size: <input type="number" id="shapeSize" value="2" min="1" max="50"></label>
+     <label>Fill: <input type="checkbox" id="shapeFillEnabled"> <input type="color" id="shapeFill" value="#0ff"></label>
+    `;
     } else if (tool === "signature") {
         subToolbar.innerHTML = `
     <label>Font: <select id="signatureFont">
@@ -849,6 +849,7 @@ function handleMouseUp(e, pageIndex) {
         const st = document.getElementById("shapeType").value;
         const color = document.getElementById("shapeColor").value;
         const size = parseInt(document.getElementById("shapeSize").value);
+        const fillEnabled = document.getElementById("shapeFillEnabled").checked;
         const fill = document.getElementById("shapeFill").value;
         objects.push({
             id: objectId++,
@@ -857,6 +858,7 @@ function handleMouseUp(e, pageIndex) {
             color,
             size,
             fill,
+            fillEnabled,
             x1: tempPath[0].x,
             y1: tempPath[0].y,
             x2: tempPath[tempPath.length - 1].x,
@@ -1012,32 +1014,36 @@ function drawText(o, ctx) {
 }
 
 function drawShape(o, ctx) {
-    ctx.strokeStyle = o.color;
-    ctx.lineWidth = o.size;
-    const x1 = o.x1,
-        y1 = o.y1,
-        x2 = o.x2,
-        y2 = o.y2;
-    if (o.type === "rect") {
-        ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-        ctx.fillStyle = o.fill;
-        ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
-    }
-    if (o.type === "ellipse") {
-        ctx.beginPath();
-        ctx.ellipse(
-            (x1 + x2) / 2,
-            (y1 + y2) / 2,
-            Math.abs(x2 - x1) / 2,
-            Math.abs(y2 - y1) / 2,
-            0,
-            0,
-            Math.PI * 2
-        );
-        ctx.fillStyle = o.fill;
-        ctx.fill();
-        ctx.stroke();
-    }
+     ctx.strokeStyle = o.color;
+     ctx.lineWidth = o.size;
+     const x1 = o.x1,
+         y1 = o.y1,
+         x2 = o.x2,
+         y2 = o.y2;
+     if (o.type === "rect") {
+         ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+         if (o.fillEnabled) {
+             ctx.fillStyle = o.fill;
+             ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+         }
+     }
+     if (o.type === "ellipse") {
+         ctx.beginPath();
+         ctx.ellipse(
+             (x1 + x2) / 2,
+             (y1 + y2) / 2,
+             Math.abs(x2 - x1) / 2,
+             Math.abs(y2 - y1) / 2,
+             0,
+             0,
+             Math.PI * 2
+         );
+         if (o.fillEnabled) {
+             ctx.fillStyle = o.fill;
+             ctx.fill();
+         }
+         ctx.stroke();
+     }
     if (o.type === "line") {
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -1099,15 +1105,43 @@ function drawArrow(o, ctx) {
 }
 
 function drawTemp(pageIndex) {
-    const ctx = pages[pageIndex].drawCanvas.getContext("2d");
-    ctx.clearRect(
-        0,
-        0,
-        pages[pageIndex].drawCanvas.width,
-        pages[pageIndex].drawCanvas.height
-    );
-    drawObjects();
-    if (tool === "pen" || tool === "highlight") {
+     const ctx = pages[pageIndex].drawCanvas.getContext("2d");
+     ctx.clearRect(
+         0,
+         0,
+         pages[pageIndex].drawCanvas.width,
+         pages[pageIndex].drawCanvas.height
+     );
+     drawObjects();
+     if (tool === "arrow" && tempPath.length > 0) {
+         const x1 = tempPath[0].x;
+         const y1 = tempPath[0].y;
+         const x2 = tempPath[tempPath.length - 1].x;
+         const y2 = tempPath[tempPath.length - 1].y;
+         const color = document.getElementById("arrowColor")?.value || "#0ff";
+         const size = parseInt(document.getElementById("arrowSize")?.value || 2);
+         
+         ctx.strokeStyle = color;
+         ctx.lineWidth = size;
+         ctx.lineCap = "round";
+         
+         // Draw arrow line
+         ctx.beginPath();
+         ctx.moveTo(x1, y1);
+         ctx.lineTo(x2, y2);
+         ctx.stroke();
+         
+         // Draw arrowhead
+         const headlen = 15;
+         const angle = Math.atan2(y2 - y1, x2 - x1);
+         ctx.beginPath();
+         ctx.moveTo(x2, y2);
+         ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+         ctx.moveTo(x2, y2);
+         ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+         ctx.stroke();
+     }
+     if (tool === "pen" || tool === "highlight") {
         ctx.beginPath();
         ctx.strokeStyle =
             document.getElementById("penColor")?.value || "#0ff";
@@ -1126,6 +1160,7 @@ function drawTemp(pageIndex) {
         const size = parseInt(
             document.getElementById("shapeSize")?.value || 2
         );
+        const fillEnabled = document.getElementById("shapeFillEnabled")?.checked || false;
         const fill = document.getElementById("shapeFill")?.value || "#0ff";
         const x1 = tempPath[0].x,
             y1 = tempPath[0].y,
@@ -1135,8 +1170,10 @@ function drawTemp(pageIndex) {
         ctx.lineWidth = size;
         if (st === "rect") {
             ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-            ctx.fillStyle = fill;
-            ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+            if (fillEnabled) {
+                ctx.fillStyle = fill;
+                ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+            }
         }
         if (st === "ellipse") {
             ctx.beginPath();
@@ -1149,8 +1186,10 @@ function drawTemp(pageIndex) {
                 0,
                 Math.PI * 2
             );
-            ctx.fillStyle = fill;
-            ctx.fill();
+            if (fillEnabled) {
+                ctx.fillStyle = fill;
+                ctx.fill();
+            }
             ctx.stroke();
         }
         if (st === "line") {
@@ -1160,9 +1199,20 @@ function drawTemp(pageIndex) {
             ctx.stroke();
         }
         if (st === "arrow") {
+            // Draw arrow line
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Draw arrowhead
+            const headlen = 15;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
             ctx.stroke();
         }
     }
@@ -1210,66 +1260,88 @@ function isPointInsideObject(pos, o) {
 }
 
 function updatePropertiesPanel() {
-    const panel = document.getElementById("propertiesContent");
-    panel.innerHTML = `
-  <h3>Tool Properties</h3>
-  <fieldset>
-    <legend>Text</legend>
-    <label>Font: <select id="propFont">
-      <option>Arial</option>
-      <option>Verdana</option>
-      <option>Courier New</option>
-      <option>Times New Roman</option>
-      <option>Roboto</option>
-      <option>Open Sans</option>
-      <option>Lato</option>
-      <option>Montserrat</option>
-      <option>Playfair Display</option>
-      <option>Poppins</option>
-      <option>Raleway</option>
-      <option>Ubuntu</option>
-      <option>Merriweather</option>
-      <option>Lora</option>
-      <option>Oswald</option>
-      <option>Pacifico</option>
-      <option>Dancing Script</option>
-      <option>Caveat</option>
-      <option>Great Vibes</option>
-      <option>Satisfy</option>
-      <option>Indie Flower</option>
-      <option>Fredoka</option>
-      <option>Inter</option>
-      <option>Work Sans</option>
-      <option>Quicksand</option>
-      <option>Nunito</option>
-      <option>Mulish</option>
-      <option>Outfit</option>
-      <option>Sora</option>
-      <option>IBM Plex Mono</option>
-      <option>JetBrains Mono</option>
-      <option>Source Code Pro</option>
-      <option>Space Mono</option>
-      <option>Inconsolata</option>
-      <option>Fira Code</option>
-      <option>Cormorant Garamond</option>
-      <option>EB Garamond</option>
-      <option>Cinzel</option>
-      <option>Bodoni Moda</option>
-    </select></label>
-    <label>Size: <input type="number" id="propTextSize" value="20" min="6" max="200"></label>
-    <label>Color: <input type="color" id="propTextColor" value="#0ff"></label>
-  </fieldset>
-  <fieldset>
-    <legend>Pen</legend>
-    <label>Color: <input type="color" id="propPenColor" value="#0ff"></label>
-    <label>Size: <input type="number" id="propPenSize" value="2" min="1" max="50"></label>
-  </fieldset>
-  <fieldset>
-    <legend>Shapes</legend>
-    <label>Color: <input type="color" id="propShapeColor" value="#0ff"></label>
-    <label>Size: <input type="number" id="propShapeSize" value="2" min="1" max="50"></label>
-  </fieldset>
-`;
+     const panel = document.getElementById("propertiesContent");
+     
+     if (selectedObject) {
+         // Show properties for selected object
+         let html = `<h3>Object Properties</h3>`;
+         
+         if (selectedObject.type === "text") {
+             html += `
+             <fieldset>
+                 <legend>Text</legend>
+                 <label>Font: <select id="propFont" onchange="applyPropertyChange('font', this.value)">
+                   <option ${selectedObject.font === 'Arial' ? 'selected' : ''}>Arial</option>
+                   <option ${selectedObject.font === 'Verdana' ? 'selected' : ''}>Verdana</option>
+                   <option ${selectedObject.font === 'Courier New' ? 'selected' : ''}>Courier New</option>
+                   <option ${selectedObject.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+                   <option ${selectedObject.font === 'Roboto' ? 'selected' : ''}>Roboto</option>
+                   <option ${selectedObject.font === 'Open Sans' ? 'selected' : ''}>Open Sans</option>
+                 </select></label>
+                 <label>Size: <input type="number" id="propTextSize" value="${selectedObject.size}" min="6" max="200" onchange="applyPropertyChange('size', this.value)"></label>
+                 <label>Color: <input type="color" id="propTextColor" value="${selectedObject.color}" onchange="applyPropertyChange('color', this.value)"></label>
+             </fieldset>
+             `;
+         } else if (selectedObject.type === "pen" || selectedObject.type === "highlight") {
+             html += `
+             <fieldset>
+                 <legend>${selectedObject.type === 'pen' ? 'Pen' : 'Highlight'}</legend>
+                 <label>Color: <input type="color" id="propPenColor" value="${selectedObject.color}" onchange="applyPropertyChange('color', this.value)"></label>
+                 <label>Size: <input type="number" id="propPenSize" value="${selectedObject.size}" min="1" max="50" onchange="applyPropertyChange('size', this.value)"></label>
+             </fieldset>
+             `;
+         } else if (["rect", "ellipse", "line", "arrow", "arrow-line"].includes(selectedObject.type)) {
+             html += `
+             <fieldset>
+                 <legend>Shape</legend>
+                 <label>Color: <input type="color" id="propShapeColor" value="${selectedObject.color}" onchange="applyPropertyChange('color', this.value)"></label>
+                 <label>Size: <input type="number" id="propShapeSize" value="${selectedObject.size}" min="1" max="50" onchange="applyPropertyChange('size', this.value)"></label>
+                 ${(selectedObject.type === 'rect' || selectedObject.type === 'ellipse') ? `<label>Fill: <input type="checkbox" id="propFillEnabled" ${selectedObject.fillEnabled ? 'checked' : ''} onchange="applyPropertyChange('fillEnabled', this.checked)"> <input type="color" id="propFill" value="${selectedObject.fill}" onchange="applyPropertyChange('fill', this.value)"></label>` : ''}
+             </fieldset>
+             `;
+         } else if (selectedObject.type === "note") {
+             html += `
+             <fieldset>
+                 <legend>Note</legend>
+                 <label>Color: <input type="color" id="propNoteColor" value="${selectedObject.color}" onchange="applyPropertyChange('color', this.value)"></label>
+                 <label>Size: <input type="number" id="propNoteSize" value="${selectedObject.size}" min="6" max="100" onchange="applyPropertyChange('size', this.value)"></label>
+             </fieldset>
+             `;
+         }
+         
+         panel.innerHTML = html;
+     } else {
+         // Show default tool properties
+         panel.innerHTML = `
+         <h3>Tool Properties</h3>
+         <p style="color: #888; font-size: 12px;">Select an object to edit its properties</p>
+         `;
+     }
+}
+
+function applyPropertyChange(property, value) {
+     if (!selectedObject) return;
+     
+     switch(property) {
+         case 'font':
+             selectedObject.font = value;
+             break;
+         case 'size':
+             selectedObject.size = parseInt(value);
+             break;
+         case 'color':
+             selectedObject.color = value;
+             break;
+         case 'fill':
+             selectedObject.fill = value;
+             break;
+         case 'fillEnabled':
+             selectedObject.fillEnabled = value;
+             break;
+     }
+     
+     saveState();
+     drawObjects();
 }
 
 function eraseAtPoint(pos, pageIndex) {
