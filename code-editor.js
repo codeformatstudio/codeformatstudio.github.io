@@ -1,4 +1,9 @@
-function cyberConfirm(message, callback) {
+/**
+ * Shows a cyber-styled confirm dialog with three options.
+ * @param {string} message - The message to show.
+ * @param {function("zip"|"single"|"multiple")} callback - Returns the user's choice.
+ */
+function cyberConfirmThreeOptions(message, callback) {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
   overlay.style.inset = "0";
@@ -11,35 +16,37 @@ function cyberConfirm(message, callback) {
   overlay.style.color = "#00ffff";
   overlay.style.fontFamily = '"Orbitron", sans-serif';
 
+  // Message
   const msg = document.createElement("div");
   msg.textContent = message;
   msg.style.marginBottom = "20px";
   msg.style.fontSize = "20px";
   overlay.appendChild(msg);
 
+  // Buttons container
   const btnBox = document.createElement("div");
 
-  const okBtn = document.createElement("button");
-  okBtn.textContent = "Single";
+  const zipBtn = document.createElement("button");
+  zipBtn.textContent = "ZIP";
+  zipBtn.style.marginRight = "10px";
 
-  const cancelBtn = document.createElement("button");
-  cancelBtn.textContent = "Multiple";
-  cancelBtn.style.marginLeft = "20px";
+  const singleBtn = document.createElement("button");
+  singleBtn.textContent = "Single";
+  singleBtn.style.marginRight = "10px";
 
-  okBtn.onclick = () => {
-    document.body.removeChild(overlay);
-    callback(true);
-  };
+  const multipleBtn = document.createElement("button");
+  multipleBtn.textContent = "Multiple";
 
-  cancelBtn.onclick = () => {
-    document.body.removeChild(overlay);
-    callback(false);
-  };
+  // Button handlers
+  zipBtn.onclick = () => { document.body.removeChild(overlay); callback("zip"); };
+  singleBtn.onclick = () => { document.body.removeChild(overlay); callback("single"); };
+  multipleBtn.onclick = () => { document.body.removeChild(overlay); callback("multiple"); };
 
-  btnBox.appendChild(okBtn);
-  btnBox.appendChild(cancelBtn);
+  btnBox.appendChild(zipBtn);
+  btnBox.appendChild(singleBtn);
+  btnBox.appendChild(multipleBtn);
+
   overlay.appendChild(btnBox);
-
   document.body.appendChild(overlay);
 }
 
@@ -719,6 +726,98 @@ else if (lang === "wat") ext = "wat";
     URL.revokeObjectURL(url);
   }
 }
+async function downloadProjectFallback() {
+  cyberPrompt("Enter your project name:", async (projectName) => {
+    if (!projectName || !projectName.trim()) projectName = "project";
+
+    const ua = navigator.userAgent.toLowerCase();
+    const isChromium = ua.includes("chrome") || ua.includes("edg") || ua.includes("chromium");
+
+    if (isChromium && window.showDirectoryPicker) {
+      // Normal folder download
+      const root = await window.showDirectoryPicker();
+      const projectFolder = await root.getDirectoryHandle(projectName, { create: true });
+
+      await writeFile(projectFolder, "index.html", htmlSelect.value === "markdown" ? marked.parse(htmlEditor.getValue()) : htmlEditor.getValue());
+      await writeFile(projectFolder, "style.css", cssEditor.getValue());
+      await writeFile(projectFolder, "script.js", jsEditor.getValue());
+
+      const lang = pySelect.value;
+      let folderName, fileName;
+
+      if (lang === "python" || lang === "brython") { folderName = "python"; fileName = "main.py"; }
+      else if (lang === "ruby") { folderName = "ruby"; fileName = "main.rb"; }
+      else if (lang === "lua") { folderName = "lua"; fileName = "main.lua"; }
+      else if (lang === "scheme") { folderName = "scheme"; fileName = "main.scm"; }
+      else if (lang === "r") { folderName = "r"; fileName = "main.r"; }
+      else if (lang === "wat") { folderName = "wasm"; fileName = "module.wat"; }
+
+      if (folderName && fileName) {
+        const langFolder = await projectFolder.getDirectoryHandle(folderName, { create: true });
+        await writeFile(langFolder, fileName, pyEditor.getValue());
+      }
+
+      console.log("✅ Project folder created successfully!");
+      return;
+    }
+
+    // Fallback for non-Chromium browsers
+    cyberConfirm("Your browser doesn't support folder download. Choose ZIP, Single HTML, or Multiple Files.", async (choice) => {
+      if (choice === true) {
+        // Single HTML
+        const blob = new Blob([generateFullOutput()], { type: "text/html" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = projectName + ".html";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else if (choice === false) {
+        // Multiple files
+        downloadMultipleFilesFallback(projectName);
+      } else {
+        // ZIP fallback
+        await downloadProjectAsZip(projectName);
+      }
+    });
+  });
+}
+
+// Updated ZIP function to accept projectName
+async function downloadProjectAsZip(projectName) {
+  const zip = new JSZip();
+
+  // Core files
+  let htmlContent = htmlEditor.getValue();
+  if (htmlSelect.value === "markdown") htmlContent = marked.parse(htmlContent);
+
+  zip.file("index.html", htmlContent);
+  zip.file("style.css", cssEditor.getValue());
+  zip.file("script.js", jsEditor.getValue());
+
+  const lang = pySelect.value;
+  let folderName, fileName;
+
+  if (lang === "python" || lang === "brython") { folderName = "python"; fileName = "main.py"; }
+  else if (lang === "ruby") { folderName = "ruby"; fileName = "main.rb"; }
+  else if (lang === "lua") { folderName = "lua"; fileName = "main.lua"; }
+  else if (lang === "scheme") { folderName = "scheme"; fileName = "main.scm"; }
+  else if (lang === "r") { folderName = "r"; fileName = "main.r"; }
+  else if (lang === "wat") { folderName = "wasm"; fileName = "module.wat"; }
+
+  if (folderName && fileName) {
+    zip.folder(folderName).file(fileName, pyEditor.getValue());
+  }
+
+  const blob = await zip.generateAsync({ type: "blob" });
+  saveAs(blob, projectName + ".zip");
+}
+
+// Hook download button
+downloadBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  downloadProjectFallback();
+});
 
 async function downloadProjectAsFolder() {
   cyberPrompt("Enter your project name:", async (projectName) => {
