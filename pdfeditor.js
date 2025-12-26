@@ -2070,14 +2070,26 @@ async function renderPagePreview() {
 }
 
 function scrollToPage() {
-    const wrapper = pages[currentPreviewPage].wrapper;
+    // Use currentPreviewPage which is 0-indexed
+    const pageIndex = currentPreviewPage;
+    if (pageIndex < 0 || pageIndex >= pages.length) {
+        console.error("Invalid page index:", pageIndex);
+        return;
+    }
+    
+    const wrapper = pages[pageIndex].wrapper;
+    if (!wrapper) {
+        console.error("Page wrapper not found for index:", pageIndex);
+        return;
+    }
+    
     wrapper.scrollIntoView({ behavior: "smooth" });
 
     // Update thumbnail selection
     document
         .querySelectorAll(".thumbnail")
         .forEach((t) => t.classList.remove("selected"));
-    document.querySelectorAll(".thumbnail")[currentPreviewPage]?.classList.add("selected");
+    document.querySelectorAll(".thumbnail")[pageIndex]?.classList.add("selected");
 
     // Close modal
     document.getElementById("pagePreviewModal").classList.remove("active");
@@ -2112,6 +2124,27 @@ document.getElementById("pagePreviewModal").addEventListener("click", (e) => {
         document.getElementById("pagePreviewModal").classList.remove("active");
     }
 });
+
+// ===================== SIDEBAR TOGGLE =====================
+const toggleSidebarBtn = document.getElementById("toggleSidebar");
+const appContainer = document.getElementById("app");
+
+if (toggleSidebarBtn) {
+    toggleSidebarBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        appContainer.classList.toggle("sidebar-collapsed");
+        
+        // Save preference to localStorage
+        const isCollapsed = appContainer.classList.contains("sidebar-collapsed");
+        localStorage.setItem("sidebarCollapsed", isCollapsed);
+    });
+    
+    // Restore sidebar state from localStorage
+    const isSidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    if (isSidebarCollapsed) {
+        appContainer.classList.add("sidebar-collapsed");
+    }
+}
 
 // Initialize
 loadSignatureFromStorage();
