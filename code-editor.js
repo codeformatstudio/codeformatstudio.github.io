@@ -684,10 +684,6 @@ pySelect.addEventListener("load", (e) => {
   }
 });
 
-downloadBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  downloadProjectAsFolder();
-});
 function downloadMultipleFilesFallback(projectName) {
   const files = {
     "index.html": htmlSelect.value === "markdown" ? marked.parse(htmlEditor.getValue()) : htmlEditor.getValue(),
@@ -812,11 +808,70 @@ async function downloadProjectAsZip(projectName) {
   saveAs(blob, projectName + ".zip");
 }
 
-// Hook download button
-downloadBtn.addEventListener("click", (e) => {
+downloadBtn.addEventListener("click", async (e) => {
   e.preventDefault();
-  downloadProjectFallback();
+
+  // Ask for project name
+  cyberPrompt("Enter your project name:", async (projectName) => {
+    if (!projectName || !projectName.trim()) projectName = "project";
+
+    const ua = navigator.userAgent.toLowerCase();
+    const isChromium = ua.includes("chrome") || ua.includes("edg") || ua.includes("chromium");
+
+    // Chromium → try folder download
+    if (isChromium && window.showDirectoryPicker) {
+      try {
+        const root = await window.showDirectoryPicker();
+        const projectFolder = await root.getDirectoryHandle(projectName, { create: true });
+
+        await writeFile(projectFolder, "index.html", htmlSelect.value === "markdown" ? marked.parse(htmlEditor.getValue()) : htmlEditor.getValue());
+        await writeFile(projectFolder, "style.css", cssEditor.getValue());
+        await writeFile(projectFolder, "script.js", jsEditor.getValue());
+
+        const lang = pySelect.value;
+        let folderName, fileName;
+
+        if (lang === "python" || lang === "brython") { folderName = "python"; fileName = "main.py"; }
+        else if (lang === "ruby") { folderName = "ruby"; fileName = "main.rb"; }
+        else if (lang === "lua") { folderName = "lua"; fileName = "main.lua"; }
+        else if (lang === "scheme") { folderName = "scheme"; fileName = "main.scm"; }
+        else if (lang === "r") { folderName = "r"; fileName = "main.r"; }
+        else if (lang === "wat") { folderName = "wasm"; fileName = "module.wat"; }
+
+        if (folderName && fileName) {
+          const langFolder = await projectFolder.getDirectoryHandle(folderName, { create: true });
+          await writeFile(langFolder, fileName, pyEditor.getValue());
+        }
+
+        console.log("✅ Project folder created successfully!");
+        return;
+      } catch (err) {
+        console.warn("Folder download failed, falling back to other methods.", err);
+      }
+    }
+
+    // Non-Chromium or fallback → choose ZIP, single HTML, or multiple files
+    cyberConfirm(
+      "Your browser doesn't support folder download. Choose ZIP, Single HTML, or Multiple Files.",
+      async (choice) => {
+        if (choice === "single") {
+          const blob = new Blob([generateFullOutput()], { type: "text/html" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = projectName + ".html";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        } else if (choice === "multiple") {
+          downloadMultipleFilesFallback(projectName);
+        } else {
+          await downloadProjectAsZip(projectName);
+        }
+      }
+    );
+  });
 });
+
 
 async function downloadProjectAsFolder() {
   cyberPrompt("Enter your project name:", async (projectName) => {
