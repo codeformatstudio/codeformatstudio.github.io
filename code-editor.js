@@ -3,7 +3,7 @@
  * @param {string} message - The message to show.
  * @param {function("zip"|"single"|"multiple")} callback - Returns the user's choice.
  */
-function cyberConfirmThreeOptions(message, callback) {
+function cyberConfirm(message, callback) {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
   overlay.style.inset = "0";
