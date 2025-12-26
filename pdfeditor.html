@@ -41,33 +41,36 @@
             transition: all 0.3s ease;
         }
 
-        #app.sidebar-collapsed {
-            grid-template-columns: 0 1fr 260px;
+        #app.pages-hidden {
+            grid-template-columns: 1fr 260px;
         }
 
-        #app.sidebar-collapsed #pagesPanel {
+        #app.pages-hidden #pagesPanel {
             display: none;
+            width: 0;
         }
 
-        .sidebar-toggle-btn {
-            background: none;
-            border: none;
-            color: #0ff;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 0 8px;
-            margin-right: 8px;
-            transition: transform 0.2s ease;
+        #app.properties-hidden {
+            grid-template-columns: 220px 1fr;
         }
 
-        .sidebar-toggle-btn:hover {
-            transform: scale(1.2);
+        #app.properties-hidden #propertiesPanel {
+            display: none;
+            width: 0;
         }
 
-        .panel-title {
-            display: flex;
-            align-items: center;
+        #app.pages-hidden.properties-hidden {
+            grid-template-columns: 1fr;
         }
+
+        #app.pages-hidden.properties-hidden #pagesPanel,
+        #app.pages-hidden.properties-hidden #propertiesPanel {
+            display: none;
+            width: 0;
+        }
+
+
+
 
         @media (max-width: 1024px) {
             #app {
@@ -243,6 +246,7 @@
         #redoBtn,
         #deleteBtn,
         #exportPDF,
+        #toggleProperties,
         button[onclick*="loadPDF"] {
             padding: 8px 12px;
             background: #222;
@@ -415,6 +419,10 @@
             cursor: text;
         }
 
+        .drawCanvas.select-tool {
+            cursor: text;
+        }
+
         @media (max-width: 768px) {
 
             .pdfCanvas,
@@ -445,6 +453,12 @@
             box-sizing: border-box;
             cursor: move;
             touch-action: none;
+            width: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            vertical-align: middle;
+            display: flex;
+            align-items: center;
         }
 
         .text-input-area:focus {
@@ -486,6 +500,9 @@
             cursor: move;
             touch-action: none;
             opacity: 0.9;
+            width: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .note-input-area:focus {
@@ -1200,18 +1217,17 @@
     <div id="app">
         <!-- Left Pages Panel -->
         <aside id="pagesPanel">
-            <div class="panel-title">
-                <button id="toggleSidebar" class="sidebar-toggle-btn" title="Toggle Sidebar">☰</button>
-                Pages
-            </div>
+            <div class="panel-title">Pages</div>
             <div id="pagesList"></div>
         </aside>
 
         <!-- Editor -->
         <main id="editor">
             <header id="toolbar">
+                <button id="toggleSidebar" class="tool-btn" title="Toggle Pages Panel">☰</button>
+                <div class="toolbar-separator"></div>
                 <button class="tool-btn" data-tool="select" title="Select Tool (A)">
-                    👆
+                    𝙸
                 </button>
                 <button class="tool-btn" data-tool="text" title="Text Tool (T)">
                     📝
@@ -1247,6 +1263,8 @@
                     📂
                 </button>
                 <button id="exportPDF" title="Export PDF">💾</button>
+                <div class="toolbar-separator"></div>
+                <button id="toggleProperties" class="properties-toggle-btn" title="Toggle Properties Panel">⚙️</button>
             </header>
             <div id="subToolbar"></div>
             <div id="pageContainer"></div>
