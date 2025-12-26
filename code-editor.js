@@ -379,9 +379,6 @@ function updatePreview() {
   iframe.style.border = "none";
   previewContent.appendChild(iframe);
 
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open();
-
   let rawHTML = htmlEditor.getValue();
 
   // 🔥 If HTML section is set to Markdown → convert it
@@ -397,16 +394,10 @@ function updatePreview() {
 
   const runtimeScripts = injectRuntime(lang);
   const pyScript = generateLanguageScriptForPreview(lang, code);
-
-  doc.write(`
-    ${htmlContent}
-    ${cssContent}
-    ${runtimeScripts}
-    <script>${jsContent}</script>
-    ${pyScript}
-  `);
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(generateFullOutput());
   doc.close();
-
   // new tab preview
   if (previewWindow && !previewWindow.closed) {
     previewWindow.document.open();
@@ -462,13 +453,8 @@ function generateOutput() {
 // ---------------------------
 function generateFullOutput() {
   let rawHTML = htmlEditor.getValue();
+  if (htmlSelect.value === "markdown") rawHTML = marked.parse(rawHTML);
 
-  // 🔥 Convert Markdown if selected
-  if (htmlSelect.value === "markdown") {
-    rawHTML = marked.parse(rawHTML);
-  }
-
-  const htmlContent = "<!DOCTYPE html>\n" + rawHTML;
   const cssContent = `<style>${cssEditor.getValue()}</style>`;
   const jsContent = jsEditor.getValue();
   const lang = pySelect.value;
@@ -477,14 +463,27 @@ function generateFullOutput() {
   const runtimeScripts = injectRuntime(lang);
   const pyScript = generateLanguageScriptForPreview(lang, code);
 
+  // Wrap everything in proper HTML
   return `
-    ${htmlContent}
-    ${cssContent}
-    ${runtimeScripts}
-    <script>${jsContent}</script>
-    ${pyScript}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Preview</title>
+${cssContent}
+${runtimeScripts}
+</head>
+<body>
+${rawHTML}
+<script>
+${jsContent}
+</script>
+${pyScript}
+</body>
+</html>
   `;
 }
+
 
 function generateLanguageScript(lang, code) {
   switch (lang) {
