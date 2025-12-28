@@ -6,25 +6,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Code Editor & Page Maker</title>
-    <script src="https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js"></script>
-    <!-- <script src="assets/coffee-script/lib/coffee-script/coffee-script.js"></script> -->
-    <script src="assets/typescript/typescript.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- <script src="assets/livescript/lib/index.js"></script> -->
-    <script src="assets/brython/brython.js"></script>
-    <script src="assets/marked/lib/marked.umd.js"></script>
-    <script src="https://codemirror.net/5/mode/htmlmixed/htmlmixed.js"></script>
+    <!-- Core Editors & UI -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-
-    <!-- Syntax modes -->
-    <script src="https://cdn.jsdelivr.net/npm/wabt/index.js"></script>
-
+    
+    <!-- File & Compression Libraries (working CDNs) -->
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+    
+    <!-- Autocomplete & Hints -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/css-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/javascript-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/anyword-hint.min.js"></script>
+    
+    <!-- CodeMirror Modes (must load after CodeMirror) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/wast/wast.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
@@ -34,19 +37,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/scheme/scheme.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.11.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
+    
     <!-- Bracket addons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-<!-- Language support  -->
+    
+    <!-- Language support & Syntax -->
+    <script src="https://cdn.jsdelivr.net/npm/sass.js@0.11.1/dist/sass.sync.js"></script>
+    <script src="assets/typescript/typescript.js"></script>
+    <script src="assets/brython/brython.js"></script>
+    <script src="assets/marked/lib/marked.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wabt/index.js"></script>
     <script src="https://cdn.opalrb.com/opal/current/opal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.3/release/biwascheme.js"></script>
+    <script src="https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js"></script>
     <script type="module">
       import * as WebR from "https://webr.r-wasm.org/latest/webr.mjs";
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/biwascheme@0.8.3/release/biwascheme.js"></script>
-    <script src="https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js"></script>
+    
+    <!-- Theme -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"
@@ -294,8 +303,81 @@ body.dock-bottom #previewScreen {
   margin: 20px auto;   /* ✅ Perfect horizontal center */
 }
 #downloadBtn {
-  display: block;
-  margin: 20px auto;   /* ✅ Perfect horizontal center */
+   display: block;
+   margin: 20px auto;   /* ✅ Perfect horizontal center */
+}
+
+#openFileBtn, #exportBtn {
+   justify-self: center;
+   background: #000010;
+   color: #00ffff;
+   border: 1px solid #00ffff;
+   border-radius: 6px;
+   width: fit-content;
+   height: fit-content;
+   padding: 10px;
+   font-size: 16px;
+   line-height: 1;
+   cursor: pointer;
+   box-shadow: 0 0 8px #00ffff88;
+   transition: all 0.2s ease;
+   z-index: 9999;
+   display: block;
+   margin: 20px auto;
+}
+
+#openFileBtn:hover, #exportBtn:hover {
+    background: #00ffff;
+    color: #000010;
+    box-shadow: 0 0 15px #00ffffcc;
+}
+
+/* === CUSTOM AUTOCOMPLETE STYLING === */
+.hint-keyword {
+  color: #ff79c6;
+  font-weight: bold;
+}
+
+.hint-tag {
+  color: #8be9fd;
+  font-weight: bold;
+}
+
+.hint-property {
+  color: #50fa7b;
+  font-weight: bold;
+}
+
+.CodeMirror-hints {
+  background: rgba(40, 42, 54, 0.95) !important;
+  color: #f8f8f2 !important;
+  border: 2px solid #00ffff !important;
+  border-radius: 6px !important;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3) !important;
+}
+
+.CodeMirror-hint {
+  color: #f8f8f2 !important;
+  padding: 5px 10px !important;
+  border-radius: 3px !important;
+}
+
+.CodeMirror-hint-active {
+  background: rgba(0, 255, 255, 0.2) !important;
+  color: #00ffff !important;
+  border-left: 3px solid #00ffff !important;
+}
+
+.CodeMirror-hint-keyword {
+  color: #ff79c6 !important;
+}
+
+.CodeMirror-hint-tag {
+  color: #8be9fd !important;
+}
+
+.CodeMirror-hint-property {
+  color: #50fa7b !important;
 }
 
     </style>
@@ -407,9 +489,46 @@ body.dock-bottom #previewScreen {
       <button id="closePreviewBtn" title="Close Preview">✖</button>
       <div id="previewContent" style="width: 100%; height: 100%"></div>
     </div>
-    <button id="downloadBtn">Download</button>
     <button id="openPreviewBtn">Open Preview</button>
-
+    <button id="openFileBtn">📂 Open Project</button>
+    <button id="exportBtn">🔥 Export Project</button>
+    <input type="text" id="projectNameInput" placeholder="Project name (optional)" style="display: none;" />
+    <!-- File input for folder selection (with fallback for file selection) -->
+    <input type="file" id="fileInput" multiple webkitdirectory mozdirectory style="display: none;" />
+    <input type="file" id="fileInputFallback" multiple accept=".html,.css,.js,.py,.rb,.lua,.scm,.r,.wat,.json,.md,.txt" style="display: none;" />
+    
+    <!-- Floating Toast Notification -->
+    <div id="floatingNotification" style="
+      display: none;
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 255, 136, 0.95);
+      color: #000010;
+      padding: 15px 25px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      z-index: 9999;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+      max-width: 400px;
+      text-align: center;
+      animation: slideDown 0.3s ease;
+    ">
+      <div id="notificationText"></div>
+    </div>
+    
+    <style>
+      @keyframes slideDown {
+        from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+      }
+      @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(0); opacity: 1; }
+        to { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+      }
+    </style>
 
     <script src="code-editor.js"></script>
   </body>
