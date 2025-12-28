@@ -1779,7 +1779,9 @@ async function exportProject(format, level) {
         switch (format) {
             case 'folder':
                 await exportAsFolder(files, projectName);
-                cyberAlert(`✅ Folder exported successfully`);
+                if (isChromiumBrowser()) {
+                    cyberAlert(`✅ Folder exported successfully`);
+                }
                 return;
             case 'zip':
                 blob = await exportAsZip(files, level);
@@ -1825,11 +1827,17 @@ async function exportProject(format, level) {
     }
 }
 
+function isChromiumBrowser() {
+    const ua = navigator.userAgent;
+    const isChromium = /Chrome|Edge|Brave|Vivaldi|Opera/.test(ua) && !/Edg/.test(ua) || /Edg/.test(ua);
+    return isChromium && window.showDirectoryPicker;
+}
+
 async function exportAsFolder(files, projectName) {
     // Check for File System Access API support (Chromium browsers)
     if (!window.showDirectoryPicker) {
         cyberAlert('❌ Folder export requires Chromium browser (Chrome, Edge, Brave, etc.)');
-        return;
+        throw new Error('Folder export not supported on this browser');
     }
 
     const dirHandle = await window.showDirectoryPicker();
@@ -1931,19 +1939,41 @@ async function exportAsTar(files) {
 async function exportAsTarXz(files, level) {
     const tar = await createTar(files);
 
-    if (window.LZMA && window.LZMA.compress) {
+    if (typeof LZMA !== 'undefined') {
         return new Promise((resolve, reject) => {
-            window.LZMA.compress(tar, level, (result, error) => {
-                if (error) {
-                    reject(new Error('TAR.XZ compression failed'));
-                } else {
-                    resolve(new Blob([new Uint8Array(result)], { type: 'application/x-xz' }));
-                }
-            });
+            try {
+                LZMA.compress(
+                    tar,
+                    Math.min(Math.max(level, 1), 9),
+                    (compressed, error) => {
+                        if (error) {
+                            reject(new Error('XZ compression failed'));
+                            return;
+                        }
+                        if (!compressed || compressed.length === 0) {
+                            reject(new Error('XZ compression produced empty result'));
+                            return;
+                        }
+                        try {
+                            const blob = new Blob([new Uint8Array(compressed)], { type: 'application/x-xz' });
+                            resolve(blob);
+                        } catch (e) {
+                            reject(new Error('Failed to create XZ blob: ' + e.message));
+                        }
+                    }
+                );
+            } catch (err) {
+                reject(new Error('XZ compression error: ' + err.message));
+            }
         });
     }
 
-    throw new Error('TAR.XZ compression not available');
+    // Fallback to gzip if LZMA unavailable
+    try {
+        return await exportAsGzip(files, level);
+    } catch (err) {
+        throw new Error('TAR.XZ compression unavailable (LZMA library not loaded)');
+    }
 }
 
 function cyberNameSelect(message, callback) {
