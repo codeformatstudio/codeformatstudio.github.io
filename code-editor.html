@@ -294,13 +294,11 @@ body.split-view #previewScreen {
 }
 body.dock-top #previewScreen {
   left: 2.5%;
-  top: 10px;
+  top: 47px;
   width: 95%;
   height: 40vh;  /* preview takes top 40% of screen */
 }
-body.dock-top {
-  padding-top: 45vh;  /* pushes editor content DOWN */
-}
+body.dock-top { padding-top: 50vh; }
 
 /* FLOATING PREVIEW (draggable small window) */
 body.floating-preview #previewScreen {
@@ -546,34 +544,6 @@ body.floating-preview #previewScreen:active {
           text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
         "
       />
-      <style>
-        #previewInput::placeholder {
-          color: rgba(0, 255, 255, 0.5);
-          text-shadow: 0 0 3px rgba(0, 255, 255, 0.3);
-        }
-        
-        #previewInput:focus {
-          outline: none;
-          border-color: #00ff88;
-          border-bottom: 3px solid #00ffff;
-          box-shadow: 0 6px 20px rgba(0, 255, 255, 0.5), inset 0 1px 5px rgba(0, 255, 255, 0.2);
-          background: linear-gradient(135deg, rgba(0, 30, 50, 0.98) 0%, rgba(0, 15, 40, 0.98) 100%);
-        }
-        
-        #previewInput:hover {
-          box-shadow: 0 5px 18px rgba(0, 255, 255, 0.4), inset 0 1px 4px rgba(0, 255, 255, 0.15);
-          border-color: #00ff88;
-        }
-        
-        /* Autocomplete list styling */
-        #previewInput::-webkit-calendar-picker-indicator {
-          filter: invert(1) hue-rotate(180deg);
-        }
-        
-        datalist {
-          display: none;
-        }
-      </style>
     </form>
     <div
       class="dataContainer"
