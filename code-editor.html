@@ -276,7 +276,15 @@ body.dock-bottom #previewScreen {
   width: 95%;
   height: 40vh;  /* preview takes bottom 40% of screen */
 }
-
+body.dock-top #previewScreen {
+  left: 2.5%;
+  bottom: 10px;
+  width: 95%;
+  height: 40vh;  /* preview takes bottom 40% of screen */
+}
+body.dock-top {
+  padding-top: 45vh;  /* pushes editor content DOWN */
+}
 #openPreviewBtn {
   justify-self: center;
   background: #000010;
@@ -466,6 +474,7 @@ body.dock-bottom #previewScreen {
         <option value="Dock To Bottom">Dock To Bottom</option>
         <option value="Separate Window">Separate Window</option>
         <option value="New Tab">New Tab</option>
+        <option value="Dock To Top">Dock to top</option>
         
       </datalist>
       <input
