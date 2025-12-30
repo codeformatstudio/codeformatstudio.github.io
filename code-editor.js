@@ -601,6 +601,9 @@ form.addEventListener("submit", (event) => {
 
     const mode = previewInput.value.toLowerCase().trim();
 
+    // Save to localStorage
+    localStorage.setItem("preferredDockMode", mode);
+
     // RESET EVERYTHING
     document.body.classList.remove(
         "dock-right",
@@ -618,13 +621,22 @@ form.addEventListener("submit", (event) => {
     previewStyle.right = "";
     previewStyle.width = "";
     previewStyle.height = "";
+
+    // Apply the mode
+    applyPreviewMode(mode);
 });
 const openPreviewBtn = document.getElementById("openPreviewBtn");
 
 // ✅ MAIN PREVIEW APPLY FUNCTION
 function applyPreviewMode(mode) {
-    mode = previewInput.value.toLowerCase().trim();
+    // Normalize mode (use parameter or input value)
+    if (!mode) {
+        mode = previewInput.value.toLowerCase().trim();
+    } else {
+        mode = mode.toLowerCase().trim();
+    }
 
+    // Save to localStorage
     localStorage.setItem("preferredDockMode", mode);
 
     // RESET
