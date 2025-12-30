@@ -606,7 +606,9 @@ form.addEventListener("submit", (event) => {
         "dock-right",
         "dock-left",
         "dock-bottom",
-        "dock-top"
+        "dock-top",
+        "split-view",
+        "floating-preview"
     );
 
     previewStyle.display = "block";
@@ -630,7 +632,9 @@ function applyPreviewMode(mode) {
         "dock-right",
         "dock-left",
         "dock-bottom",
-        "dock-top"
+        "dock-top",
+        "split-view",
+        "floating-preview"
     );
 
 
@@ -681,6 +685,11 @@ function applyPreviewMode(mode) {
         document.body.classList.add("dock-bottom");
     } else if (mode === "dock to top") {
         document.body.classList.add("dock-top");
+    } else if (mode === "split view") {
+        document.body.classList.add("split-view");
+    } else if (mode === "floating preview") {
+        document.body.classList.add("floating-preview");
+        initFloatingPreviewDrag();
     }
 
     schedulePreviewUpdate(true);
@@ -2249,6 +2258,48 @@ function cyberNameSelect(message, callback) {
     input.focus();
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') okBtn.click();
+    });
+}
+
+// Floating Preview Drag Implementation
+function initFloatingPreviewDrag() {
+    const previewScreen = document.getElementById('previewScreen');
+    let isMouseDown = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // Make draggable from the header area
+    previewScreen.addEventListener('mousedown', (e) => {
+        // Only drag from top area (first 30px)
+        if (e.clientY - previewScreen.getBoundingClientRect().top > 30) {
+            return;
+        }
+
+        isMouseDown = true;
+        offsetX = e.clientX - previewScreen.getBoundingClientRect().left;
+        offsetY = e.clientY - previewScreen.getBoundingClientRect().top;
+        previewScreen.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isMouseDown) return;
+
+        const newX = e.clientX - offsetX;
+        const newY = e.clientY - offsetY;
+
+        // Constrain within viewport
+        const maxX = window.innerWidth - previewScreen.offsetWidth;
+        const maxY = window.innerHeight - previewScreen.offsetHeight;
+
+        previewScreen.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+        previewScreen.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+        previewScreen.style.right = 'auto';
+        previewScreen.style.bottom = 'auto';
+    });
+
+    document.addEventListener('mouseup', () => {
+        isMouseDown = false;
+        previewScreen.style.cursor = 'grab';
     });
 }
 
