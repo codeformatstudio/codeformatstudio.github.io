@@ -1131,12 +1131,12 @@ async function downloadProjectFallback() {
 }
 function exportMarkdown(projectName, markdownCode) {
     const zip = new JSZip();
-  
+
     const name = projectName || "project";
-  
+
     // Save raw markdown
     zip.file(`index.md`, markdownCode);
-  
+
     // Convert markdown → HTML
     const html = `
   <!DOCTYPE html>
@@ -1149,14 +1149,14 @@ function exportMarkdown(projectName, markdownCode) {
   ${marked.parse(markdownCode)}
   </body>
   </html>`;
-  
+
     zip.file("index.html", html);
-  
+
     zip.generateAsync({ type: "blob" }).then(blob => {
-      saveAs(blob, `${name}.zip`);
+        saveAs(blob, `${name}.zip`);
     });
-  }
-  
+}
+
 // Updated ZIP function to accept projectName
 async function downloadProjectAsZip(projectName) {
     const zip = new JSZip();
@@ -1809,12 +1809,33 @@ function cyberFormatSelect(message, formats, callback) {
 function collectProjectFiles() {
     const files = [];
 
-    let html = htmlEditor.getValue();
-    if (htmlSelect.value === 'markdown') html = marked.parse(html);
-    files.push({ name: 'index.html', content: html });
+    // Handle HTML/Markdown
+    const htmlRaw = htmlEditor.getValue();
+    const isMarkdown = htmlSelect.value === 'markdown';
+
+    if (isMarkdown) {
+        // Export both raw Markdown and compiled HTML
+        files.push({ name: 'index.md', content: htmlRaw });
+        files.push({ name: 'index.html', content: marked.parse(htmlRaw) });
+    } else {
+        // Export HTML only
+        files.push({ name: 'index.html', content: htmlRaw });
+    }
 
     files.push({ name: 'style.css', content: cssEditor.getValue() });
-    files.push({ name: 'script.js', content: jsEditor.getValue() });
+
+    // Handle JavaScript/TypeScript
+    const jsRaw = jsEditor.getValue();
+    const isTypeScript = jsSelect.value === 'typescript';
+
+    if (isTypeScript) {
+        // Export both raw TypeScript and compiled JavaScript
+        files.push({ name: 'script.ts', content: jsRaw });
+        files.push({ name: 'script.js', content: jsRaw }); // Note: Real compilation would require ts-compiler
+    } else {
+        // Export JavaScript only
+        files.push({ name: 'script.js', content: jsRaw });
+    }
 
     const lang = pySelect.value;
     const ext = {
