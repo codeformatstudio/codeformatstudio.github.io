@@ -623,7 +623,7 @@ const openPreviewBtn = document.getElementById("openPreviewBtn");
 
 // ✅ MAIN PREVIEW APPLY FUNCTION
 function applyPreviewMode(mode) {
-    mode = mode.toLowerCase().trim();
+    mode = previewInput.value.toLowerCase().trim();
 
     localStorage.setItem("preferredDockMode", mode);
 
