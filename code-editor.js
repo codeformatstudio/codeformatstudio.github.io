@@ -602,7 +602,12 @@ form.addEventListener("submit", (event) => {
     const mode = previewInput.value.toLowerCase().trim();
 
     // RESET EVERYTHING
-    document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+    document.body.classList.remove(
+        "dock-right",
+        "dock-left",
+        "dock-bottom",
+        "dock-top"
+    );
 
     previewStyle.display = "block";
     previewStyle.top = "";
@@ -621,7 +626,13 @@ function applyPreviewMode(mode) {
     localStorage.setItem("preferredDockMode", mode);
 
     // RESET
-    document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+    document.body.classList.remove(
+        "dock-right",
+        "dock-left",
+        "dock-bottom",
+        "dock-top"
+    );
+
 
     previewStyle.display = "block";
 
@@ -668,9 +679,11 @@ function applyPreviewMode(mode) {
         document.body.classList.add("dock-left");
     } else if (mode === "dock to bottom") {
         document.body.classList.add("dock-bottom");
+    } else if (mode === "dock to top") {
+        document.body.classList.add("dock-top");
     }
 
-    schedulePreviewUpdate();
+    schedulePreviewUpdate(true);
     resizeEditors();
 }
 
@@ -916,12 +929,6 @@ function downloadProject(defaultName = "project") {
 // attach download button
 // ---------------------------
 
-// === Auto Update on Input Change ===
-htmlEditor.on("change", schedulePreviewUpdate);
-cssEditor.on("change", schedulePreviewUpdate);
-jsEditor.on("change", schedulePreviewUpdate);
-pyEditor.on("change", schedulePreviewUpdate);
-
 // === Dynamic Syntax Highlighting ===
 htmlSelect.addEventListener("change", (e) => {
     if (e.target.value === "markdown") {
@@ -956,7 +963,13 @@ jsSelect.addEventListener("change", (e) => {
 
 closePreviewBtn.addEventListener("click", () => {
     previewStyle.display = "none";
-    document.body.classList.remove("dock-right", "dock-left", "dock-bottom");
+    document.body.classList.remove(
+        "dock-right",
+        "dock-left",
+        "dock-bottom",
+        "dock-top"
+    );
+
     localStorage.removeItem("preferredDockMode");
     resizeEditors();
 });
@@ -1116,7 +1129,34 @@ async function downloadProjectFallback() {
         });
     });
 }
-
+function exportMarkdown(projectName, markdownCode) {
+    const zip = new JSZip();
+  
+    const name = projectName || "project";
+  
+    // Save raw markdown
+    zip.file(`index.md`, markdownCode);
+  
+    // Convert markdown → HTML
+    const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>${name}</title>
+  </head>
+  <body>
+  ${marked.parse(markdownCode)}
+  </body>
+  </html>`;
+  
+    zip.file("index.html", html);
+  
+    zip.generateAsync({ type: "blob" }).then(blob => {
+      saveAs(blob, `${name}.zip`);
+    });
+  }
+  
 // Updated ZIP function to accept projectName
 async function downloadProjectAsZip(projectName) {
     const zip = new JSZip();
@@ -1178,22 +1218,60 @@ async function downloadByFormat(projectName, format) {
 function collectProjectFiles() {
     const files = [];
 
-    let html = htmlEditor.getValue();
-    if (htmlSelect.value === "markdown") html = marked.parse(html);
+    const rawHtml = htmlEditor.getValue();
+    const rawCss = cssEditor.getValue();
+    const rawJs = jsEditor.getValue();
+    const rawMarkdown = htmlSelect.value === "markdown" ? rawHtml : null;
 
-    files.push({ name: "index.html", content: html });
-    files.push({ name: "style.css", content: cssEditor.getValue() });
-    files.push({ name: "script.js", content: jsEditor.getValue() });
+    /* ---------- HTML ---------- */
+    const htmlOutput =
+        htmlSelect.value === "markdown"
+            ? marked.parse(rawHtml)
+            : rawHtml;
 
+    files.push({
+        name: "index.html",
+        content: htmlOutput
+    });
+
+    /* ---------- CSS ---------- */
+    files.push({
+        name: "style.css",
+        content: rawCss
+    });
+
+    /* ---------- JavaScript ---------- */
+    files.push({
+        name: "script.js",
+        content: rawJs
+    });
+
+    /* ---------- TypeScript ---------- */
+    if (jsSelect.value === "typescript") {
+        files.push({
+            name: "script.ts",
+            content: rawJs
+        });
+    }
+
+    /* ---------- Markdown ---------- */
+    if (rawMarkdown) {
+        files.push({
+            name: "README.md",
+            content: rawMarkdown
+        });
+    }
+
+    /* ---------- Backend / Language files ---------- */
     const lang = pySelect.value;
     const map = {
-        python: ["python/main.py", "py"],
-        brython: ["python/main.py", "py"],
-        ruby: ["ruby/main.rb", "rb"],
-        lua: ["lua/main.lua", "lua"],
-        scheme: ["scheme/main.scm", "scm"],
-        r: ["r/main.r", "r"],
-        wat: ["wasm/module.wat", "wat"]
+        python: ["python/main.py"],
+        brython: ["python/main.py"],
+        ruby: ["ruby/main.rb"],
+        lua: ["lua/main.lua"],
+        scheme: ["scheme/main.scm"],
+        r: ["r/main.r"],
+        wat: ["wasm/module.wat"]
     };
 
     if (map[lang]) {
@@ -1205,6 +1283,21 @@ function collectProjectFiles() {
 
     return files;
 }
+function isAnyPreviewOpen() {
+    // Docked preview visible
+    if (previewScreen && previewScreen.style.display !== "none") {
+        return true;
+    }
+
+    // New tab / separate window preview open
+    if (previewWindow && !previewWindow.closed) {
+        return true;
+    }
+
+    return false;
+}
+
+
 function downloadAsTar(projectName) {
     const tar = new Tar();
     const files = collectProjectFiles();
@@ -1344,10 +1437,92 @@ async function writeFile(dirHandle, name, content) {
     await writable.close();
 }
 
-function schedulePreviewUpdate() {
-    clearTimeout(previewTimer);
-    previewTimer = setTimeout(updatePreview, 250);
+let previewUpdateTimer = null;
+let previewDirty = false;
+
+// Cache last rendered state
+const lastPreviewState = {
+    html: "",
+    css: "",
+    js: "",
+    py: "",
+    htmlMode: "",
+    jsMode: "",
+    pyMode: ""
+};
+function markPreviewDirty() {
+    previewDirty = true;
+    schedulePreviewUpdate();
 }
+
+htmlEditor.on("change", markPreviewDirty);
+cssEditor.on("change", markPreviewDirty);
+jsEditor.on("change", markPreviewDirty);
+pyEditor.on("change", markPreviewDirty);
+function schedulePreviewUpdate(force = false) {
+    // 💤 Freeze if tab not visible (unless forced)
+    if (!force && document.visibilityState !== "visible") return;
+
+    // 🚫 No preview open → no work
+    if (!force && !isAnyPreviewOpen()) return;
+
+    // 🧠 Nothing changed → skip
+    if (!force && !previewDirty) return;
+
+    // Cancel pending work
+    if (previewUpdateTimer) {
+        cancelAnimationFrame(previewUpdateTimer);
+        previewUpdateTimer = null;
+    }
+
+    const run = () => {
+        previewUpdateTimer = null;
+
+        // Re-check before heavy work
+        if (!force && (!isAnyPreviewOpen() || document.visibilityState !== "visible")) {
+            return;
+        }
+
+        // 🎯 Diff check (skip iframe rebuild if identical)
+        const currentState = {
+            html: htmlEditor.getValue(),
+            css: cssEditor.getValue(),
+            js: jsEditor.getValue(),
+            py: pyEditor.getValue(),
+            htmlMode: htmlSelect.value,
+            jsMode: jsSelect.value,
+            pyMode: pySelect.value
+        };
+
+        let changed = false;
+        for (const key in currentState) {
+            if (currentState[key] !== lastPreviewState[key]) {
+                changed = true;
+                break;
+            }
+        }
+
+        if (!changed && !force) {
+            previewDirty = false;
+            return;
+        }
+
+        // Update cache
+        Object.assign(lastPreviewState, currentState);
+        previewDirty = false;
+
+        updatePreview();
+    };
+
+    // ⚡ Prefer idle time when typing fast
+    if (!force && "requestIdleCallback" in window) {
+        previewUpdateTimer = requestIdleCallback(run, { timeout: 300 });
+    } else {
+        previewUpdateTimer = requestAnimationFrame(run);
+    }
+}
+
+
 
 // ============================================
 // 🔥 FILE OPENING & EXPORT FEATURES
