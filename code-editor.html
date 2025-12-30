@@ -276,6 +276,21 @@ body.dock-bottom #previewScreen {
   width: 95%;
   height: 40vh;  /* preview takes bottom 40% of screen */
 }
+
+/* SPLIT VIEW (50/50) */
+body.split-view {
+  padding-right: 50vw;  /* pushes editors to left 50% */
+}
+
+body.split-view #previewScreen {
+  right: 0;
+  left: auto;
+  top: 0;
+  width: 50vw;
+  height: 100vh;
+  border-radius: 0;
+  border-left: 2px solid #00ffff;
+}
 body.dock-top #previewScreen {
   left: 2.5%;
   bottom: 10px;
@@ -284,6 +299,33 @@ body.dock-top #previewScreen {
 }
 body.dock-top {
   padding-top: 45vh;  /* pushes editor content DOWN */
+}
+
+/* FLOATING PREVIEW (draggable small window) */
+body.floating-preview #previewScreen {
+  right: 20px;
+  bottom: 20px;
+  width: 500px;
+  height: 400px;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+  cursor: grab;
+  resize: both;
+  overflow: auto;
+}
+
+body.floating-preview #previewScreen:active {
+  cursor: grabbing;
+}
+
+/* Mobile responsive floating preview */
+@media (max-width: 768px) {
+  body.floating-preview #previewScreen {
+    width: 90vw;
+    height: 50vh;
+    right: 5vw;
+    bottom: 10px;
+  }
 }
 #openPreviewBtn {
   justify-self: center;
