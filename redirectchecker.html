@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>URL Status & Redirect Checker</title>
+<link rel="stylesheet" href="assets/Orbitron.css" />
+<style>
+  body { font-family:"Orbitron",sans-serif; background:#0a0a12; color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:40px; }
+  h1 { text-shadow:0 0 10px #00fff7; margin-bottom:20px; text-align:center; }
+  input, button { padding:10px; margin:10px; border-radius:8px; border:none; font-weight:bold; }
+  input { width:250px; background:#0f0f20; color:#00fff7; border:2px solid #00fff7; }
+  button { background:#00fff7; color:#0f0f20; cursor:pointer; }
+  button:hover { background:#00dcd0; }
+  #result { margin-top:20px; max-width:600px; text-align:left; background:#0d0d20cc; border:2px solid #00fff7; border-radius:12px; padding:20px; word-wrap:break-word; }
+  .ok { color:#00ff7f; font-weight:bold; }
+  .fail { color:#ff3f3f; font-weight:bold; }
+</style>
+</head>
+<body>
+<h1>URL Status & Redirect Checker</h1>
+<input id="url" type="text" placeholder="Enter URL (e.g. https://example.com)" />
+<button onclick="checkURL()">Check URL</button>
+<div id="result">Results will appear here...</div>
+
+<script>
+async function checkURL(){
+  const urlInput = document.getElementById("url").value.trim();
+  const result = document.getElementById("result");
+  if(!urlInput){
+    result.innerHTML = '<span class="fail">Please enter a URL.</span>';
+    return;
+  }
+
+  let url = urlInput;
+  if(!/^https?:\/\//i.test(url)) url = 'https://' + url; // add https if missing
+
+  result.textContent = 'Checking...';
+
+  try {
+    const response = await fetch(url, { method:'HEAD', mode:'cors' });
+    const status = response.status;
+    const redirected = response.url !== url;
+
+    result.innerHTML = `
+      Status Code: <span class="ok">${status}</span><br>
+      ${redirected ? 'Redirected to: <span class="ok">'+response.url+'</span>' : 'No redirect detected'}
+    `;
+  } catch(e){
+    result.innerHTML = '<span class="fail">Failed to reach the URL. It might be offline or block requests.</span>';
+  }
+}
+</script>
+</body>
+</html>
