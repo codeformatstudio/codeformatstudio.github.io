@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>URL Shortener / Redirect Checker</title>
+<link rel="stylesheet" href="assets/Orbitron.css" />
+<style>
+body { font-family:"Orbitron",sans-serif; background:#0a0a12; color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:40px; }
+h1 { text-shadow:0 0 10px #00fff7; margin-bottom:20px; }
+input, button { padding:10px; margin:10px; border-radius:8px; border:none; font-weight:bold; }
+input { width:300px; background:#0f0f20; color:#00fff7; border:2px solid #00fff7; }
+button { background:#00fff7; color:#0f0f20; cursor:pointer; }
+button:hover { background:#00dcd0; }
+#output { margin-top:20px; max-width:600px; text-align:center; word-wrap:break-word; }
+</style>
+</head>
+<body>
+<h1>URL Shortener / Redirect Checker</h1>
+<input id="url" type="text" placeholder="Enter URL" />
+<button onclick="shortenURL()">Shorten URL</button>
+<div id="output"></div>
+
+<script>
+async function shortenURL(){
+  const url = document.getElementById("url").value;
+  const output = document.getElementById("output");
+  if(!url){ output.textContent="Please enter a URL."; return; }
+  output.textContent="Processing...";
+  try {
+    const res = await fetch(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    if(data.ok){
+      output.innerHTML = `Short URL: <a href="${data.result.full_short_link}" target="_blank">${data.result.full_short_link}</a>`;
+    } else { output.textContent = "Failed to shorten URL."; }
+  } catch(e){ output.textContent="Error: Could not reach API."; }
+}
+</script>
+</body>
+</html>
