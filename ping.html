@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ping / Traceroute Tool</title>
+<link rel="stylesheet" href="assets/Orbitron.css" />
+<style>
+body { font-family:"Orbitron",sans-serif; background:#0a0a12; color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:40px; }
+h1 { text-shadow:0 0 10px #00fff7; margin-bottom:20px; }
+input, button { padding:10px; margin:10px; border-radius:8px; border:none; font-weight:bold; }
+input { width:250px; background:#0f0f20; color:#00fff7; border:2px solid #00fff7; }
+button { background:#00fff7; color:#0f0f20; cursor:pointer; }
+button:hover { background:#00dcd0; }
+#result { margin-top:20px; max-width:600px; text-align:left; }
+</style>
+</head>
+<body>
+<h1>Ping / Traceroute Tool</h1>
+<input id="host" type="text" placeholder="Enter domain or IP" />
+<button onclick="pingHost()">Ping</button>
+<pre id="result">Results will appear here...</pre>
+
+<script>
+async function pingHost() {
+  const host = document.getElementById("host").value;
+  const result = document.getElementById("result");
+  if(!host){ result.textContent="Please enter a host."; return; }
+  result.textContent = "Pinging...";
+
+  try {
+    // Using a free ping API
+    const res = await fetch(`https://api.hackertarget.com/nping/?q=${host}`);
+    const text = await res.text();
+    result.textContent = text || "No response.";
+  } catch(e) {
+    result.textContent = "Ping failed or API limit reached.";
+  }
+}
+</script>
+</body>
+</html>
