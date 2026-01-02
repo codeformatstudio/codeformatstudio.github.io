@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Live GitHub Stats</title>
+<link rel="stylesheet" href="assets/Orbitron.css" />
+<style>
+body { font-family:"Orbitron",sans-serif; background:#0a0a12; color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:40px; }
+h1 { text-shadow:0 0 10px #00fff7; margin-bottom:20px; }
+input, button { padding:10px; margin:10px; border-radius:8px; border:none; font-weight:bold; }
+input { width:250px; background:#0f0f20; color:#00fff7; border:2px solid #00fff7; }
+button { background:#00fff7; color:#0f0f20; cursor:pointer; }
+button:hover { background:#00dcd0; }
+#stats { margin-top:20px; background:#0d0d20cc; border:2px solid #00fff7; border-radius:12px; padding:20px; width:100%; max-width:500px; text-align:center; }
+.stat-item { margin:10px 0; font-weight:bold; }
+</style>
+</head>
+<body>
+<h1>Live GitHub Stats</h1>
+<input id="repo" type="text" placeholder="username/repo" />
+<button onclick="getStats()">Get Stats</button>
+<div id="stats">Stats will appear here...</div>
+
+<script>
+async function getStats(){
+  const repo = document.getElementById("repo").value;
+  const stats = document.getElementById("stats");
+  if(!repo){ stats.textContent="Enter repo like username/repo"; return; }
+  stats.textContent="Fetching...";
+  try{
+    const res = await fetch(`https://api.github.com/repos/${repo}`);
+    const data = await res.json();
+    if(data.message){ stats.textContent="Repo not found"; return; }
+    stats.innerHTML = `
+      <div class="stat-item">Stars: ${data.stargazers_count}</div>
+      <div class="stat-item">Forks: ${data.forks_count}</div>
+      <div class="stat-item">Open Issues: ${data.open_issues_count}</div>
+      <div class="stat-item">Watchers: ${data.watchers_count}</div>
+    `;
+  }catch(e){ stats.textContent="Error fetching data"; }
+}
+</script>
+</body>
+</html>
