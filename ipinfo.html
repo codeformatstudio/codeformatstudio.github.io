@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IP Info / GeoLookup</title>
+<link rel="stylesheet" href="assets/Orbitron.css" />
+<style>
+  body { font-family: "Orbitron", sans-serif; background:#0a0a12; color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:40px; }
+  h1 { text-shadow:0 0 10px #00fff7; margin-bottom:20px; }
+  .info-box { background:#0d0d20cc; border:2px solid #00fff7; border-radius:12px; padding:20px; width:100%; max-width:600px; text-align:center; }
+  .info-item { margin:10px 0; font-weight:bold; }
+  button { padding:10px 20px; border:none; border-radius:8px; background:#00fff7; color:#0f0f20; font-weight:bold; cursor:pointer; margin-top:20px; }
+  button:hover { background:#00dcd0; }
+</style>
+</head>
+<body>
+<h1>IP Info / GeoLookup</h1>
+<div class="info-box" id="info">
+  <p>Click the button to get your IP info</p>
+</div>
+<button onclick="getIPInfo()">Get My Info</button>
+
+<script>
+async function getIPInfo() {
+  const infoBox = document.getElementById("info");
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const data = await res.json();
+    infoBox.innerHTML = `
+      <div class="info-item">IP: ${data.ip}</div>
+      <div class="info-item">City: ${data.city}</div>
+      <div class="info-item">Region: ${data.region}</div>
+      <div class="info-item">Country: ${data.country_name}</div>
+      <div class="info-item">ISP: ${data.org}</div>
+    `;
+  } catch (e) {
+    infoBox.textContent = "Failed to fetch IP info.";
+  }
+}
+</script>
+</body>
+</html>
