@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorem Ipsum / Placeholder Generator</title>
+  <link href="assets/Orbitron.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Orbitron", sans-serif;
+      background: #0a0a12;
+      color: #00fff7;
+      text-align: center;
+      padding: 40px;
+    }
+    body.light { background:#f3faff; color:#0a0a12; }
+    h1 { font-size:2rem; text-shadow:0 0 15px #00fff7; margin-bottom:25px; }
+    button {
+      background:#00fff7; color:#0a0a12; border:none; padding:15px 25px; font-weight:700;
+      border-radius:10px; cursor:pointer; margin:10px; box-shadow:0 0 20px #00fff7;
+      transition:0.25s;
+    }
+    button:hover { transform:scale(1.05); background:#00dcd0; }
+    input, select { padding:12px; border-radius:8px; border:2px solid #00fff7; margin:10px 5px; font-size:1rem; background:#0f0f20; color:#00fff7; }
+    textarea { width:80%; height:200px; margin-top:20px; border-radius:8px; border:2px solid #00fff7; background:#0f0f20; color:#00fff7; padding:10px; font-family: "Orbitron", monospace; }
+    .container { max-width:800px; margin:auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lorem Ipsum / Placeholder Generator</h1>
+
+    <label for="typeSelect">Type:</label>
+    <select id="typeSelect">
+      <option value="paragraph">Paragraphs</option>
+      <option value="sentence">Sentences</option>
+      <option value="words">Words</option>
+    </select>
+
+    <label for="countInput">Count:</label>
+    <input type="number" id="countInput" value="3" min="1" max="50">
+
+    <button id="generateBtn">Generate</button>
+
+    <textarea id="output" readonly placeholder="Your placeholder text will appear here..."></textarea>
+  </div>
+
+  <script>
+    const generateBtn = document.getElementById('generateBtn');
+    const output = document.getElementById('output');
+
+    const words = ["lorem","ipsum","dolor","sit","amet","consectetur","adipiscing","elit","sed","do","eiusmod","tempor","incididunt","ut","labore","et","dolore","magna","aliqua"];
+
+    function generateLorem(type, count) {
+      let result = "";
+      if(type === "words") {
+        for(let i=0;i<count;i++){
+          result += words[Math.floor(Math.random()*words.length)] + " ";
+        }
+      } else if(type === "sentence") {
+        for(let i=0;i<count;i++){
+          let sentence = "";
+          const len = Math.floor(Math.random()*8)+4;
+          for(let j=0;j<len;j++){
+            sentence += words[Math.floor(Math.random()*words.length)] + " ";
+          }
+          sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1).trim() + ". ";
+          result += sentence;
+        }
+      } else { // paragraph
+        for(let i=0;i<count;i++){
+          let para = "";
+          const sentences = Math.floor(Math.random()*5)+3;
+          for(let j=0;j<sentences;j++){
+            let sentence = "";
+            const len = Math.floor(Math.random()*8)+4;
+            for(let k=0;k<len;k++){
+              sentence += words[Math.floor(Math.random()*words.length)] + " ";
+            }
+            sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1).trim() + ". ";
+            para += sentence;
+          }
+          result += para + "\n\n";
+        }
+      }
+      return result.trim();
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const type = document.getElementById('typeSelect').value;
+      const count = parseInt(document.getElementById('countInput').value);
+      output.value = generateLorem(type,count);
+    });
+  </script>
+</body>
+</html>
