@@ -510,6 +510,26 @@ VERY SMALL SCREENS (<=150px)
                 <a href="pdfeditor.html" class="tool-button" 
           >PDF Editor</a
         >
+        <a href="uuid-crypto.html" class="tool-button" title="Generate UUIDs, API keys, or cryptographic keys">
+  UUID & Crypto Key Generator
+</a>
+
+<a href="lorem-placeholder.html" class="tool-button" title="Generate placeholder text, users, or mock data">
+  Lorem Ipsum / Placeholder Generator
+</a>
+
+<a href="font-pairing.html" class="tool-button" title="Preview fonts and find complementary pairings">
+  Font Preview & Pairing Tool
+</a>
+
+<a href="unit-converter.html" class="tool-button" title="Convert units like length, weight, time, temperature, and more">
+  Unit & Measurement Converter
+</a>
+
+<a href="web-performance.html" class="tool-button" title="Analyze website performance and get optimization suggestions">
+  Web Performance Analyzer
+</a>
+
         <!-- <a class="tool-button" href="qrcode.html" >QR Code Generator</a>
                 <a href="https://www.dropbox.com/scl/fi/fb17rmr83kab3cxhyi0ip/codeformatstudio_2.6.0_amd64.deb?rlkey=sbrl9ommvuc9w3ggdqhd9kley&st=0vyj9xwl&dl=1" class="tool-button"
           id="linux">Download Desktop for Linux</a
@@ -1139,12 +1159,8 @@ function getOperatingSystem() {
 
 window.addEventListener("load", () => {
   const os = getOperatingSystem();
-
-  // If OS not supported → trigger PWA install UI
-  if (os !== "Windows" && os !== "Linux") {
     tryInstallPWA();
-  }
-});
+  });
 
     </script>
   </body>
