@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unit & Measurement Converter</title>
+<link rel="stylesheet" href="assets/Orbitron.css">
+<style>
+  body {
+    font-family: "Orbitron", sans-serif;
+    background: #0a0a12;
+    color: #00fff7;
+    margin: 0;
+    padding: 0;
+  }
+  body.light {
+    background: #f3faff;
+    color: #0a0a12;
+  }
+  .container {
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #0d0d20cc;
+    border: 2px solid #00fff7;
+    border-radius: 12px;
+    box-shadow: 0 0 30px #00fff744;
+  }
+  body.light .container {
+    background: #fff;
+    border-color: #00c8c8;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  select, input {
+    width: 48%;
+    padding: 10px;
+    margin: 5px 1%;
+    border-radius: 8px;
+    border: 2px solid #00fff7;
+    background: #0f0f20;
+    color: #00fff7;
+    font-size: 1rem;
+  }
+  body.light select, body.light input {
+    background: #fff;
+    border-color: #00c8c8;
+    color: #0a0a12;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: none;
+    background: #00fff7;
+    color: #0f0f20;
+    cursor: pointer;
+    box-shadow: 0 0 20px #00fff788;
+    transition: 0.25s;
+  }
+  button:hover {
+    background: #00dcd0;
+    transform: translateY(-2px) scale(1.02);
+  }
+  body.light button {
+    background: #00e0e0;
+    color: #001010;
+  }
+  body.light button:hover {
+    background: #00bdbd;
+  }
+  #result {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Unit & Measurement Converter</h1>
+
+  <input type="number" id="value" placeholder="Enter value" />
+  
+  <select id="fromUnit">
+    <option value="">From Unit</option>
+    <optgroup label="Length">
+      <option value="m">Meter (m)</option>
+      <option value="km">Kilometer (km)</option>
+      <option value="cm">Centimeter (cm)</option>
+      <option value="mm">Millimeter (mm)</option>
+      <option value="mi">Mile (mi)</option>
+      <option value="yd">Yard (yd)</option>
+      <option value="ft">Foot (ft)</option>
+      <option value="in">Inch (in)</option>
+    </optgroup>
+    <optgroup label="Weight / Mass">
+      <option value="kg">Kilogram (kg)</option>
+      <option value="g">Gram (g)</option>
+      <option value="mg">Milligram (mg)</option>
+      <option value="lb">Pound (lb)</option>
+      <option value="oz">Ounce (oz)</option>
+    </optgroup>
+    <optgroup label="Temperature">
+      <option value="c">Celsius (°C)</option>
+      <option value="f">Fahrenheit (°F)</option>
+      <option value="k">Kelvin (K)</option>
+    </optgroup>
+  </select>
+
+  <select id="toUnit">
+    <option value="">To Unit</option>
+    <optgroup label="Length">
+      <option value="m">Meter (m)</option>
+      <option value="km">Kilometer (km)</option>
+      <option value="cm">Centimeter (cm)</option>
+      <option value="mm">Millimeter (mm)</option>
+      <option value="mi">Mile (mi)</option>
+      <option value="yd">Yard (yd)</option>
+      <option value="ft">Foot (ft)</option>
+      <option value="in">Inch (in)</option>
+    </optgroup>
+    <optgroup label="Weight / Mass">
+      <option value="kg">Kilogram (kg)</option>
+      <option value="g">Gram (g)</option>
+      <option value="mg">Milligram (mg)</option>
+      <option value="lb">Pound (lb)</option>
+      <option value="oz">Ounce (oz)</option>
+    </optgroup>
+    <optgroup label="Temperature">
+      <option value="c">Celsius (°C)</option>
+      <option value="f">Fahrenheit (°F)</option>
+      <option value="k">Kelvin (K)</option>
+    </optgroup>
+  </select>
+
+  <button onclick="convertUnit()">Convert</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+function convertUnit() {
+  const value = parseFloat(document.getElementById("value").value);
+  const from = document.getElementById("fromUnit").value;
+  const to = document.getElementById("toUnit").value;
+  let result = "";
+
+  if (isNaN(value)) {
+    result = "Please enter a number";
+  } else if (!from || !to) {
+    result = "Please select both units";
+  } else if (from === to) {
+    result = value;
+  } else {
+    // Length conversions (all in meters)
+    const lengthUnits = {
+      m: 1, km: 1000, cm: 0.01, mm: 0.001,
+      mi: 1609.34, yd: 0.9144, ft: 0.3048, in: 0.0254
+    };
+    // Weight/Mass conversions (all in kg)
+    const weightUnits = {
+      kg: 1, g: 0.001, mg: 0.000001, lb: 0.453592, oz: 0.0283495
+    };
+
+    if (lengthUnits[from] && lengthUnits[to]) {
+      result = value * lengthUnits[from] / lengthUnits[to];
+    } else if (weightUnits[from] && weightUnits[to]) {
+      result = value * weightUnits[from] / weightUnits[to];
+    } else if (["c","f","k"].includes(from) && ["c","f","k"].includes(to)) {
+      if (from === "c") {
+        if (to === "f") result = (value * 9/5) + 32;
+        else if (to === "k") result = value + 273.15;
+      } else if (from === "f") {
+        if (to === "c") result = (value - 32) * 5/9;
+        else if (to === "k") result = ((value - 32) * 5/9) + 273.15;
+      } else if (from === "k") {
+        if (to === "c") result = value - 273.15;
+        else if (to === "f") result = ((value - 273.15) * 9/5) + 32;
+      }
+    } else {
+      result = "Conversion not supported";
+    }
+  }
+
+  document.getElementById("result").textContent = result;
+}
+</script>
+</body>
+</html>
