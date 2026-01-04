@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID & Crypto Key Generator</title>
+  <link href="assets/Orbitron.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Orbitron", sans-serif;
+      background: #0a0a12;
+      color: #00fff7;
+      text-align: center;
+      padding: 40px;
+    }
+    body.light { background:#f3faff; color:#0a0a12; }
+    h1 { font-size:2rem; text-shadow:0 0 15px #00fff7; margin-bottom:25px; }
+    button {
+      background:#00fff7; color:#0a0a12; border:none; padding:15px 25px; font-weight:700;
+      border-radius:10px; cursor:pointer; margin:10px; box-shadow:0 0 20px #00fff7;
+      transition:0.25s;
+    }
+    button:hover { transform:scale(1.05); background:#00dcd0; }
+    input { width:80%; padding:12px; border-radius:8px; border:2px solid #00fff7; margin-top:15px; font-size:1rem; background:#0f0f20; color:#00fff7; }
+    .container { max-width:600px; margin:auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UUID & Crypto Key Generator</h1>
+
+    <button id="uuidBtn">Generate UUID v4</button>
+    <button id="keyBtn">Generate Random AES Key</button>
+    <input type="text" id="output" readonly placeholder="Your result will appear here">
+
+    <p>Click a button to generate a unique ID or cryptographic key.</p>
+  </div>
+
+  <script>
+    // UUID v4 generator
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    // Random AES key generator (256-bit)
+    function generateAESKey() {
+      const array = new Uint8Array(32); // 256 bits
+      crypto.getRandomValues(array);
+      return Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    const uuidBtn = document.getElementById('uuidBtn');
+    const keyBtn = document.getElementById('keyBtn');
+    const output = document.getElementById('output');
+
+    uuidBtn.addEventListener('click', () => output.value = generateUUID());
+    keyBtn.addEventListener('click', () => output.value = generateAESKey());
+  </script>
+</body>
+</html>
