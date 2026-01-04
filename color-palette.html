@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Color Palette Generator</title>
+  <link href="assets/Orbitron.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Orbitron", sans-serif;
+      background: #0a0a12;
+      color: #00fff7;
+      padding: 40px;
+      text-align: center;
+    }
+    body.light { background:#f3faff; color:#0a0a12; }
+    h1 { font-size:2rem; text-shadow:0 0 15px #00fff7; margin-bottom:25px; }
+    button { 
+      background:#00fff7; color:#0a0a12; border:none; padding:15px 25px; font-weight:700;
+      border-radius:10px; cursor:pointer; margin:10px; box-shadow:0 0 20px #00fff7; transition:0.25s;
+    }
+    button:hover { transform: scale(1.05); background:#00dcd0; }
+    .palette { display:flex; justify-content:center; margin-top:25px; gap:15px; flex-wrap:wrap; }
+    .color-box { width:100px; height:100px; border-radius:12px; box-shadow:0 0 15px #00fff7; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; cursor:pointer; transition:0.25s; }
+    .color-box:hover { transform:scale(1.05); }
+  </style>
+</head>
+<body>
+  <h1>Random Color Palette Generator</h1>
+  <button id="generateBtn">Generate Palette</button>
+
+  <div class="palette" id="paletteContainer"></div>
+
+  <script>
+    const generateBtn = document.getElementById('generateBtn');
+    const paletteContainer = document.getElementById('paletteContainer');
+
+    function getRandomColor() {
+      // Generate neon-ish pastel colors
+      const r = Math.floor(Math.random()*156)+100; 
+      const g = Math.floor(Math.random()*156)+100; 
+      const b = Math.floor(Math.random()*156)+100;
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function generatePalette(size = 5) {
+      paletteContainer.innerHTML = "";
+      for(let i=0;i<size;i++){
+        const color = getRandomColor();
+        const box = document.createElement('div');
+        box.className = 'color-box';
+        box.style.background = color;
+        box.textContent = color;
+        box.title = "Click to copy";
+        box.addEventListener('click', () => {
+          navigator.clipboard.writeText(color);
+          alert(`${color} copied to clipboard!`);
+        });
+        paletteContainer.appendChild(box);
+      }
+    }
+
+    generateBtn.addEventListener('click', () => generatePalette(5));
+
+    // Initial palette
+    generatePalette(5);
+  </script>
+</body>
+</html>
