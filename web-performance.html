@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Performance Analyzer</title>
+<link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0a0a12;
+    color: #00fff7;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  h1 { text-align: center; margin-bottom: 10px; }
+  input, button { padding: 10px; margin: 5px 0; border-radius: 6px; border: none; }
+  input { width: calc(100% - 24px); margin-bottom: 10px; }
+  button { background: #00fff7; color: #0a0a12; font-weight: bold; cursor: pointer; }
+  button:hover { background: #00e0e0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { padding: 12px; border: 1px solid #00fff7; text-align: left; }
+  th { background: #0d0d20; }
+  canvas { margin-top: 20px; background: #0d0d20; border-radius: 8px; }
+  .green { color: #00ff66; font-weight: bold; }
+  .yellow { color: #ffdc00; font-weight: bold; }
+  .red { color: #ff4d4d; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Web Performance Analyzer</h1>
+
+<input type="text" id="urlInput" placeholder="Enter a URL (leave empty for this page)">
+<button onclick="runAnalysis()">Analyze</button>
+<button onclick="exportCSV()">Export CSV</button>
+
+<table id="perfTable">
+  <thead>
+    <tr><th>Metric</th><th>Value</th><th>Score</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<canvas id="perfChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let metricsData = {};
+let chart;
+
+// Helper: format ms
+function fmt(ms) { return ms ? ms.toFixed(2) : "n/a"; }
+
+// Helper: score color
+function scoreColor(metric, value) {
+  if (metric === "CLS") return value < 0.1 ? "green" : value < 0.25 ? "yellow" : "red";
+  if (metric === "LCP") return value <= 2500 ? "green" : value <= 4000 ? "yellow" : "red";
+  if (metric === "FID") return value <= 100 ? "green" : value <= 300 ? "yellow" : "red";
+  return "green";
+}
+
+// Run performance analysis
+async function runAnalysis() {
+  const url = document.getElementById("urlInput").value || window.location.href;
+
+  // Reset metrics
+  metricsData = {};
+  const tbody = document.querySelector("#perfTable tbody");
+  tbody.innerHTML = "";
+
+  // Performance API only works on same-origin pages, so external URL fetch is simulated
+  if (url !== window.location.href) {
+    alert("External URL analysis is limited due to browser security. Only basic timing available.");
+  }
+
+  // Navigation timings
+  const nav = performance.getEntriesByType("navigation")[0] || {};
+  const dns = nav.domainLookupEnd - nav.domainLookupStart;
+  const conn = nav.connectEnd - nav.connectStart;
+  const resp = nav.responseEnd - nav.requestStart;
+  const dom = nav.domContentLoadedEventEnd - nav.fetchStart;
+  const load = nav.loadEventEnd - nav.fetchStart;
+
+  metricsData = {
+    "Redirect Time": fmt(nav.redirectEnd - nav.redirectStart),
+    "DNS Lookup": fmt(dns),
+    "Connection": fmt(conn),
+    "TTFB": fmt(resp),
+    "DOM Content Loaded": fmt(dom),
+    "Full Load": fmt(load),
+    "First Paint": fmt(performance.getEntriesByType("paint")[0]?.startTime),
+    "First Contentful Paint": fmt(performance.getEntriesByType("paint")[1]?.startTime),
+    "LCP": 0,
+    "CLS": 0,
+    "FID": 0
+  };
+
+  // Core Web Vitals
+  const obs = new PerformanceObserver((list) => {
+    list.getEntries().forEach((entry) => {
+      if (entry.entryType === "largest-contentful-paint") metricsData.LCP = entry.startTime;
+      if (entry.entryType === "layout-shift" && !entry.hadRecentInput) metricsData.CLS += entry.value;
+      if (entry.entryType === "first-input") metricsData.FID = entry.processingStart - entry.startTime;
+    });
+    updateTable();
+    updateChart();
+  });
+
+  obs.observe({ type: "largest-contentful-paint", buffered: true });
+  obs.observe({ type: "layout-shift", buffered: true });
+  obs.observe({ type: "first-input", buffered: true });
+
+  updateTable();
+  updateChart();
+}
+
+// Update table
+function updateTable() {
+  const tbody = document.querySelector("#perfTable tbody");
+  tbody.innerHTML = "";
+  for (let key in metricsData) {
+    const val = metricsData[key];
+    const colorClass = scoreColor(key, val);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${key}</td><td>${fmt(val)}</td><td class="${colorClass}">${colorClass.toUpperCase()}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// Update chart
+function updateChart() {
+  const labels = Object.keys(metricsData);
+  const data = Object.values(metricsData);
+  if (chart) chart.destroy();
+  const ctx = document.getElementById("perfChart").getContext("2d");
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Milliseconds',
+        data,
+        backgroundColor: labels.map(l => `rgba(${scoreColor(l,data[labels.indexOf(l)])==='green'?0:scoreColor(l,data[labels.indexOf(l)])==='yellow'?255:255},${scoreColor(l,data[labels.indexOf(l)])==='green'?255:scoreColor(l,data[labels.indexOf(l)])==='yellow'?255:77}, ${scoreColor(l,data[labels.indexOf(l)])==='green'?102:scoreColor(l,data[labels.indexOf(l)])==='yellow'?0:77},0.7)`),
+        borderColor: '#00fff7',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+// Export CSV
+function exportCSV() {
+  let csv = "Metric,Value,Score\n";
+  for (let key in metricsData) {
+    const val = fmt(metricsData[key]);
+    const score = scoreColor(key, metricsData[key]).toUpperCase();
+    csv += `${key},${val},${score}\n`;
+  }
+  const blob = new Blob([csv], {type: "text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "web_performance_metrics.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>
