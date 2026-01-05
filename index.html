@@ -411,9 +411,120 @@ VERY SMALL SCREENS (<=150px)
           font-size: 0.7rem;
         }
       }
+      .download-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.download-overlay.hidden {
+  display: none;
+}
+
+.download-modal {
+  background: #0d0d20;
+  border: 2px solid #00fff7;
+  box-shadow: 0 0 30px #00fff7aa;
+  padding: 25px;
+  border-radius: 14px;
+  width: 320px;
+  color: #00fff7;
+  text-align: center;
+}
+
+.download-modal h2 {
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px #00fff7;
+}
+
+.format-title {
+  margin: 15px 0;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #101030;
+  border: 1px solid #00fff7;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.radio-option:hover {
+  background: #00fff722;
+}
+
+.radio-option input {
+  accent-color: #00fff7;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-actions button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+#start-download {
+  background: #00fff7;
+  color: #001010;
+}
+
+#close-download {
+  background: transparent;
+  color: #00fff7;
+  border: 2px solid #00fff7;
+}
+
     </style>
   </head>
   <body>
+  <div id="download-overlay" class="download-overlay hidden">
+  <div class="download-modal">
+    <h2>Linux</h2>
+    <hr />
+
+    <label class="radio-option">
+      <input type="radio" name="linux-format" value="https://github.com/codeformatstudio/codeformatstudio.github.io/releases/download/codeformatstudio/CodeFormatStudio-3.0.0.AppImage" checked>
+      <span>AppImage (Universal)</span>
+    </label>
+
+    <label class="radio-option">
+      <input type="radio" name="linux-format" value="https://github.com/codeformatstudio/codeformatstudio.github.io/releases/download/codeformatstudio/codeformatstudio_3.0.0_amd64.deb">
+      <span>DEB (Ubuntu / Debian)</span>
+    </label>
+
+    <label class="radio-option">
+      <input type="radio" name="linux-format" value="https://github.com/codeformatstudio/codeformatstudio.github.io/releases/download/codeformatstudio/CodeFormatStudio-3.0.0_amd64.snap">
+      <span>Snap (Ubuntu / Snapcraft)</span>
+    </label>
+
+    <div class="modal-actions">
+      <button id="start-download">Download</button>
+      <button id="close-download">Cancel</button>
+    </div>
+  </div>
+</div>
+
     <div class="grid-bg"></div>
     <div class="stars"></div>
 
@@ -428,6 +539,7 @@ VERY SMALL SCREENS (<=150px)
       <a href="#coming-soon">Coming Soon</a>
       <a href="#license">License</a>
       <a href="#copyright">Copyright</a>
+      <a id="linux-download-btn" style="cursor: pointer">Download Desktop</a>
     </div>
 
     <!-- NAVBAR -->
@@ -530,8 +642,8 @@ VERY SMALL SCREENS (<=150px)
   Web Performance Analyzer
 </a>
 
-        <!-- <a class="tool-button" href="qrcode.html" >QR Code Generator</a>
-                <a href="https://www.dropbox.com/scl/fi/fb17rmr83kab3cxhyi0ip/codeformatstudio_2.6.0_amd64.deb?rlkey=sbrl9ommvuc9w3ggdqhd9kley&st=0vyj9xwl&dl=1" class="tool-button"
+        <a class="tool-button" href="qrcode.html" >QR Code Generator</a>
+         <!--       <a href="https://www.dropbox.com/scl/fi/fb17rmr83kab3cxhyi0ip/codeformatstudio_2.6.0_amd64.deb?rlkey=sbrl9ommvuc9w3ggdqhd9kley&st=0vyj9xwl&dl=1" class="tool-button"
           id="linux">Download Desktop for Linux</a
         > -->
         
@@ -1003,6 +1115,36 @@ Creative Commons may be contacted at creativecommons.org.
         yearSpan.textContent = new Date().getFullYear();
       });
     </script>
+<script>
+const overlay = document.getElementById("download-overlay");
+const openBtn = document.getElementById("linux-download-btn");
+const closeBtn = document.getElementById("close-download");
+const downloadBtn = document.getElementById("start-download");
+
+openBtn.addEventListener("click", () => {
+  overlay.classList.remove("hidden");
+});
+
+closeBtn.addEventListener("click", () => {
+  overlay.classList.add("hidden");
+});
+
+downloadBtn.addEventListener("click", () => {
+  const selected = document.querySelector(
+    'input[name="linux-format"]:checked'
+  );
+  if (!selected) return;
+
+  const a = document.createElement("a");
+  a.href = selected.value;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  overlay.classList.add("hidden");
+});
+</script>
 
     <script>
       /* TYPING EFFECT */
