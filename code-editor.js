@@ -999,7 +999,7 @@ window.addEventListener("resize", () => {
     resizeEditors();
 
     const savedMode = localStorage.getItem("preferredDockMode");
-    if (savedMode && previewScreen.style.display !== "none") {
+    if (savedMode && if (getComputedStyle(previewScreen).display !== "none")) {
         applyPreviewMode(savedMode);
     }
 });
@@ -1306,7 +1306,7 @@ function collectProjectFiles() {
 }
 function isAnyPreviewOpen() {
     // Docked preview visible
-    if (previewScreen && previewScreen.style.display !== "none") {
+    if (previewScreen && if (getComputedStyle(previewScreen).display !== "none")) {
         return true;
     }
 
