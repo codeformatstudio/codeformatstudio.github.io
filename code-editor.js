@@ -1,7 +1,7 @@
 // ============================================
 // Smart Autocompletion for All Languages
 // ============================================
-
+const textEncoder = new TextEncoder();
 const LANGUAGE_KEYWORDS = {
     python: [
         'and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue',
@@ -1318,13 +1318,7 @@ function isAnyPreviewOpen() {
     return false;
 }
 
-
-function downloadAsTar(projectName) {
-    const tar = new Tar();
-    const files = collectProjectFiles();
-
-    files.forEach(f => {
-        tar.append(f.name, new TextEncoder().encode(f.content));
+textEncoder.encode(f.content));
     });
 
     const blob = new Blob([tar.out], { type: "application/x-tar" });
@@ -1335,7 +1329,7 @@ function downloadAsTarGz(projectName) {
     const files = collectProjectFiles();
 
     files.forEach(f => {
-        tar.append(f.name, new TextEncoder().encode(f.content));
+        tar.append(f.name, textEncoder.encode(f.content));
     });
 
     // gzip compression
@@ -1573,7 +1567,7 @@ async function loadProjectFiles(files) {
             try {
                 const content = await file.text();
                 const path = file.webkitRelativePath || file.name;
-                openedProjectFiles[path] = content;
+                openedProjectFiles = Object.create(null);
 
                 // Auto-load HTML files
                 if (path.endsWith('.html') || path.endsWith('index.html')) {
@@ -1826,67 +1820,6 @@ function cyberFormatSelect(message, formats, callback) {
     overlay.appendChild(btnBox);
     document.body.appendChild(overlay);
 }
-
-function collectProjectFiles() {
-    const files = [];
-
-    // Handle HTML/Markdown
-    const htmlRaw = htmlEditor.getValue();
-    const isMarkdown = htmlSelect.value === 'markdown';
-
-    if (isMarkdown) {
-        // Export both raw Markdown and compiled HTML
-        files.push({ name: 'index.md', content: htmlRaw });
-        files.push({ name: 'index.html', content: marked.parse(htmlRaw) });
-    } else {
-        // Export HTML only
-        files.push({ name: 'index.html', content: htmlRaw });
-    }
-
-    files.push({ name: 'style.css', content: cssEditor.getValue() });
-
-    // Handle JavaScript/TypeScript
-    const jsRaw = jsEditor.getValue();
-    const isTypeScript = jsSelect.value === 'typescript';
-
-    if (isTypeScript) {
-        // Export both raw TypeScript and compiled JavaScript
-        files.push({ name: 'script.ts', content: jsRaw });
-        files.push({ name: 'script.js', content: jsRaw }); // Note: Real compilation would require ts-compiler
-    } else {
-        // Export JavaScript only
-        files.push({ name: 'script.js', content: jsRaw });
-    }
-
-    const lang = pySelect.value;
-    const ext = {
-        brython: 'py',
-        python: 'py',
-        ruby: 'rb',
-        lua: 'lua',
-        scheme: 'scm',
-        r: 'r',
-        wat: 'wat'
-    }[lang] || 'py';
-
-    const folder = {
-        brython: 'python',
-        python: 'python',
-        ruby: 'ruby',
-        lua: 'lua',
-        scheme: 'scheme',
-        r: 'r',
-        wat: 'wasm'
-    }[lang] || 'python';
-
-    files.push({
-        name: `${folder}/main.${ext}`,
-        content: pyEditor.getValue()
-    });
-
-    return files;
-}
-
 // Floating notification system
 let notificationTimeout = null;
 
@@ -1928,7 +1861,7 @@ async function createTar(files) {
 
     for (const file of files) {
         const content = typeof file.content === 'string'
-            ? new TextEncoder().encode(file.content)
+            ? textEncoder.encode(file.content)
             : new Uint8Array(file.content);
 
         const header = createTarHeader(file.name, content.length);
@@ -1956,27 +1889,27 @@ async function createTar(files) {
 
 function createTarHeader(filename, size) {
     const header = new Uint8Array(512);
-    const nameBytes = new TextEncoder().encode(filename);
+    const nameBytes = textEncoder.encode(filename);
     header.set(nameBytes.slice(0, 100), 0);
-    header.set(new TextEncoder().encode('0000644\0'.padEnd(8)), 100);
-    header.set(new TextEncoder().encode('0000000\0'.padEnd(8)), 108);
-    header.set(new TextEncoder().encode('0000000\0'.padEnd(8)), 116);
+    header.set(textEncoder.encode('0000644\0'.padEnd(8)), 100);
+    header.set(textEncoder.encode('0000000\0'.padEnd(8)), 108);
+    header.set(textEncoder.encode('0000000\0'.padEnd(8)), 116);
 
     const sizeOctal = size.toString(8).padStart(11, '0') + '\0';
-    header.set(new TextEncoder().encode(sizeOctal), 124);
+    header.set(textEncoder.encode(sizeOctal), 124);
 
     const now = Math.floor(Date.now() / 1000);
     const timeOctal = now.toString(8).padStart(11, '0') + '\0';
-    header.set(new TextEncoder().encode(timeOctal), 136);
+    header.set(textEncoder.encode(timeOctal), 136);
 
-    header.set(new TextEncoder().encode('        '), 148);
+    header.set(textEncoder.encode('        '), 148);
     header[156] = 48;
-    header.set(new TextEncoder().encode('ustar\0'), 257);
+    header.set(textEncoder.encode('ustar\0'), 257);
 
     let checksum = 0;
     for (let i = 0; i < header.length; i++) checksum += header[i];
     const checksumStr = checksum.toString(8).padStart(6, '0') + '\0 ';
-    header.set(new TextEncoder().encode(checksumStr), 148);
+    header.set(textEncoder.encode(checksumStr), 148);
 
     return header;
 }
@@ -2126,10 +2059,10 @@ async function exportAsGzip(files, level) {
 }
 
 async function exportAsDeflate(files, level) {
-    const data = new Uint8Array(files.reduce((sum, f) => sum + new TextEncoder().encode(f.content).length, 0));
+    const data = new Uint8Array(files.reduce((sum, f) => sum + textEncoder.encode(f.content).length, 0));
     let offset = 0;
     files.forEach(f => {
-        const bytes = new TextEncoder().encode(f.content);
+        const bytes = textEncoder.encode(f.content);
         data.set(bytes, offset);
         offset += bytes.length;
     });
@@ -2138,10 +2071,10 @@ async function exportAsDeflate(files, level) {
 }
 
 async function exportAsZlib(files, level) {
-    const data = new Uint8Array(files.reduce((sum, f) => sum + new TextEncoder().encode(f.content).length, 0));
+    const data = new Uint8Array(files.reduce((sum, f) => sum + textEncoder.encode(f.content).length, 0));
     let offset = 0;
     files.forEach(f => {
-        const bytes = new TextEncoder().encode(f.content);
+        const bytes = textEncoder.encode(f.content);
         data.set(bytes, offset);
         offset += bytes.length;
     });
