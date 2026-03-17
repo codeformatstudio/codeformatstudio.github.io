@@ -1,6 +1,17 @@
 // ============================================
 // Smart Autocompletion for All Languages
 // ============================================
+
+// Monaco Editor Compability Function
+function setEditorValue(editor, value) {
+    if (editor.setValue) {
+        editor.setValue(value);
+    } else if (editor.getModel) {
+        editor.getModel().setValue(value);
+    }
+}
+
+
 const textEncoder = new TextEncoder();
 const LANGUAGE_KEYWORDS = {
     python: [
@@ -1571,54 +1582,54 @@ async function loadProjectFiles(files) {
 
                 // Auto-load HTML files
                 if (path.endsWith('.html') || path.endsWith('index.html')) {
-                    htmlEditor.setValue(content);
+                    setEditorValue(htmlEditor, content);
                     htmlSelect.value = 'html';
                     loadedCount++;
                 }
                 // Auto-load CSS files
                 else if (path.endsWith('.css') || path.endsWith('style.css')) {
-                    cssEditor.setValue(content);
+                    setEditorValue(cssEditor, content);
                     loadedCount++;
                 }
                 // Auto-load JavaScript files
                 else if (path.endsWith('.js') || path.endsWith('script.js')) {
-                    jsEditor.setValue(content);
+                    setEditorValue(jsEditor, content);
                     jsSelect.value = 'javascript';
                     loadedCount++;
                 }
                 // Auto-load Python files
                 else if (path.endsWith('.py') || path.endsWith('main.py')) {
-                    pyEditor.setValue(content);
+                    setEditorValue(pyEditor, content);
                     pySelect.value = 'brython';
                     loadedCount++;
                 }
                 // Auto-load Ruby files
                 else if (path.endsWith('.rb') || path.endsWith('main.rb')) {
-                    pyEditor.setValue(content);
+                    setEditorValue(pyEditor, content);
                     pySelect.value = 'ruby';
                     loadedCount++;
                 }
                 // Auto-load Lua files
                 else if (path.endsWith('.lua') || path.endsWith('main.lua')) {
-                    pyEditor.setValue(content);
+                    setEditorValue(pyEditor, content);
                     pySelect.value = 'lua';
                     loadedCount++;
                 }
                 // Auto-load Scheme files
                 else if (path.endsWith('.scm') || path.endsWith('main.scm')) {
-                    pyEditor.setValue(content);
+                    setEditorValue(pyEditor, content);
                     pySelect.value = 'scheme';
                     loadedCount++;
                 }
                 // Auto-load R files
                 else if (path.endsWith('.r') || path.endsWith('main.r')) {
-                    pyEditor.setValue(content);
+                    setEditorValue(pyEditor, content);
                     pySelect.value = 'r';
                     loadedCount++;
                 }
                 // Auto-load WebAssembly files
                 else if (path.endsWith('.wat') || path.endsWith('main.wat')) {
-                    pyEditor.setValue(content);
+                    setEditorValue(pyEditor, content);
                     pySelect.value = 'wat';
                     loadedCount++;
                 }
