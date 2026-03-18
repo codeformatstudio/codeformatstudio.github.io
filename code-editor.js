@@ -2,7 +2,7 @@
 // Smart Autocompletion for All Languages
 // ============================================
 
-// Monaco Editor Compability Function
+// Monaco Editor Compilability Function
 function setEditorValue(editor, value) {
     if (editor.setValue) {
         editor.setValue(value);
@@ -1010,7 +1010,7 @@ window.addEventListener("resize", () => {
     resizeEditors();
 
     const savedMode = localStorage.getItem("preferredDockMode");
-    if (savedMode && if (getComputedStyle(previewScreen).display !== "none")) {
+    if (savedMode && getComputedStyle(previewScreen).display !== "none") {
         applyPreviewMode(savedMode);
     }
 });
