@@ -1317,7 +1317,7 @@ function collectProjectFiles() {
 }
 function isAnyPreviewOpen() {
     // Docked preview visible
-    if (previewScreen && if (getComputedStyle(previewScreen).display !== "none")) {
+    if (getComputedStyle(previewScreen).display !== "none") {
         return true;
     }
 
@@ -1329,12 +1329,10 @@ function isAnyPreviewOpen() {
     return false;
 }
 
-textEncoder.encode(f.content));
-    });
+textEncoder.encode(f.content);
 
     const blob = new Blob([tar.out], { type: "application/x-tar" });
     saveAs(blob, projectName + ".tar");
-}
 function downloadAsTarGz(projectName) {
     const tar = new Tar();
     const files = collectProjectFiles();
