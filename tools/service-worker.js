@@ -15,7 +15,7 @@ const urlsToCache = [
 "/info.js",
 "/icons",
 "/icons/icon-2.png",
-"/icons/icon.png",
+"/./icons/icon.png",
 "/trial.html",
 "/search.txt",
 "/tsconfig.json",
