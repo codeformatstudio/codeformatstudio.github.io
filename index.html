@@ -160,38 +160,5 @@
         <a href="tools/" class="cyber-btn">// Open Toolkit</a>
     </header>
 
-    <main class="grid-container">
-        <script>
-            const features = [
-                "JSON Beautifier", "Minify JavaScript", "HTML Tree Visualizer", "CSS Grid Generator",
-                "SQL Query Aligner", "Markdown Live Preview", "RegEx Pattern Tester", "JWT Token Decoder",
-                "Base64 String Encoder", "Hex to RGB Converter", "XML Tree Formatter", "YAML Syntax Validator",
-                "URL Component Encoder", "SHA-256 Hasher", "Diff Checker Engine", "CSV to JSON Parser",
-                "Unicode Escaper", "Prettier Code Sync", "ESLint Rule Injector", "CSS Variable Mapper",
-                "GraphQL Query Lint", "TypeScript Transpiler", "Sass Component Compiler", "Dockerile Generator",
-                "NPM Package Analyzer", "Git Log Pretty Print", "Cron Expression Parser", "Babel Syntax Helper",
-                "HTML Entity Encoder", "LEES Style Processor", "PHP Array Serializer", "Python Indent Fixer",
-                "Ruby Beautifier", "C++ Code Cleanse", "Rust Format Matrix", "Go fmt Integrator",
-                "Shell Script Lint", "TOML Config Checker", "SVG Path Optimizer", "Webpack Config Maker",
-                "C# Syntax Beautifier", "Java Class Formatter", "Web Manifest Builder", "TSConfig Validator",
-                "Sublime Keymap Emulator", "Vim Binding Router", "Code Snippet Manager", "Color Palette Extractor",
-                "Responsive Grid Checker", "AST Parse Inspector"
-            ];
-
-            const container = document.querySelector('.grid-container');
-            
-            features.forEach((feature, index) => {
-                const idString = String(index + 1).padStart(3, '0');
-                const card = document.createElement('div');
-                card.className = 'feature-card';
-                card.innerHTML = `
-                    <div class="feature-id">MODULE_SYS_${idString}</div>
-                    <div class="feature-title">${feature}</div>
-                `;
-                container.appendChild(card);
-            });
-        </script>
-    </main>
-
 </body>
 </html>
