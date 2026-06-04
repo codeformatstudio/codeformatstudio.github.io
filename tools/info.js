@@ -2052,7 +2052,6 @@ document.addEventListener('keydown', function(e) {
 // 9. Show a welcome message on first load
 if (!localStorage.getItem('langgen_welcome')) {
   setTimeout(() => {
-    alert('Welcome to the Language Information Generator!\n Try searching or use the Random button.');
     localStorage.setItem('langgen_welcome', '1');
   }, 500);
 }
