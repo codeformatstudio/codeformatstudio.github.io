@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Format Studio</title>
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff0055;
+            --neon-purple: #7b2cbf;
+            --dark-surface: #0f0f1e;
+            --text-color: #c0c0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 3rem 2rem;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(15, 15, 30, 0.6) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(15, 15, 30, 0.6) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #fff;
+            text-shadow: 
+                0 0 5px var(--neon-cyan),
+                0 0 10px var(--neon-cyan),
+                0 0 20px var(--neon-cyan);
+            margin-bottom: 2rem;
+            animation: flicker 3s infinite alternate;
+        }
+
+        /* Cyberpunk Anchor Button */
+        .cyber-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: var(--neon-magenta);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 16px 32px;
+            border: 2px solid var(--neon-magenta);
+            background: transparent;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.2), inset 0 0 10px rgba(255, 0, 85, 0.2);
+        }
+
+        .cyber-btn:hover {
+            color: #fff;
+            background: var(--neon-magenta);
+            box-shadow: 
+                0 0 20px var(--neon-magenta),
+                0 0 40px var(--neon-magenta);
+            text-shadow: 0 0 5px #fff;
+        }
+
+        /* Tech corner cuts */
+        .cyber-btn::before, .cyber-btn::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--bg-color);
+            border: 2px solid var(--neon-magenta);
+        }
+
+        .cyber-btn::before {
+            top: -5px;
+            left: -5px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .cyber-btn::after {
+            bottom: -5px;
+            right: -5px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Grid Configuration */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--dark-surface);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            padding: 24px;
+            border-radius: 2px;
+            position: relative;
+            transition: all 0.25s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .feature-id {
+            font-size: 0.75rem;
+            color: var(--neon-purple);
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .feature-title {
+            font-size: 0.95rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+            }
+            20%, 24%, 55% {        
+                text-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Code Format Studio</h1>
+        <a href="tools/" class="cyber-btn">// Open Toolkit</a>
+    </header>
+
+    <main class="grid-container">
+        <script>
+            const features = [
+                "JSON Beautifier", "Minify JavaScript", "HTML Tree Visualizer", "CSS Grid Generator",
+                "SQL Query Aligner", "Markdown Live Preview", "RegEx Pattern Tester", "JWT Token Decoder",
+                "Base64 String Encoder", "Hex to RGB Converter", "XML Tree Formatter", "YAML Syntax Validator",
+                "URL Component Encoder", "SHA-256 Hasher", "Diff Checker Engine", "CSV to JSON Parser",
+                "Unicode Escaper", "Prettier Code Sync", "ESLint Rule Injector", "CSS Variable Mapper",
+                "GraphQL Query Lint", "TypeScript Transpiler", "Sass Component Compiler", "Dockerile Generator",
+                "NPM Package Analyzer", "Git Log Pretty Print", "Cron Expression Parser", "Babel Syntax Helper",
+                "HTML Entity Encoder", "LEES Style Processor", "PHP Array Serializer", "Python Indent Fixer",
+                "Ruby Beautifier", "C++ Code Cleanse", "Rust Format Matrix", "Go fmt Integrator",
+                "Shell Script Lint", "TOML Config Checker", "SVG Path Optimizer", "Webpack Config Maker",
+                "C# Syntax Beautifier", "Java Class Formatter", "Web Manifest Builder", "TSConfig Validator",
+                "Sublime Keymap Emulator", "Vim Binding Router", "Code Snippet Manager", "Color Palette Extractor",
+                "Responsive Grid Checker", "AST Parse Inspector"
+            ];
+
+            const container = document.querySelector('.grid-container');
+            
+            features.forEach((feature, index) => {
+                const idString = String(index + 1).padStart(3, '0');
+                const card = document.createElement('div');
+                card.className = 'feature-card';
+                card.innerHTML = `
+                    <div class="feature-id">MODULE_SYS_${idString}</div>
+                    <div class="feature-title">${feature}</div>
+                `;
+                container.appendChild(card);
+            });
+        </script>
+    </main>
+
+</body>
+</html>
