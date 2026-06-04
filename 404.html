@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+  <link rel="icon" href="icons/icon.png" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>404 | CodeFormatStudio</title>
+
+<style>
+:root {
+  --neon-pink: #ff2fdc;
+  --neon-blue: #00f7ff;
+  --neon-purple: #9b5cff;
+  --bg-dark: #05010a;
+  --text: #e6e6ff;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, #040008, #090015),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: min(1100px, 92%);
+  padding: 2rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(10,0,20,0.7);
+  box-shadow:
+    0 0 25px rgba(255,47,220,0.25),
+    inset 0 0 40px rgba(0,247,255,0.08);
+  backdrop-filter: blur(8px);
+}
+
+h1 {
+  font-size: clamp(3rem, 10vw, 6rem);
+  margin: 0;
+  color: var(--neon-pink);
+  text-shadow:
+    0 0 15px var(--neon-pink),
+    0 0 30px var(--neon-purple);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 2rem;
+}
+
+.neon-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+  box-shadow: 0 0 12px var(--neon-blue);
+  margin: 1.5rem 0;
+}
+
+.repo-title {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.repo-title h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.file-list {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.item {
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.4);
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+  transition: 0.25s ease;
+}
+
+.item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: 0.3s;
+}
+
+.item:hover::before {
+  opacity: 1;
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0,247,255,0.3);
+  border-color: var(--neon-blue);
+}
+
+.icon {
+  margin-right: 0.4rem;
+}
+
+.footer {
+  margin-top: 2.5rem;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.loading {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 1.4rem;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>404</h1>
+  <p class="subtitle">Page not found — but the repository still exists.</p>
+
+  <div class="neon-bar"></div>
+
+  <div class="repo-title">
+    <h2>📂 codeformatstudio / codeformatstudio.github.io</h2>
+    <span class="loading" id="status">Loading repository files…</span>
+  </div>
+
+  <div class="file-list" id="files"></div>
+
+  <div class="footer">
+    © CodeFormatStudio — Cyber-Neon Interface
+  </div>
+</div>
+
+<script>
+const USER = "codeformatstudio";
+const REPO = "codeformatstudio.github.io";
+const API_BASE = "https://api.github.com/repos/" + USER + "/" + REPO + "/contents";
+
+const filesEl = document.getElementById("files");
+const statusEl = document.getElementById("status");
+
+async function loadFiles(path = "") {
+  try {
+    const res = await fetch(API_BASE + (path ? "/" + path : ""));
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      statusEl.textContent = "Failed to load repository contents.";
+      return;
+    }
+
+    statusEl.textContent = "Browse the repository files:";
+
+    data.forEach(item => {
+      const link = document.createElement("a");
+      link.className = "item";
+
+      if (item.type === "dir") {
+        link.href = item.html_url;
+        link.innerHTML = `<span class="icon">📁</span>${item.name}`;
+      } else {
+        link.href = item.download_url || item.html_url;
+        link.innerHTML = `<span class="icon">📄</span>${item.name}`;
+      }
+
+      link.target = "_blank";
+      filesEl.appendChild(link);
+    });
+
+  } catch (err) {
+    statusEl.textContent = "Error connecting to GitHub API.";
+  }
+}
+
+loadFiles();
+</script>
+</body>
+</html>
