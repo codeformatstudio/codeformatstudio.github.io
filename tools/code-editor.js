@@ -1,4 +1,4 @@
-var tar = new Tar();
+
 // ============================================
 // Smart Autocompletion for All Languages
 // ============================================
@@ -1331,7 +1331,7 @@ function isAnyPreviewOpen() {
 
     return false;
 }
-
+const tar = new Tar();
 textEncoder.encode(f.content);
 
     const blob = new Blob([tar.out], { type: "application/x-tar" });
