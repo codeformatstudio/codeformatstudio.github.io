@@ -1,7 +1,10 @@
+var tar = new Tar();
 // ============================================
 // Smart Autocompletion for All Languages
 // ============================================
-
+window.process = {
+    argv: []
+};
 // Monaco Editor Compilability Function
 function setEditorValue(editor, value) {
     if (editor.setValue) {
