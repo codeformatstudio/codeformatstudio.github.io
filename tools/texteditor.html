@@ -3,45 +3,379 @@
   <head>
     <meta charset="utf-8"/>
     <title>Basic Text Editor</title>
-    <link rel="icon" href="../icon.png" type="image/png" type="image/png" />
+    <link rel="icon" href="../icon.png" type="image/png" />
     <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #111;
+        color: #fff;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+      
+      /* --- Sidebar Layout --- */
+      #sidebar {
+        width: 280px;
+        min-width: 240px;
+        background: #1a1a1a;
+        border-right: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        user-select: none;
+      }
+      #sidebar-header {
+        padding: 10px;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #open-btn {
+        background: #222;
+        color: #00ff00;
+        border: 1px solid #00ff00;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-family: monospace;
+      }
+      #open-btn:hover {
+        background: #00ff00;
+        color: #000;
+      }
+      #file-tree {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 5px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+
+      /* --- Action Buttons (F+ / D+) --- */
+      .actions-container {
+        display: none;
+        margin-left: auto;
+        gap: 6px;
+      }
+      .action-btn {
+        background: #333;
+        color: #00ff00;
+        border: unset;
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 2px 6px;
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      .action-btn:hover {
+        background: #00ff00;
+        color: #000;
+      }
+
+      /* Hover rules to expose controls */
+      #sidebar-header:hover .actions-container,
+      .tree-item.folder-item:hover .actions-container {
+        display: flex;
+      }
+
+      /* --- Tree Styles (Nested Items) --- */
+      .tree-row {
+        display: flex;
+        flex-direction: column;
+      }
+      .tree-item {
+        padding: 4px 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+      }
+      .tree-item:hover {
+        background: #2a2a2a;
+      }
+      .tree-item.active-file {
+        background: #003300;
+        color: #00ff00;
+        border-left: 2px solid #00ff00;
+      }
+      .folder-children {
+        margin-left: 12px;
+        border-left: 1px dashed #333;
+        padding-left: 4px;
+      }
+      .hidden {
+        display: none;
+      }
+      .icon {
+        margin-right: 6px;
+        font-weight: bold;
+      }
+
+      /* --- Editor Layout --- */
+      #editor-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      #file-status {
+        background: #151515;
+        padding: 4px 20px;
+        font-family: monospace;
+        font-size: 12px;
+        color: #888;
+        border-bottom: 1px solid #222;
+      }
       textarea {
+        flex: 1;
         font-family: monospace;
         background: #000000;
         color: #00ff00;
         text-align: left;
-        padding: 10px 20px;
+        padding: 15px 20px;
         outline: none;
         border: none;
         resize: none;
-      }
-      textarea:focus {
-        outline: none;
-        border: none;
+        width: 100%;
+        height: 100%;
       }
     </style>
   </head>
   <body>
-    <textarea spellcheck="false" autofocus="true"></textarea>
+
+    <div id="sidebar">
+      <div id="sidebar-header">
+        <button id="open-btn">OPEN FOLDER</button>
+        <div class="actions-container" id="root-actions" style="display: none;">
+          <button class="action-btn" title="Create File here" onclick="createNewItem(event, rootDirectoryHandle, 'file')">F+</button>
+          <button class="action-btn" title="Create Folder here" onclick="createNewItem(event, rootDirectoryHandle, 'directory')">D+</button>
+        </div>
+      </div>
+      <div id="file-tree">
+        <div style="color: #666; text-align: center; margin-top: 20px;">No folder opened</div>
+      </div>
+    </div>
+
+    <div id="editor-container">
+      <div id="file-status">Untitled Document</div>
+      <textarea spellcheck="false" autofocus="true"></textarea>
+    </div>
+
     <script>
-      const userClientWidth = document.documentElement.clientWidth;
-      const userClientHeight = document.documentElement.clientHeight;
       const textarea = document.querySelector("textarea");
-      textarea.style.width = `${userClientWidth}px`;
-      textarea.style.height = `${userClientHeight}px`;
-      textarea.style.margin = '0px';
-      textarea.style.boxSizing = 'border-box'
-      document.body.style.margin = '0';
-      document.body.style.overflow = 'hidden';
-      document.addEventListener("keydown", function(e){
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "s") {
+      const openBtn = document.getElementById("open-btn");
+      const fileTreeContainer = document.getElementById("file-tree");
+      const fileStatus = document.getElementById("file-status");
+      const rootActions = document.getElementById("root-actions");
+
+      let activeFileHandle = null;
+      let rootDirectoryHandle = null;
+
+      // 1. Recursive Directory Rendering Engine
+      async function renderDirectory(dirHandle, parentElement) {
+        const sortedEntries = [];
+        
+        for await (const entry of dirHandle.values()) {
+          sortedEntries.push(entry);
+        }
+        
+        // Sort items: Folders first, then Files alphabetically
+        sortedEntries.sort((a, b) => {
+          if (a.kind !== b.kind) return a.kind === 'directory' ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        });
+
+        for (const entry of sortedEntries) {
+          const rowEl = document.createElement("div");
+          rowEl.className = "tree-row";
+
+          const itemEl = document.createElement("div");
+          itemEl.className = "tree-item";
+
+          if (entry.kind === "directory") {
+            itemEl.classList.add("folder-item");
+            itemEl.innerHTML = `
+              <span class="icon">📁</span> 
+              <span>${entry.name}</span>
+              <div class="actions-container">
+                <button class="action-btn" title="New File">F+</button>
+                <button class="action-btn" title="New Folder">D+</button>
+              </div>
+            `;
+            rowEl.appendChild(itemEl);
+
+            const childrenContainer = document.createElement("div");
+            childrenContainer.className = "folder-children hidden";
+            rowEl.appendChild(childrenContainer);
+
+            let loaded = false;
+
+            // Folder expansion logic
+            itemEl.addEventListener("click", async (e) => {
+              e.stopPropagation();
+              if (!loaded) {
+                await renderDirectory(entry, childrenContainer);
+                loaded = true;
+              }
+              childrenContainer.classList.toggle("hidden");
+              itemEl.querySelector(".icon").textContent = childrenContainer.classList.contains("hidden") ? "📁" : "📂";
+            });
+
+            // Inline item insertion injection routing handles
+            const buttons = itemEl.querySelectorAll(".action-btn");
+            buttons[0].addEventListener("click", async (e) => {
+              e.stopPropagation();
+              await createNewItem(e, entry, 'file', childrenContainer, () => { loaded = true; });
+            });
+            buttons[1].addEventListener("click", async (e) => {
+              e.stopPropagation();
+              await createNewItem(e, entry, 'directory', childrenContainer, () => { loaded = true; });
+            });
+
+          } else {
+            itemEl.innerHTML = `<span class="icon">📄</span> ${entry.name}`;
+            rowEl.appendChild(itemEl);
+
+            itemEl.addEventListener("click", async (e) => {
+              e.stopPropagation();
+              await loadFile(entry, itemEl);
+            });
+          }
+
+          parentElement.appendChild(rowEl);
+        }
+      }
+
+      // 2. Local File / Folder Creation Pipeline
+      async function createNewItem(event, targetDirHandle, type, uiContainer = null, setLoadedCallback = null) {
+        if (!targetDirHandle) return;
+        
+        const typeLabel = type === 'file' ? 'File' : 'Folder';
+        const name = prompt(`Enter new ${typeLabel} name:`);
+        if (!name || !name.trim()) return;
+
+        try {
+          if (type === 'file') {
+            // Generates empty baseline file on system storage
+            const fileHandle = await targetDirHandle.getFileHandle(name, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write("");
+            await writable.close();
+          } else {
+            // Generates system subdirectory structure
+            await targetDirHandle.getDirectoryHandle(name, { create: true });
+          }
+
+          // Smart Refresh Logic
+          if (uiContainer) {
+            // Target subfolder element container node view refreshes dynamically
+            uiContainer.innerHTML = "";
+            uiContainer.classList.remove("hidden");
+            if (setLoadedCallback) setLoadedCallback();
+            
+            // Sync structural parent folder styling matching opened states
+            const parentItem = uiContainer.previousElementSibling;
+            if (parentItem && parentItem.querySelector(".icon")) {
+              parentItem.querySelector(".icon").textContent = "📂";
+            }
+            await renderDirectory(targetDirHandle, uiContainer);
+          } else {
+            // Otherwise force global tree cascade synchronization from roots
+            fileTreeContainer.innerHTML = "";
+            await renderDirectory(rootDirectoryHandle, fileTreeContainer);
+          }
+        } catch (err) {
+          alert(`Error creating ${typeLabel}: ` + err.message);
+        }
+      }
+
+      // 3. Document Viewer Load Module
+      async function loadFile(fileHandle, elementNode) {
+        try {
+          const file = await fileHandle.getFile();
+          const text = await file.text();
+          
+          textarea.value = text;
+          activeFileHandle = fileHandle;
+          fileStatus.textContent = fileHandle.name;
+
+          document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active-file'));
+          if (elementNode) elementNode.classList.add('active-file');
+          
+          textarea.focus();
+        } catch (err) {
+          alert("Could not open file: " + err.message);
+        }
+      }
+
+      // 4. File-Saving Operations Modules
+      async function writeToDisk(handle) {
+        const writable = await handle.createWritable();
+        await writable.write(textarea.value);
+        await writable.close();
+        console.log("Save complete.");
+      }
+
+      async function saveAs() {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'note.txt',
+            types: [{ description: 'Text Files', accept: { 'text/plain': ['.txt'] } }]
+          });
+          activeFileHandle = handle;
+          fileStatus.textContent = handle.name;
+          await writeToDisk(activeFileHandle);
+          
+          if (rootDirectoryHandle) {
+            fileTreeContainer.innerHTML = "";
+            await renderDirectory(rootDirectoryHandle, fileTreeContainer);
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') alert('Save As failed: ' + err.message);
+        }
+      }
+
+      async function save() {
+        if (!activeFileHandle) {
+          await saveAs();
+          return;
+        }
+        try {
+          await writeToDisk(activeFileHandle);
+        } catch (err) {
+          alert('Save failed: ' + err.message);
+        }
+      }
+
+      // 5. Open Project Folders Listener
+      openBtn.addEventListener("click", async () => {
+        try {
+          rootDirectoryHandle = await window.showDirectoryPicker();
+          fileTreeContainer.innerHTML = "";
+          rootActions.style.display = "flex"; // Activate root action buttons
+          await renderDirectory(rootDirectoryHandle, fileTreeContainer);
+        } catch (err) {
+          if (err.name !== 'AbortError') alert("Error reading folder: " + err.message);
+        }
+      });
+
+      // 6. Global Key Bindings Management Routing Actions
+      document.addEventListener("keydown", function(e) {
+        const isSKey = e.key.toLowerCase() === "s";
+        const hasModifier = e.ctrlKey || e.metaKey;
+
+        if (hasModifier && isSKey) {
           e.preventDefault();
-          const blob = new Blob([textarea.value], {type: "text/plain"});
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = prompt("Enter filename: ", "note.txt");
-          link.click();
+          if (e.shiftKey) {
+            saveAs();
+          } else {
+            save();
+          }
         }
       });
     </script>
