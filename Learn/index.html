@@ -1,0 +1,781 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Code Format Studio</title>
+
+<style>
+
+* {
+    box-sizing:border-box;
+    font-family:Consolas, monospace;
+}
+
+
+html {
+    scroll-behavior:smooth;
+}
+
+
+body {
+
+    margin:0;
+
+    min-height:100vh;
+
+    background:
+    radial-gradient(circle at top,#142850,#020208 70%);
+
+    color:#eaffff;
+
+    overflow-x:hidden;
+
+}
+
+
+/* Animated grid */
+
+body::before {
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    background:
+    linear-gradient(#00ffff12 1px,transparent 1px),
+    linear-gradient(90deg,#00ffff12 1px,transparent 1px);
+
+    background-size:45px 45px;
+
+    animation:grid 12s linear infinite;
+
+    pointer-events:none;
+
+}
+
+
+@keyframes grid {
+
+    from {
+        transform:translateY(0);
+    }
+
+    to {
+        transform:translateY(45px);
+    }
+
+}
+
+
+/* Scanline */
+
+body::after {
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    background:
+    linear-gradient(
+        transparent,
+        #00ffff08,
+        transparent
+    );
+
+    animation:scan 5s infinite;
+
+    pointer-events:none;
+
+}
+
+
+@keyframes scan {
+
+    from {
+        transform:translateY(-100%);
+    }
+
+    to {
+        transform:translateY(100%);
+    }
+
+}
+
+
+
+/* Header */
+
+
+header {
+
+    text-align:center;
+
+    padding:70px 20px;
+
+}
+
+
+.brand {
+
+    display:inline-block;
+
+    padding:8px 20px;
+
+    border:1px solid #00ffff;
+
+    border-radius:30px;
+
+    color:#00ffff;
+
+    box-shadow:
+    0 0 20px #00ffff55;
+
+}
+
+
+.logo {
+
+    width:100px;
+
+    height:100px;
+
+    margin:25px auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    border-radius:50%;
+
+    border:2px solid #00ffff;
+
+    background:#ffffff08;
+
+    box-shadow:
+    0 0 35px #00ffff;
+
+    animation:pulse 2s infinite;
+
+}
+
+
+.logo img {
+
+    width:60px;
+
+}
+
+
+
+@keyframes pulse {
+
+    50% {
+
+        box-shadow:
+        0 0 70px #00ffff;
+
+    }
+
+}
+
+
+
+h1 {
+
+    font-size:3rem;
+
+    color:#00ffff;
+
+    text-shadow:
+    0 0 10px #00ffff,
+    0 0 35px #0088ff;
+
+}
+
+
+.subtitle {
+
+    color:#aaa;
+
+    font-size:1.2rem;
+
+}
+
+
+
+
+/* Sections */
+
+
+section {
+
+    max-width:1100px;
+
+    margin:auto;
+
+    padding:30px;
+
+}
+
+
+.section-title {
+
+    color:#ff00ff;
+
+    font-size:2rem;
+
+    margin-bottom:25px;
+
+    text-shadow:
+    0 0 15px #ff00ff;
+
+}
+
+
+
+/* Cards */
+
+
+.cards {
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(250px,1fr));
+
+    gap:25px;
+
+}
+
+
+
+.card {
+
+    background:
+    rgba(255,255,255,.05);
+
+    border:1px solid #00ffff55;
+
+    border-radius:20px;
+
+    padding:25px;
+
+    backdrop-filter:blur(12px);
+
+    transition:.3s;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+
+.card::before {
+
+    content:"";
+
+    position:absolute;
+
+    width:100px;
+
+    height:100px;
+
+    background:#00ffff;
+
+    filter:blur(70px);
+
+    opacity:.15;
+
+}
+
+
+.card:hover {
+
+    transform:
+    translateY(-10px)
+    scale(1.02);
+
+    border-color:#ff00ff;
+
+    box-shadow:
+    0 0 35px #ff00ff55;
+
+}
+
+
+
+.card img {
+
+    width:80px;
+
+}
+
+
+
+.card h2 {
+
+    color:#00ffff;
+
+}
+
+
+.card p {
+
+    color:#ccc;
+
+    line-height:1.6;
+
+}
+
+
+
+/* Chips */
+
+
+.chips {
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+}
+
+
+.chip {
+
+    border:1px solid #00ffff;
+
+    border-radius:20px;
+
+    padding:6px 15px;
+
+    color:#00ffff;
+
+}
+
+
+
+/* Buttons */
+
+
+.button {
+
+    display:inline-block;
+
+    margin-top:15px;
+
+    padding:12px 25px;
+
+    border-radius:25px;
+
+    text-decoration:none;
+
+    color:white;
+
+    border:1px solid #00ffff;
+
+    transition:.3s;
+
+}
+
+
+.button:hover {
+
+    background:#00ffff22;
+
+    box-shadow:
+    0 0 25px #00ffff;
+
+}
+
+
+
+/* Stats */
+
+
+.stats {
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:15px;
+
+}
+
+
+.stat {
+
+    text-align:center;
+
+    padding:20px;
+
+    border:
+    1px solid #ff00ff55;
+
+    border-radius:15px;
+
+}
+
+
+
+.stat b {
+
+    display:block;
+
+    font-size:2rem;
+
+    color:#ff00ff;
+
+}
+
+
+
+
+/* Coming */
+
+
+.coming {
+
+    opacity:.65;
+
+}
+
+
+
+.badge {
+
+    color:#ff88ff;
+
+    border:1px solid #ff00ff;
+
+    padding:5px 15px;
+
+    border-radius:20px;
+
+}
+
+
+
+footer {
+
+    text-align:center;
+
+    padding:40px;
+
+    color:#777;
+
+}
+
+
+
+/* Mobile */
+
+
+@media(max-width:700px) {
+
+
+    header {
+
+        padding:40px 15px;
+
+    }
+
+
+    h1 {
+
+        font-size:2rem;
+
+    }
+
+
+    .subtitle {
+
+        font-size:1rem;
+
+    }
+
+
+    section {
+
+        padding:20px 15px;
+
+    }
+
+
+    .section-title {
+
+        font-size:1.5rem;
+
+    }
+
+
+    .cards {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .stats {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .card {
+
+        padding:20px;
+
+    }
+
+
+    .button {
+
+        width:100%;
+
+        text-align:center;
+
+    }
+
+
+}
+
+
+
+@media(prefers-reduced-motion:reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation:none!important;
+
+        transition:none!important;
+
+    }
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<div class="logo">
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg">
+
+</div>
+
+
+<h1>
+⚡ CODE FORMAT STUDIO ⚡
+</h1>
+
+
+<p class="subtitle">
+Learn • Understand • Build
+</p>
+
+
+<div class="chips">
+
+<div class="chip">
+Frontend
+</div>
+
+<div class="chip">
+Programming
+</div>
+
+<div class="chip">
+Open Source
+</div>
+
+</div>
+
+
+</header>
+
+
+
+
+<section>
+
+
+<div class="section-title">
+📊 Platform Status
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+<b>1</b>
+Active Course
+</div>
+
+
+<div class="stat">
+<b>4</b>
+Coming Soon
+</div>
+
+
+<div class="stat">
+<b>∞</b>
+Learning
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+<section>
+
+
+<div class="section-title">
+🚀 Current Plans
+</div>
+
+
+<div class="cards">
+
+
+<div class="card">
+
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg">
+
+
+<h2>
+Mastering C
+</h2>
+
+
+<p>
+A complete C programming journey from basics to systems programming.
+</p>
+
+
+<div class="chips">
+
+<span class="chip">
+Pointers
+</span>
+
+<span class="chip">
+Memory
+</span>
+
+<span class="chip">
+Systems
+</span>
+<span class="card coming">
+In Progress
+</span>
+</div>
+
+
+<a class="button" href="Mastering-C/index.html">
+ENTER COURSE
+</a>
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+<section>
+
+
+<div class="section-title">
+🔮 Coming Soon
+</div>
+
+
+<div class="cards">
+
+
+<div class="card coming">
+<img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" /> <h2>Python</h2>
+<p>Complete Python learning path.</p>
+<span class="badge">COMING SOON</span>
+</div>
+
+
+<div class="card coming">
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" />
+<h2>HTML</h2>
+<p>Modern web structure.</p>
+<span class="badge">COMING SOON</span>
+</div>
+
+
+<div class="card coming">
+<img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" />
+<h2>CSS</h2>
+<p>Modern interface styling.</p>
+<span class="badge">COMING SOON</span>
+</div>
+
+
+<div class="card coming">
+<img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" />
+<h2>JavaScript</h2>
+<p>Interactive programming.</p>
+<span class="badge">COMING SOON</span>
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+<footer>
+
+⚡ CODE FORMAT STUDIO © 2026 ⚡
+
+</footer>
+
+
+</body>
+</html>
