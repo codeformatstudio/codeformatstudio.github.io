@@ -1,40 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Visitor Analytics Dashboard</title>
-  <link rel="icon" href="../icon.png" type="image/png" type="image/png" />
-<link rel="stylesheet" href="assets/Orbitron.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Visitor Analytics | Code Format Studio</title>
+
+<link rel="icon" href="../icon.png" type="image/png">
+
 <style>
-body { font-family:"Orbitron",sans-serif; background:#0a0a12; color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:40px; }
-h1 { text-shadow:0 0 10px #00fff7; margin-bottom:20px; }
-.info-box { background:#0d0d20cc; border:2px solid #00fff7; border-radius:12px; padding:20px; width:100%; max-width:600px; text-align:center; }
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+    --cyan:#00fff7;
+    --purple:#8b5cf6;
+    --bg:#05060d;
+    --card:#0d1222;
+    --text:#e8ffff;
+}
+
+* {
+    box-sizing:border-box;
+}
+
+body {
+
+    margin:0;
+    padding:40px;
+
+    font-family:"Orbitron",sans-serif;
+
+    background:
+    radial-gradient(circle at top,#111b35,#05060d);
+
+    color:var(--text);
+
+}
+
+
+h1 {
+
+    text-align:center;
+
+    color:var(--cyan);
+
+    text-shadow:
+    0 0 10px var(--cyan),
+    0 0 25px var(--cyan);
+
+}
+
+
+.container {
+
+    max-width:1100px;
+
+    margin:auto;
+
+}
+
+
+.dashboard {
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(300px,1fr));
+
+    gap:20px;
+
+}
+
+
+.card {
+
+    background:rgba(13,18,34,.9);
+
+    border:1px solid var(--cyan);
+
+    border-radius:18px;
+
+    padding:25px;
+
+    box-shadow:
+    0 0 15px rgba(0,255,247,.25);
+
+    transition:.3s;
+
+}
+
+
+.card:hover {
+
+    transform:translateY(-5px);
+
+    box-shadow:
+    0 0 30px rgba(0,255,247,.5);
+
+}
+
+
+.title {
+
+    color:var(--cyan);
+
+    font-size:18px;
+
+    margin-bottom:15px;
+
+}
+
+
+.number {
+
+    font-size:42px;
+
+    font-weight:900;
+
+    color:white;
+
+    text-shadow:
+    0 0 10px var(--cyan);
+
+}
+
+
+.list div {
+
+    margin:10px 0;
+
+}
+
+
+.progress {
+
+    height:8px;
+
+    background:#111;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+}
+
+
+.progress span {
+
+    display:block;
+
+    height:100%;
+
+    background:var(--cyan);
+
+    box-shadow:
+    0 0 10px var(--cyan);
+
+}
+
+
+.full {
+
+    grid-column:1/-1;
+
+}
+
+
+.chart {
+
+    font-size:40px;
+
+    letter-spacing:8px;
+
+    color:var(--cyan);
+
+    text-shadow:
+    0 0 15px var(--cyan);
+
+}
+
+
+.footer {
+
+    margin-top:30px;
+
+    text-align:center;
+
+    color:#aaa;
+
+}
+
+
+
 </style>
+
 </head>
+
+
 <body>
-<h1>Visitor Analytics Dashboard</h1>
-<div class="info-box" id="analytics">
-  <p>Total Visits: <span id="visits">0</span></p>
-  <p>Unique Visitors (simulated): <span id="unique">0</span></p>
-  <p>Last Visit: <span id="lastvisit">Never</span></p>
+
+
+<div class="container">
+
+
+<h1>
+Visitor Analytics<br>
+<small>Code Format Studio</small>
+</h1>
+
+
+
+<div class="dashboard">
+
+
+
+<div class="card">
+
+<div class="title">
+👥 Visitors Today
 </div>
 
+<div class="number" id="visitors">
+0
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<div class="title">
+📈 Total Page Views
+</div>
+
+<div class="number" id="views">
+0
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<div class="title">
+🌍 Countries
+</div>
+
+<div class="number" id="countries">
+0
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<div class="title">
+🌐 Browsers
+</div>
+
+<div class="list" id="browsers">
+
+Loading...
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<div class="title">
+📱 Devices
+</div>
+
+
+<div class="list" id="devices">
+
+Loading...
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<div class="title">
+💻 Operating Systems
+</div>
+
+
+<div class="list" id="systems">
+
+Loading...
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card full">
+
+
+<div class="title">
+🔥 Top Pages
+</div>
+
+
+<div class="list" id="pages">
+
+Loading...
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card full">
+
+
+<div class="title">
+📊 Daily Visitors
+</div>
+
+
+<div class="chart" id="chart">
+
+█▂▃▄▅▆▇█▇▆▅▄▃▂▁
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div class="footer">
+
+Last Updated:
+<span id="updated">
+Never
+</span>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
 <script>
-let visits = localStorage.getItem("visits") || 0;
-let unique = localStorage.getItem("unique") || 0;
-let last = localStorage.getItem("lastvisit") || "Never";
 
-visits++;
-if(!localStorage.getItem("visited")){ unique++; localStorage.setItem("visited","true"); }
 
-localStorage.setItem("visits",visits);
-localStorage.setItem("unique",unique);
-localStorage.setItem("lastvisit", new Date().toLocaleString());
+const API_URL =
+"https://YOUR-WORKER.workers.dev/stats";
 
-document.getElementById("visits").textContent = visits;
-document.getElementById("unique").textContent = unique;
-document.getElementById("lastvisit").textContent = localStorage.getItem("lastvisit");
+
+
+function list(data) {
+
+return Object.entries(data)
+
+.map(([name,value])=>`
+
+<div>
+
+${name}
+<b>${value}%</b>
+
+<div class="progress">
+
+<span style="width:${value}%"></span>
+
+</div>
+
+</div>
+
+`)
+
+.join("");
+
+}
+
+
+
+async function loadAnalytics(){
+
+
+try {
+
+
+const res =
+await fetch(API_URL);
+
+
+
+const data =
+await res.json();
+
+
+
+document.getElementById("visitors")
+.textContent =
+data.visitors ?? 0;
+
+
+
+document.getElementById("views")
+.textContent =
+data.views ?? 0;
+
+
+
+document.getElementById("countries")
+.textContent =
+data.countries ?? 0;
+
+
+
+document.getElementById("browsers")
+.innerHTML =
+list(data.browsers);
+
+
+
+document.getElementById("devices")
+.innerHTML =
+list(data.devices);
+
+
+
+document.getElementById("systems")
+.innerHTML =
+list(data.systems);
+
+
+
+document.getElementById("pages")
+.innerHTML =
+Object.entries(data.pages)
+
+.map(x=>`
+
+<div>
+🔥 ${x[0]}
+<b>${x[1]}</b>
+</div>
+
+`).join("");
+
+
+
+document.getElementById("updated")
+.textContent =
+new Date()
+.toUTCString();
+
+
+
+}
+
+catch(error){
+
+
+console.error(error);
+
+
+document.getElementById("updated")
+.textContent =
+"Offline";
+
+
+}
+
+
+}
+
+
+
+loadAnalytics();
+
+
+
+setInterval(
+loadAnalytics,
+60000
+);
+
+
+
 </script>
+
+
 </body>
 </html>
