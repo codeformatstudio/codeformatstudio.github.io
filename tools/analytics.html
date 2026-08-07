@@ -421,13 +421,17 @@ async function loadAnalytics(){
 try {
 
 
-const res =
-await fetch(API_URL);
+const res = await fetch(API_URL);
 
+if (!res.ok) {
+    throw new Error(
+        "Worker returned " + res.status
+    );
+}
 
+const data = await res.json();
 
-const data =
-await res.json();
+console.log(data);
 
 
 
